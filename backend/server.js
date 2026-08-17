@@ -12,6 +12,7 @@ import enquiryRoutes from './routes/enquiry.routes.js';
 import downloadRoutes from './routes/download.routes.js';
 // import cmsRoutes from './routes/cms.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
 
 dotenv.config();
 
@@ -42,6 +43,7 @@ app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/downloads',downloadRoutes);
 // app.use('/api/cms', cmsRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Centralized 404
 app.use((req, res) => {

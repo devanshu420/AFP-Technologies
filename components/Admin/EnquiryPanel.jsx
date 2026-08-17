@@ -95,7 +95,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
   const readCount = enquiries.filter((e) => e.status !== 'new').length;
 
   return (
-    <section className="admin-panel" style={{ position: 'relative', width: '100%' }}>
+    <section className="admin-panel" style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
       {/* Panel Header */}
       <div
         className="panel-heading"
@@ -112,7 +112,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           <p className="kicker dark" style={{ margin: '0 0 2px 0' }}>
             <span /> INBOX
           </p>
-          <h2 style={{ margin: 0, fontSize: 'clamp(1.2rem, 3vw, 1.4rem)', color: '#ffffff', fontWeight: 800 }}>
+          <h2 style={{ margin: 0, fontSize: 'clamp(1.15rem, 2.5vw, 1.4rem)', color: '#ffffff', fontWeight: 800 }}>
             Leads & Inquiries
           </h2>
         </div>
@@ -128,9 +128,12 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             borderRadius: '8px',
             padding: '7px',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
       </div>
 
@@ -141,13 +144,14 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           paddingBottom: '0.5rem',
           marginBottom: '1rem',
           WebkitOverflowScrolling: 'touch',
+          width: '100%',
         }}
       >
         <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '6px',
             padding: '4px',
             backgroundColor: '#07101c',
             borderRadius: '10px',
@@ -162,10 +166,10 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '7px 14px',
+              gap: '6px',
+              padding: '6px 12px',
               borderRadius: '7px',
-              fontSize: '0.84rem',
+              fontSize: 'clamp(0.75rem, 2vw, 0.84rem)',
               fontWeight: 600,
               cursor: 'pointer',
               border: activeTab === 'new' ? '1px solid #0284c7' : '1px solid transparent',
@@ -177,8 +181,8 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           >
             <span
               style={{
-                width: '8px',
-                height: '8px',
+                width: '7px',
+                height: '7px',
                 borderRadius: '50%',
                 backgroundColor: activeTab === 'new' ? '#ffffff' : '#38bdf8',
                 flexShrink: 0,
@@ -187,11 +191,11 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             <span>New Leads</span>
             <span
               style={{
-                padding: '2px 7px',
+                padding: '1px 6px',
                 borderRadius: '9999px',
                 backgroundColor: activeTab === 'new' ? 'rgba(0, 0, 0, 0.25)' : 'rgba(255, 255, 255, 0.08)',
                 color: '#ffffff',
-                fontSize: '0.72rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
               }}
             >
@@ -206,10 +210,10 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '7px 14px',
+              gap: '6px',
+              padding: '6px 12px',
               borderRadius: '7px',
-              fontSize: '0.84rem',
+              fontSize: 'clamp(0.75rem, 2vw, 0.84rem)',
               fontWeight: 600,
               cursor: 'pointer',
               border: activeTab === 'read' ? '1px solid #334155' : '1px solid transparent',
@@ -219,15 +223,15 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
               whiteSpace: 'nowrap',
             }}
           >
-            <Check size={14} color={activeTab === 'read' ? '#10b981' : '#64748b'} />
+            <Check size={13} color={activeTab === 'read' ? '#10b981' : '#64748b'} />
             <span>Reviewed</span>
             <span
               style={{
-                padding: '2px 7px',
+                padding: '1px 6px',
                 borderRadius: '9999px',
                 backgroundColor: activeTab === 'read' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.08)',
                 color: '#ffffff',
-                fontSize: '0.72rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
               }}
             >
@@ -243,9 +247,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '7px 14px',
+              padding: '6px 12px',
               borderRadius: '7px',
-              fontSize: '0.84rem',
+              fontSize: 'clamp(0.75rem, 2vw, 0.84rem)',
               fontWeight: 600,
               cursor: 'pointer',
               border: activeTab === 'all' ? '1px solid #334155' : '1px solid transparent',
@@ -258,11 +262,11 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             <span>All</span>
             <span
               style={{
-                padding: '2px 7px',
+                padding: '1px 6px',
                 borderRadius: '9999px',
                 backgroundColor: activeTab === 'all' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.08)',
                 color: '#ffffff',
-                fontSize: '0.72rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
               }}
             >
@@ -281,16 +285,17 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           display: 'flex',
           flexDirection: 'column',
           gap: '8px',
-          paddingRight: '4px',
+          paddingRight: '2px',
           width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         {loading ? (
-          <p style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+          <p style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
             Loading database leads...
           </p>
         ) : filteredEnquiries.length === 0 ? (
-          <p style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.9rem' }}>
+          <p style={{ padding: '2.5rem', textAlign: 'center', color: '#94a3b8', fontSize: '0.85rem' }}>
             {activeTab === 'new'
               ? 'No new unread inquiries in inbox.'
               : 'No inquiries in this category.'}
@@ -307,9 +312,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                  padding: 'clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 16px)',
+                  flexWrap: 'nowrap',
+                  gap: '8px sm:gap-12px',
+                  padding: 'clamp(8px, 2vw, 12px) clamp(10px, 2.5vw, 14px)',
                   backgroundColor: isNew ? '#0b192c' : '#08111e',
                   border: '1px solid',
                   borderColor: isNew ? 'rgba(56, 189, 248, 0.28)' : 'rgba(255, 255, 255, 0.07)',
@@ -332,16 +337,19 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 }}
               >
                 {/* Left Content Area */}
-                <div style={{ flex: '1 1 240px', minWidth: 0 }}>
+                <div style={{ flex: '1 1 auto', minWidth: 0 }}>
                   {/* Name & Timestamp */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
                     <strong
                       style={{
-                        fontSize: 'clamp(0.95rem, 2.5vw, 1.05rem)',
+                        fontSize: 'clamp(0.88rem, 2.2vw, 1rem)',
                         fontWeight: 700,
                         color: '#ffffff',
                         letterSpacing: '0.01em',
-                        wordBreak: 'break-word',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: '220px',
                       }}
                     >
                       {enquiry.name}
@@ -349,11 +357,12 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
 
                     <span
                       style={{
-                        fontSize: '0.75rem',
+                        fontSize: 'clamp(0.68rem, 1.8vw, 0.75rem)',
                         color: '#94a3b8',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '4px',
+                        gap: '2px',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       • {new Date(enquiry.createdAt).toLocaleDateString()}
@@ -366,24 +375,24 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                       display: 'flex',
                       alignItems: 'center',
                       flexWrap: 'wrap',
-                      gap: '8px 12px',
-                      fontSize: '0.82rem',
+                      gap: '4px 8px',
+                      fontSize: 'clamp(0.72rem, 1.8vw, 0.8rem)',
                       color: '#cbd5e1',
-                      marginBottom: '6px',
+                      marginBottom: '4px',
                     }}
                   >
-                    <span style={{ color: '#60a5fa', fontWeight: 500, wordBreak: 'break-all' }}>
+                    <span style={{ color: '#60a5fa', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px', whiteSpace: 'nowrap' }}>
                       {enquiry.email}
                     </span>
 
                     {enquiry.phone && (
-                      <span style={{ color: '#34d399', fontWeight: 600 }}>
+                      <span style={{ color: '#34d399', fontWeight: 600, whiteSpace: 'nowrap' }}>
                         {enquiry.phone}
                       </span>
                     )}
 
                     {enquiry.company && (
-                      <span style={{ color: '#94a3b8' }}>
+                      <span style={{ color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px', whiteSpace: 'nowrap' }}>
                         🏢 {enquiry.company}
                       </span>
                     )}
@@ -393,7 +402,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   <p
                     style={{
                       margin: 0,
-                      fontSize: '0.84rem',
+                      fontSize: 'clamp(0.75rem, 1.8vw, 0.82rem)',
                       color: '#94a3b8',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -410,10 +419,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '10px',
+                    gap: '6px',
                     flexShrink: 0,
-                    marginLeft: 'auto',
+                    marginLeft: '4px',
                   }}
                 >
                   {/* 1-Click Status Toggle */}
@@ -427,10 +435,10 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '5px',
-                      padding: '5px 10px',
+                      gap: '4px',
+                      padding: '4px 8px',
                       borderRadius: '6px',
-                      fontSize: '0.78rem',
+                      fontSize: '0.72rem',
                       fontWeight: 600,
                       cursor: 'pointer',
                       border: '1px solid',
@@ -443,13 +451,13 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   >
                     {isNew ? (
                       <>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#38bdf8' }} />
-                        New
+                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#38bdf8', flexShrink: 0 }} />
+                        <span>New</span>
                       </>
                     ) : (
                       <>
-                        <Check size={13} color="#10b981" />
-                        Read
+                        <Check size={11} color="#10b981" />
+                        <span>Read</span>
                       </>
                     )}
                   </button>
@@ -461,10 +469,10 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      padding: '4px',
+                      padding: '2px',
                     }}
                   >
-                    <ChevronRight size={18} />
+                    <ChevronRight size={16} />
                   </div>
                 </div>
               </div>
@@ -485,7 +493,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 99999,
-            padding: '1rem',
+            padding: 'clamp(8px, 2vw, 16px)',
             boxSizing: 'border-box',
           }}
           onClick={() => setSelectedEnquiry(null)}
@@ -494,12 +502,12 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             style={{
               width: '100%',
               maxWidth: '580px',
-              maxHeight: '92vh',
+              maxHeight: '90vh',
               overflowY: 'auto',
               backgroundColor: '#091524',
               border: '1px solid rgba(255, 255, 255, 0.12)',
               borderRadius: '14px',
-              padding: 'clamp(1rem, 3vw, 1.75rem)',
+              padding: 'clamp(1rem, 3vw, 1.5rem)',
               position: 'relative',
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
               boxSizing: 'border-box',
@@ -512,16 +520,16 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
                 borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                paddingBottom: '0.85rem',
+                paddingBottom: '0.75rem',
                 gap: '10px',
               }}
             >
               <div>
                 <span
                   style={{
-                    fontSize: '0.72rem',
+                    fontSize: '0.7rem',
                     textTransform: 'uppercase',
                     color: '#38bdf8',
                     fontWeight: 600,
@@ -530,7 +538,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 >
                   Commercial Inquiry
                 </span>
-                <h3 style={{ margin: '2px 0 0 0', fontSize: 'clamp(1.15rem, 3vw, 1.35rem)', color: '#ffffff', fontWeight: 800, wordBreak: 'break-word' }}>
+                <h3 style={{ margin: '2px 0 0 0', fontSize: 'clamp(1.1rem, 2.8vw, 1.3rem)', color: '#ffffff', fontWeight: 800, wordBreak: 'break-word' }}>
                   {selectedEnquiry.name}
                 </h3>
               </div>
@@ -556,24 +564,24 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                gap: '10px',
-                marginBottom: '1.25rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                gap: '8px',
+                marginBottom: '1rem',
               }}
             >
               <div
                 style={{
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.07)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Email Address</span>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Email Address</span>
                 <a
                   href={`mailto:${selectedEnquiry.email}`}
-                  style={{ color: '#60a5fa', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}
+                  style={{ color: '#60a5fa', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}
                 >
                   {selectedEnquiry.email}
                 </a>
@@ -581,70 +589,70 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
 
               <div
                 style={{
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.07)',
                   borderRadius: '8px',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Phone Number</span>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Phone Number</span>
                 {selectedEnquiry.phone ? (
                   <a
                     href={`tel:${selectedEnquiry.phone}`}
-                    style={{ color: '#34d399', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none' }}
+                    style={{ color: '#34d399', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none' }}
                   >
                     {selectedEnquiry.phone}
                   </a>
                 ) : (
-                  <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Not provided</span>
+                  <span style={{ color: '#64748b', fontSize: '0.8rem' }}>Not provided</span>
                 )}
               </div>
 
               <div
                 style={{
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.07)',
                   borderRadius: '8px',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Company / Plant</span>
-                <strong style={{ color: '#ffffff', fontSize: '0.9rem', wordBreak: 'break-word' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Company / Plant</span>
+                <strong style={{ color: '#ffffff', fontSize: '0.85rem', wordBreak: 'break-word' }}>
                   {selectedEnquiry.company || 'Direct Client'}
                 </strong>
               </div>
 
               <div
                 style={{
-                  padding: '10px 12px',
+                  padding: '8px 10px',
                   backgroundColor: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.07)',
                   borderRadius: '8px',
                 }}
               >
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Requested System</span>
-                <strong style={{ color: '#38bdf8', fontSize: '0.9rem', wordBreak: 'break-word' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>Requested System</span>
+                <strong style={{ color: '#38bdf8', fontSize: '0.85rem', wordBreak: 'break-word' }}>
                   {selectedEnquiry.product || 'General Technical Consultation'}
                 </strong>
               </div>
             </div>
 
             {/* Complete Client Requirement Scope */}
-            <div style={{ marginBottom: '1.5rem' }}>
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <div style={{ marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginBottom: '6px', fontWeight: 600, textTransform: 'uppercase' }}>
                 Requirements & Message:
               </span>
               <div
                 style={{
-                  padding: '14px',
+                  padding: '12px',
                   backgroundColor: '#050c16',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '8px',
                   color: '#e2e8f0',
-                  fontSize: '0.92rem',
+                  fontSize: '0.88rem',
                   lineHeight: 1.6,
                   whiteSpace: 'pre-wrap',
-                  maxHeight: '200px',
+                  maxHeight: '180px',
                   overflowY: 'auto',
                   wordBreak: 'break-word',
                 }}
@@ -660,9 +668,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 flexWrap: 'wrap',
-                gap: '10px',
+                gap: '8px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                paddingTop: '1rem',
+                paddingTop: '0.85rem',
               }}
             >
               {/* Toggle Status Button inside Modal */}
@@ -673,12 +681,12 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '7px 14px',
+                  padding: '6px 12px',
                   borderRadius: '6px',
                   backgroundColor: 'rgba(255, 255, 255, 0.06)',
                   border: '1px solid rgba(255, 255, 255, 0.12)',
                   color: '#ffffff',
-                  fontSize: '0.82rem',
+                  fontSize: '0.8rem',
                   fontWeight: 600,
                   cursor: 'pointer',
                   flex: '1 1 auto',
@@ -688,17 +696,17 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
               >
                 {selectedEnquiry.status === 'new' ? (
                   <>
-                    <Check size={14} color="#10b981" /> Mark as Read
+                    <Check size={13} color="#10b981" /> Mark as Read
                   </>
                 ) : (
                   <>
-                    <RotateCcw size={14} color="#38bdf8" /> Mark as New
+                    <RotateCcw size={13} color="#38bdf8" /> Mark as New
                   </>
                 )}
               </button>
 
               {/* Direct Reply Actions */}
-              <div style={{ display: 'flex', gap: '8px', flex: '1 1 auto', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: '6px', flex: '1 1 auto', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                 {selectedEnquiry.phone && (
                   <a
                     href={`tel:${selectedEnquiry.phone}`}
@@ -706,19 +714,19 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                       display: 'inline-flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '6px',
-                      padding: '7px 14px',
+                      gap: '5px',
+                      padding: '6px 12px',
                       borderRadius: '6px',
                       backgroundColor: 'rgba(52, 211, 153, 0.12)',
                       border: '1px solid rgba(52, 211, 153, 0.3)',
                       color: '#34d399',
-                      fontSize: '0.82rem',
+                      fontSize: '0.8rem',
                       fontWeight: 600,
                       textDecoration: 'none',
                       flex: '1 1 auto',
                     }}
                   >
-                    <Phone size={14} /> Call
+                    <Phone size={13} /> Call
                   </a>
                 )}
 
@@ -728,18 +736,18 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '6px',
-                    padding: '7px 16px',
+                    gap: '5px',
+                    padding: '6px 14px',
                     borderRadius: '6px',
                     backgroundColor: '#0284c7',
                     color: '#ffffff',
-                    fontSize: '0.82rem',
+                    fontSize: '0.8rem',
                     fontWeight: 600,
                     textDecoration: 'none',
                     flex: '1 1 auto',
                   }}
                 >
-                  <Mail size={14} /> Reply
+                  <Mail size={13} /> Reply
                 </a>
               </div>
             </div>

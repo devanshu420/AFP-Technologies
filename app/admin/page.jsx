@@ -15,23 +15,20 @@ const API_BASE_URL =
 export default function AdminPage() {
   const [session, setSession] = useState(null);
   const [adminUser, setAdminUser] = useState(null);
-  const [stats, setStats] = useState({ products: 0, newEnquiries: 0, totalPdfs: 0 });
+  const [stats, setStats] = useState({
+    products: 0,
+    newEnquiries: 0,
+    totalPdfs: 0,
+  });
 
-  // 1. Strict Token Verification on Mount
   const verifyAdminToken = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
         method: 'GET',
         credentials: 'include',
         cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          Pragma: 'no-cache',
-        },
       });
-
       const json = await res.json();
-
       if (res.ok && json.success && json.data) {
         setAdminUser(json.data);
         setSession(true);
@@ -49,7 +46,6 @@ export default function AdminPage() {
     verifyAdminToken();
   }, [verifyAdminToken]);
 
-  // Stable Handlers for child components (stops infinite re-renders)
   const handleProductCountChange = useCallback((count) => {
     setStats((prev) => (prev.products === count ? prev : { ...prev, products: count }));
   }, []);
@@ -106,11 +102,12 @@ export default function AdminPage() {
       <AdminHeader adminRole={adminUser?.role} onLogout={handleLogout} />
 
       <div className="admin-content">
+        {/* Admin Heading ke andar hi Right side par button aa chuka hai */}
         <AdminHeading adminName={adminUser?.name} />
 
         <AdminStatsGrid stats={stats} />
 
-        <div className="admin-grid" style={{ marginBottom: '24px' }}>
+        <div className="admin-panels" style={{ marginBottom: '24px' }}>
           <ProductPanel onProductCountChange={handleProductCountChange} />
           <EnquiryPanel onEnquiryCountChange={handleEnquiryCountChange} />
         </div>

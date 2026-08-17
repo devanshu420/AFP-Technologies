@@ -6,9 +6,7 @@ import {
   Layers,
   ArrowRight,
   PlusCircle,
-  Package,
   RefreshCw,
-  Eye,
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
@@ -45,19 +43,19 @@ export default function ProductPanel({ onProductCountChange }) {
   }, []);
 
   return (
-    <section className="bg-slate-900/80 border border-slate-800 rounded-xl p-5 sm:p-6 shadow-xl backdrop-blur-sm text-slate-100 flex flex-col justify-between">
-      <div>
+    <section className="w-full h-full bg-slate-900/80 border border-slate-800 rounded-xl p-4 sm:p-5 md:p-6 shadow-xl backdrop-blur-sm text-slate-100 flex flex-col justify-between transition-all">
+      <div className="w-full flex flex-col flex-1">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-              <Layers size={20} />
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 sm:pb-4 mb-3 sm:mb-4 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <p className="text-[10px] font-bold tracking-widest text-sky-400 uppercase">
+            <div className="min-w-0">
+              <p className="text-[9px] sm:text-[10px] font-bold tracking-widest text-sky-400 uppercase truncate">
                 CATALOGUE MANAGEMENT
               </p>
-              <h2 className="text-base sm:text-lg font-bold text-white">
+              <h2 className="text-sm sm:text-base md:text-lg font-bold text-white truncate">
                 Machinery & Equipment
               </h2>
             </div>
@@ -67,22 +65,22 @@ export default function ProductPanel({ onProductCountChange }) {
             type="button"
             onClick={fetchSummary}
             disabled={loading}
-            className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+            className="text-slate-400 hover:text-white p-1 sm:p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
             title="Refresh list"
           >
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
         </div>
 
-        {/* Quick Info & Stats */}
-        <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+        {/* Info */}
+        <p className="text-[11px] sm:text-xs text-slate-400 mb-3 sm:mb-4 leading-relaxed">
           Manage full engineering specifications, process flows, application
           lists, capacity ratings, and multi-image galleries.
         </p>
 
         {/* Live List Snippet */}
-        <div className="space-y-2 mb-5">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+        <div className="space-y-2 mb-4 sm:mb-5 flex-1">
+          <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
             Recently Added Equipment
           </span>
 
@@ -91,7 +89,7 @@ export default function ProductPanel({ onProductCountChange }) {
               Loading machinery snapshot...
             </div>
           ) : products.length === 0 ? (
-            <div className="py-6 text-center text-xs text-slate-500 bg-slate-950/50 rounded-lg border border-slate-800/80">
+            <div className="py-6 text-center text-xs text-slate-500 bg-slate-950/50 rounded-lg border border-slate-800/80 px-2">
               No products found in database.
             </div>
           ) : (
@@ -99,9 +97,9 @@ export default function ProductPanel({ onProductCountChange }) {
               {products.slice(0, 4).map((p) => (
                 <div
                   key={p._id}
-                  className="flex items-center justify-between p-2.5 hover:bg-slate-800/40 transition-colors text-xs"
+                  className="flex items-center justify-between p-2 sm:p-2.5 hover:bg-slate-800/40 transition-colors text-xs gap-2"
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                     <img
                       src={
                         p.mainImage?.url ||
@@ -109,26 +107,28 @@ export default function ProductPanel({ onProductCountChange }) {
                         'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=120&q=80'
                       }
                       alt={p.name}
-                      className="w-7 h-7 rounded object-cover border border-slate-700 bg-slate-900 shrink-0"
+                      className="w-7 h-7 sm:w-8 sm:h-8 rounded object-cover border border-slate-700 bg-slate-900 shrink-0"
                     />
-                    <div className="truncate">
-                      <strong className="text-slate-200 block truncate text-xs">
+                    <div className="min-w-0 flex-1">
+                      <strong className="text-slate-200 block truncate text-[11px] sm:text-xs font-semibold">
                         {p.name}
                       </strong>
-                      <span className="text-[10px] text-slate-400 block truncate">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 block truncate">
                         {p.category?.name || 'Industrial System'}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {p.active ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-800/60 px-1.5 py-0.5 rounded">
-                        <CheckCircle2 size={10} /> Active
+                      <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-emerald-400 bg-emerald-950/50 border border-emerald-800/60 px-1.5 py-0.5 rounded whitespace-nowrap">
+                        <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                        <span>Active</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-400 bg-rose-950/50 border border-rose-800/60 px-1.5 py-0.5 rounded">
-                        <XCircle size={10} /> Hidden
+                      <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold text-rose-400 bg-rose-950/50 border border-rose-800/60 px-1.5 py-0.5 rounded whitespace-nowrap">
+                        <XCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" />
+                        <span>Hidden</span>
                       </span>
                     )}
                   </div>
@@ -139,14 +139,14 @@ export default function ProductPanel({ onProductCountChange }) {
         </div>
       </div>
 
-      {/* Primary Action Button -> Redirects to Full Screen Workspace */}
+      {/* Primary Action Button */}
       <Link
         href="/admin/products"
-        className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-lg shadow-sky-900/30 hover:shadow-sky-800/50"
+        className="w-full inline-flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 sm:px-4 rounded-lg bg-sky-600 hover:bg-sky-500 active:scale-[0.99] text-white text-xs font-bold transition-all shadow-lg shadow-sky-900/30 hover:shadow-sky-800/50 mt-auto"
       >
-        <PlusCircle size={15} />
-        <span>Open Full Product Workspace</span>
-        <ArrowRight size={14} className="ml-auto" />
+        <PlusCircle size={15} className="shrink-0" />
+        <span className="truncate">Open Full Product Workspace</span>
+        <ArrowRight size={14} className="ml-auto shrink-0" />
       </Link>
     </section>
   );

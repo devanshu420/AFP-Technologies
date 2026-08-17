@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   ArrowLeft,
   Check,
@@ -18,24 +18,24 @@ import {
   CheckCircle2,
   ExternalLink,
   Package,
-} from 'lucide-react';
+} from "lucide-react";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const emptyFormState = {
-  name: '',
-  slug: '',
-  category: '',
-  shortDescription: '',
-  description: '',
-  detailedDescription: '',
-  capacity: '',
-  power: '',
-  dimensions: '',
-  material: '',
-  automationType: 'Automatic',
-  warranty: '1-Year Comprehensive OEM Guarantee',
+  name: "",
+  slug: "",
+  category: "",
+  shortDescription: "",
+  description: "",
+  detailedDescription: "",
+  capacity: "",
+  power: "",
+  dimensions: "",
+  material: "",
+  automationType: "Automatic",
+  warranty: "1-Year Comprehensive OEM Guarantee",
   featured: false,
   active: true,
   capacities: [],
@@ -45,9 +45,9 @@ const emptyFormState = {
   specifications: [],
   processFlow: [],
   images: [],
-  mainImage: { url: '', fileId: '', alt: '' },
-  pdf: { url: '', fileId: '', name: '' },
-  seo: { title: '', description: '', keywords: [] },
+  mainImage: { url: "", fileId: "", alt: "" },
+  pdf: { url: "", fileId: "", name: "" },
+  seo: { title: "", description: "", keywords: [] },
 };
 
 export default function AdminProductsPage() {
@@ -55,29 +55,29 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("ALL");
 
   const [form, setForm] = useState(emptyFormState);
   const [editingId, setEditingId] = useState(null);
-  const [toast, setToast] = useState({ type: '', text: '' });
+  const [toast, setToast] = useState({ type: "", text: "" });
 
   // ─── Local Files State (Uploaded ONLY on Form Submit) ───
   const [localMainFile, setLocalMainFile] = useState(null);
-  const [localMainPreview, setLocalMainPreview] = useState('');
+  const [localMainPreview, setLocalMainPreview] = useState("");
   const [localGalleryFiles, setLocalGalleryFiles] = useState([]); // [{ file, preview }]
   const [localPdfFile, setLocalPdfFile] = useState(null);
 
   // Temporary inputs
-  const [tempCapacity, setTempCapacity] = useState('');
-  const [tempAdvantage, setTempAdvantage] = useState('');
-  const [tempFeatureTitle, setTempFeatureTitle] = useState('');
-  const [tempFeatureDesc, setTempFeatureDesc] = useState('');
-  const [tempAppTitle, setTempAppTitle] = useState('');
-  const [tempAppDesc, setTempAppDesc] = useState('');
-  const [tempSpecKey, setTempSpecKey] = useState('');
-  const [tempSpecVal, setTempSpecVal] = useState('');
-  const [tempFlowTitle, setTempFlowTitle] = useState('');
+  const [tempCapacity, setTempCapacity] = useState("");
+  const [tempAdvantage, setTempAdvantage] = useState("");
+  const [tempFeatureTitle, setTempFeatureTitle] = useState("");
+  const [tempFeatureDesc, setTempFeatureDesc] = useState("");
+  const [tempAppTitle, setTempAppTitle] = useState("");
+  const [tempAppDesc, setTempAppDesc] = useState("");
+  const [tempSpecKey, setTempSpecKey] = useState("");
+  const [tempSpecVal, setTempSpecVal] = useState("");
+  const [tempFlowTitle, setTempFlowTitle] = useState("");
 
   const mainFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
@@ -87,8 +87,8 @@ export default function AdminProductsPage() {
     setLoadingList(true);
     try {
       const [prodRes, catRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/products?limit=150`, { credentials: 'include' }),
-        fetch(`${API_BASE_URL}/categories`, { credentials: 'include' }),
+        fetch(`${API_BASE_URL}/products?limit=150`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/categories`, { credentials: "include" }),
       ]);
 
       const [prodJson, catJson] = await Promise.all([
@@ -106,7 +106,7 @@ export default function AdminProductsPage() {
         setForm((prev) => ({ ...prev, category: catList[0]._id }));
       }
     } catch {
-      showToast('error', 'Failed to load catalogue.');
+      showToast("error", "Failed to load catalogue.");
     } finally {
       setLoadingList(false);
     }
@@ -118,7 +118,7 @@ export default function AdminProductsPage() {
 
   function showToast(type, text) {
     setToast({ type, text });
-    setTimeout(() => setToast({ type: '', text: '' }), 4000);
+    setTimeout(() => setToast({ type: "", text: "" }), 4000);
   }
 
   // 1. Local Selection Handler (No Immediate API Upload)
@@ -136,7 +136,7 @@ export default function AdminProductsPage() {
     const previews = files.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
-      alt: file.name.split('.')[0],
+      alt: file.name.split(".")[0],
     }));
 
     setLocalGalleryFiles((prev) => [...prev, ...previews]);
@@ -149,13 +149,13 @@ export default function AdminProductsPage() {
   }
 
   // 2. Upload Helper (Called sequentially on Submit)
-  async function uploadFileToServer(file, type = 'image') {
+  async function uploadFileToServer(file, type = "image") {
     const formData = new FormData();
-    formData.append(type === 'image' ? 'image' : 'file', file);
+    formData.append(type === "image" ? "image" : "file", file);
 
     const res = await fetch(`${API_BASE_URL}/uploads/${type}`, {
-      method: 'POST',
-      credentials: 'include',
+      method: "POST",
+      credentials: "include",
       body: formData,
     });
 
@@ -170,52 +170,54 @@ export default function AdminProductsPage() {
   function startEditing(prod) {
     setEditingId(prod._id);
     setForm({
-      name: prod.name || '',
-      slug: prod.slug || '',
-      category: prod.category?._id || prod.category || categories[0]?._id || '',
-      shortDescription: prod.shortDescription || '',
-      description: prod.description || '',
-      detailedDescription: prod.detailedDescription || '',
-      capacity: prod.capacity || '',
-      power: prod.power || '',
-      dimensions: prod.dimensions || '',
-      material: prod.material || '',
-      automationType: prod.automationType || 'Automatic',
-      warranty: prod.warranty || '1-Year Comprehensive OEM Guarantee',
+      name: prod.name || "",
+      slug: prod.slug || "",
+      category: prod.category?._id || prod.category || categories[0]?._id || "",
+      shortDescription: prod.shortDescription || "",
+      description: prod.description || "",
+      detailedDescription: prod.detailedDescription || "",
+      capacity: prod.capacity || "",
+      power: prod.power || "",
+      dimensions: prod.dimensions || "",
+      material: prod.material || "",
+      automationType: prod.automationType || "Automatic",
+      warranty: prod.warranty || "1-Year Comprehensive OEM Guarantee",
       featured: prod.featured ?? false,
       active: prod.active ?? true,
       capacities: Array.isArray(prod.capacities) ? prod.capacities : [],
       advantages: Array.isArray(prod.advantages) ? prod.advantages : [],
       features: Array.isArray(prod.features) ? prod.features : [],
       applications: Array.isArray(prod.applications) ? prod.applications : [],
-      specifications: Array.isArray(prod.specifications) ? prod.specifications : [],
+      specifications: Array.isArray(prod.specifications)
+        ? prod.specifications
+        : [],
       processFlow: Array.isArray(prod.processFlow) ? prod.processFlow : [],
       images: Array.isArray(prod.images) ? prod.images : [],
-      mainImage: prod.mainImage || { url: '', fileId: '', alt: '' },
-      pdf: prod.pdf || { url: '', fileId: '', name: '' },
+      mainImage: prod.mainImage || { url: "", fileId: "", alt: "" },
+      pdf: prod.pdf || { url: "", fileId: "", name: "" },
       seo: {
-        title: prod.seo?.title || '',
-        description: prod.seo?.description || '',
+        title: prod.seo?.title || "",
+        description: prod.seo?.description || "",
         keywords: Array.isArray(prod.seo?.keywords) ? prod.seo.keywords : [],
       },
     });
 
     // Reset local staging
     setLocalMainFile(null);
-    setLocalMainPreview('');
+    setLocalMainPreview("");
     setLocalGalleryFiles([]);
     setLocalPdfFile(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function cancelEditing() {
     setEditingId(null);
     setForm({
       ...emptyFormState,
-      category: categories[0]?._id || '',
+      category: categories[0]?._id || "",
     });
     setLocalMainFile(null);
-    setLocalMainPreview('');
+    setLocalMainPreview("");
     setLocalGalleryFiles([]);
     setLocalPdfFile(null);
   }
@@ -225,15 +227,20 @@ export default function AdminProductsPage() {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      showToast('error', 'Product name is required.');
+      showToast("error", "Product name is required.");
       return;
     }
     if (!form.category) {
-      showToast('error', 'Please choose a category.');
+      showToast("error", "Please choose a category.");
       return;
     }
-    if (!localMainFile && !form.mainImage?.url && form.images.length === 0 && localGalleryFiles.length === 0) {
-      showToast('error', 'Please select a main product image.');
+    if (
+      !localMainFile &&
+      !form.mainImage?.url &&
+      form.images.length === 0 &&
+      localGalleryFiles.length === 0
+    ) {
+      showToast("error", "Please select a main product image.");
       return;
     }
 
@@ -245,10 +252,10 @@ export default function AdminProductsPage() {
 
       // Step A: Upload staged Main Image if new file selected
       if (localMainFile) {
-        const uploaded = await uploadFileToServer(localMainFile, 'image');
+        const uploaded = await uploadFileToServer(localMainFile, "image");
         finalMainImage = {
           url: uploaded.url,
-          fileId: uploaded.fileId || '',
+          fileId: uploaded.fileId || "",
           alt: form.name.trim(),
         };
       }
@@ -256,10 +263,10 @@ export default function AdminProductsPage() {
       // Step B: Upload staged Gallery Images
       if (localGalleryFiles.length > 0) {
         for (const item of localGalleryFiles) {
-          const uploaded = await uploadFileToServer(item.file, 'image');
+          const uploaded = await uploadFileToServer(item.file, "image");
           finalGalleryImages.push({
             url: uploaded.url,
-            fileId: uploaded.fileId || '',
+            fileId: uploaded.fileId || "",
             alt: item.alt || form.name.trim(),
             order: finalGalleryImages.length,
           });
@@ -268,10 +275,10 @@ export default function AdminProductsPage() {
 
       // Step C: Upload staged PDF if selected
       if (localPdfFile) {
-        const uploaded = await uploadFileToServer(localPdfFile, 'file');
+        const uploaded = await uploadFileToServer(localPdfFile, "file");
         finalPdf = {
           url: uploaded.url,
-          fileId: uploaded.fileId || '',
+          fileId: uploaded.fileId || "",
           name: localPdfFile.name,
         };
       }
@@ -283,8 +290,8 @@ export default function AdminProductsPage() {
           form.slug.trim() ||
           form.name
             .toLowerCase()
-            .replace(/[^\w ]+/g, '')
-            .replace(/ +/g, '-'),
+            .replace(/[^\w ]+/g, "")
+            .replace(/ +/g, "-"),
         mainImage: finalMainImage.url ? finalMainImage : finalGalleryImages[0],
         images: finalGalleryImages,
         pdf: finalPdf,
@@ -294,28 +301,30 @@ export default function AdminProductsPage() {
         ? `${API_BASE_URL}/products/${editingId}`
         : `${API_BASE_URL}/products`;
 
-      const method = editingId ? 'PUT' : 'POST';
+      const method = editingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(payload),
       });
 
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.message || 'Failed to save product');
+        throw new Error(json.message || "Failed to save product");
       }
 
       showToast(
-        'success',
-        editingId ? 'Product updated successfully!' : 'Product published successfully!'
+        "success",
+        editingId
+          ? "Product updated successfully!"
+          : "Product published successfully!",
       );
       cancelEditing();
       loadData();
     } catch (err) {
-      showToast('error', err.message || 'Error saving product');
+      showToast("error", err.message || "Error saving product");
     } finally {
       setSaving(false);
     }
@@ -323,29 +332,30 @@ export default function AdminProductsPage() {
 
   // 5. Delete Product
   async function handleDelete(id) {
-    if (!window.confirm('Are you sure you want to delete this machine?')) return;
+    if (!window.confirm("Are you sure you want to delete this machine?"))
+      return;
     try {
       const res = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
       const json = await res.json();
       if (res.ok && json.success) {
-        showToast('success', 'Product deleted.');
+        showToast("success", "Product deleted.");
         if (editingId === id) cancelEditing();
         loadData();
       } else {
-        showToast('error', json.message || 'Failed to delete.');
+        showToast("error", json.message || "Failed to delete.");
       }
     } catch {
-      showToast('error', 'Delete operation failed.');
+      showToast("error", "Delete operation failed.");
     }
   }
 
   // Filter list
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
-      selectedCategoryFilter === 'ALL' ||
+      selectedCategoryFilter === "ALL" ||
       p.category?._id === selectedCategoryFilter ||
       p.category === selectedCategoryFilter;
     const matchesSearch =
@@ -357,38 +367,55 @@ export default function AdminProductsPage() {
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-800 antialiased pb-16 font-sans text-xs">
       {/* ─── TOP WORKSPACE HEADER ─── */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm px-4 sm:px-6 py-2.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm px-3 sm:px-6 py-2 sm:py-2.5 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+          {/* Left: Back Link & Title */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1 text-xs text-slate-600 hover:text-sky-700 px-2.5 py-1 rounded bg-slate-50 border border-slate-200 font-medium"
+              className="inline-flex items-center gap-1 text-[11px] sm:text-xs text-slate-600 hover:text-sky-700 px-2 sm:px-2.5 py-1 rounded bg-slate-50 border border-slate-200 font-medium shrink-0 transition-colors"
             >
-              <ArrowLeft size={13} /> Dashboard
+              <ArrowLeft size={13} className="shrink-0" />
+              <span className="hidden xs:inline">Dashboard</span>
             </Link>
-            <div className="h-4 w-[1px] bg-slate-200 hidden sm:block" />
-            <h1 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5">
-              <Layers size={14} className="text-sky-700" /> Machinery Product Workspace
+
+            <div className="h-4 w-[1px] bg-slate-200 hidden sm:block shrink-0" />
+
+            <h1 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
+              <Layers
+                size={14}
+                className="text-sky-700 shrink-0 hidden xxs:inline"
+              />
+              <span className="truncate">
+                <span className="hidden md:inline">Machinery </span>Product
+                Workspace
+              </span>
             </h1>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right: Actions (Cancel & Save / Publish) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {editingId && (
               <button
                 type="button"
                 onClick={cancelEditing}
-                className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-xs font-semibold"
+                className="px-2 sm:px-2.5 py-1 sm:py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] sm:text-xs font-semibold whitespace-nowrap transition-colors"
               >
-                Cancel Edit
+                Cancel
               </button>
             )}
+
             <button
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-1 px-3.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded text-xs font-bold shadow-sm"
+              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-green-700 hover:bg-green-800 active:scale-95  text-white rounded text-[11px] sm:text-xs font-bold shadow-xs transition-all whitespace-nowrap cursor-pointer"
             >
-              <Check size={14} /> {saving ? 'Uploading & Saving...' : editingId ? 'Update Product' : 'Publish Product'}
+              <Check size={13} className="shrink-0" />
+              <span>
+                {saving ? "Saving..." : editingId ? "Update" : "Done"}
+              </span>
+              <span className="hidden sm:inline">{!saving && " Product"}</span>
             </button>
           </div>
         </div>
@@ -398,38 +425,178 @@ export default function AdminProductsPage() {
       {toast.text && (
         <div
           className={`fixed bottom-4 right-4 z-50 px-3.5 py-2.5 rounded border text-xs font-semibold shadow-lg flex items-center gap-2 ${
-            toast.type === 'error'
-              ? 'bg-rose-50 border-rose-200 text-rose-800'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+            toast.type === "error"
+              ? "bg-rose-50 border-rose-200 text-rose-800"
+              : "bg-emerald-50 border-emerald-200 text-emerald-800"
           }`}
         >
-          {toast.type === 'error' ? <AlertCircle size={14} /> : <CheckCircle2 size={14} />}
+          {toast.type === "error" ? (
+            <AlertCircle size={14} />
+          ) : (
+            <CheckCircle2 size={14} />
+          )}
           <span>{toast.text}</span>
         </div>
       )}
 
       {/* ─── MAIN 2-COLUMN DUAL WORKSPACE ─── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mt-4 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start">
           {/* ══════════════════════════════════════════════════════════════
-              LEFT COLUMN (65%): CLEAN FORM (SAME COMPACT UI)
+              TOP ON MOBILE (lg:right): PRODUCTS LIST - ORDER FIRST
              ══════════════════════════════════════════════════════════════ */}
-          <div className="lg:col-span-7 xl:col-span-8 space-y-4">
-            <form onSubmit={handleSave} className="space-y-4">
-              
+          <div className="col-span-1 lg:col-span-5 xl:col-span-4 order-first lg:order-last lg:sticky lg:top-16">
+            <div className="bg-white border border-slate-300 rounded p-3 sm:p-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Package size={14} className="text-sky-700 shrink-0" />
+                  <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-wider truncate">
+                    Existing Products ({filteredProducts.length})
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadData}
+                  className="text-slate-500 hover:text-slate-900 p-1 shrink-0"
+                  title="Reload"
+                >
+                  <RefreshCw
+                    size={12}
+                    className={loadingList ? "animate-spin" : ""}
+                  />
+                </button>
+              </div>
+
+              {/* Search & Category Filter */}
+              <div className="space-y-1.5 mb-2.5">
+                <div className="relative">
+                  <Search
+                    size={12}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search equipment..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-300 rounded pl-7 pr-2 py-1.5 text-xs md:text-[11px] text-slate-900"
+                  />
+                </div>
+
+                <select
+                  value={selectedCategoryFilter}
+                  onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1.5 text-xs md:text-[11px] text-slate-700"
+                >
+                  <option value="ALL">All Categories</option>
+                  {categories.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Scrollable Products List */}
+              <div className="max-h-80 md:max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-slate-100 space-y-1 pr-0.5">
+                {loadingList ? (
+                  <div className="py-8 text-center text-slate-400 text-[11px]">
+                    Loading machinery list...
+                  </div>
+                ) : filteredProducts.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 text-[11px]">
+                    No matching machinery found.
+                  </div>
+                ) : (
+                  filteredProducts.map((p) => {
+                    const isCurrent = editingId === p._id;
+                    return (
+                      <div
+                        key={p._id}
+                        className={`p-2 rounded border transition-all ${
+                          isCurrent
+                            ? "bg-sky-50 border-sky-600 shadow-sm"
+                            : "bg-slate-50/50 border-slate-200 hover:bg-slate-100/70"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <img
+                            src={
+                              p.mainImage?.url ||
+                              p.images?.[0]?.url ||
+                              "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=120&q=80"
+                            }
+                            alt=""
+                            className="w-8 h-8 sm:w-9 sm:h-9 rounded border border-slate-200 bg-white object-cover shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <strong className="text-slate-900 block truncate text-[10px] sm:text-[11px]">
+                                {p.name}
+                              </strong>
+                              <span
+                                className={`text-[8px] sm:text-[8.5px] font-bold px-1 py-0.5 rounded shrink-0 ${
+                                  p.active
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-rose-100 text-rose-800"
+                                }`}
+                              >
+                                {p.active ? "ACTIVE" : "OFF"}
+                              </span>
+                            </div>
+                            <span className="text-[9px] sm:text-[10px] text-slate-500 block truncate">
+                              {p.category?.name || "Uncategorized"} • {p.slug}
+                            </span>
+                            <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+                              <button
+                                type="button"
+                                onClick={() => startEditing(p)}
+                                className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] font-bold text-sky-700 hover:text-sky-900 px-1.5 py-0.5 bg-white rounded border border-slate-300 shadow-sm hover:shadow"
+                              >
+                                <Pencil size={10} /> Edit
+                              </button>
+                              <Link
+                                href={`/products/${p.slug || p._id}`}
+                                target="_blank"
+                                className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-slate-500 hover:text-slate-900 px-1 py-0.5"
+                              >
+                                <ExternalLink size={10} /> View
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(p._id)}
+                                className="inline-flex items-center gap-0.5 text-[9px] sm:text-[10px] text-rose-600 hover:text-rose-800 ml-auto"
+                              >
+                                <Trash2 size={11} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ══════════════════════════════════════════════════════════════
+              BOTTOM ON MOBILE (lg:left): CLEAN FORM (SAME COMPACT UI)
+             ══════════════════════════════════════════════════════════════ */}
+          <div className="lg:col-span-7 xl:col-span-8 space-y-3 sm:space-y-4">
+            <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
               {/* 1. BASIC MACHINE DETAILS */}
-              <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
+              <section className="bg-white border border-slate-300 rounded p-3 sm:p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
-                  <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
+                  <h2 className="text-xs sm:text-[11px] font-bold text-sky-800 uppercase tracking-wider">
                     1. Basic Machine Details
                   </h2>
                   {/* <span className="text-[10px] text-slate-400">Core database fields</span> */}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    <label className="block text-[10px] sm:text-[10.5px] font-semibold text-slate-700 mb-1">
                       Product Name *
                     </label>
                     <input
@@ -437,33 +604,39 @@ export default function AdminProductsPage() {
                       required
                       placeholder="e.g. Potato Chips Line"
                       value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
+                      onChange={(e) =>
+                        setForm({ ...form, name: e.target.value })
+                      }
+                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    <label className="block text-[10px] sm:text-[10.5px] font-semibold text-slate-700 mb-1">
                       Slug (URL Key)
                     </label>
                     <input
                       type="text"
                       placeholder="e.g. potato-chips-line"
                       value={form.slug}
-                      onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
+                      onChange={(e) =>
+                        setForm({ ...form, slug: e.target.value })
+                      }
+                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    <label className="block text-[10px] sm:text-[10.5px] font-semibold text-slate-700 mb-1">
                       Category *
                     </label>
                     <select
                       value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, category: e.target.value })
+                      }
                       required
-                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
+                      className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
                     >
                       {categories.map((c) => (
                         <option key={c._id} value={c._id}>
@@ -473,52 +646,64 @@ export default function AdminProductsPage() {
                     </select>
                   </div>
 
-                  <div className="flex items-center gap-4 pt-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 pt-1 sm:pt-3">
                     <label className="inline-flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={form.active}
-                        onChange={(e) => setForm({ ...form, active: e.target.checked })}
+                        onChange={(e) =>
+                          setForm({ ...form, active: e.target.checked })
+                        }
                         className="w-3.5 h-3.5 accent-sky-700 rounded"
                       />
-                      <span className="text-[11px] text-slate-700 font-medium">Active (Public)</span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-700 font-medium">
+                        Active (Public)
+                      </span>
                     </label>
 
                     <label className="inline-flex items-center gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={form.featured}
-                        onChange={(e) => setForm({ ...form, featured: e.target.checked })}
+                        onChange={(e) =>
+                          setForm({ ...form, featured: e.target.checked })
+                        }
                         className="w-3.5 h-3.5 accent-amber-600 rounded"
                       />
-                      <span className="text-[11px] text-slate-700 font-medium">Featured Machine</span>
+                      <span className="text-[10px] sm:text-[11px] text-slate-700 font-medium">
+                        Featured Machine
+                      </span>
                     </label>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                  <label className="block text-[10px] sm:text-[10.5px] font-semibold text-slate-700 mb-1">
                     Short Summary Description
                   </label>
                   <input
                     type="text"
                     placeholder="Brief 1-2 line overview for cards"
                     value={form.shortDescription}
-                    onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
+                    onChange={(e) =>
+                      setForm({ ...form, shortDescription: e.target.value })
+                    }
+                    className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                  <label className="block text-[10px] sm:text-[10.5px] font-semibold text-slate-700 mb-1">
                     Full Description
                   </label>
                   <textarea
                     rows={2}
                     placeholder="Detailed explanation of machine and engineering capabilities..."
                     value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
+                    className="w-full bg-slate-50 border border-slate-300 rounded px-2.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-sky-600"
                   />
                 </div>
               </section>
@@ -549,7 +734,9 @@ export default function AdminProductsPage() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span className="text-[9px] text-slate-400">No Image</span>
+                          <span className="text-[9px] text-slate-400">
+                            No Image
+                          </span>
                         )}
                       </div>
                       <div className="flex-1 space-y-1">
@@ -565,7 +752,10 @@ export default function AdminProductsPage() {
                           onClick={() => mainFileInputRef.current?.click()}
                           className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold"
                         >
-                          <Upload size={12} /> {localMainFile ? 'Change Local Image' : 'Choose Main Image'}
+                          <Upload size={12} />{" "}
+                          {localMainFile
+                            ? "Change Local Image"
+                            : "Choose Main Image"}
                         </button>
                         {localMainFile && (
                           <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
@@ -594,10 +784,17 @@ export default function AdminProductsPage() {
                         onClick={() => pdfFileInputRef.current?.click()}
                         className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold"
                       >
-                        <FileText size={12} /> {localPdfFile ? 'Change PDF' : form.pdf?.url ? 'Replace PDF' : 'Select PDF'}
+                        <FileText size={12} />{" "}
+                        {localPdfFile
+                          ? "Change PDF"
+                          : form.pdf?.url
+                            ? "Replace PDF"
+                            : "Select PDF"}
                       </button>
                       <span className="block text-[10px] text-slate-600 truncate">
-                        {localPdfFile ? `Staged: ${localPdfFile.name}` : form.pdf?.name || 'No PDF attached'}
+                        {localPdfFile
+                          ? `Staged: ${localPdfFile.name}`
+                          : form.pdf?.name || "No PDF attached"}
                       </span>
                     </div>
                   </div>
@@ -607,7 +804,8 @@ export default function AdminProductsPage() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[10.5px] font-semibold text-slate-700">
-                      Product Gallery ({form.images.length + localGalleryFiles.length} Images)
+                      Product Gallery (
+                      {form.images.length + localGalleryFiles.length} Images)
                     </label>
                     <input
                       type="file"
@@ -631,8 +829,15 @@ export default function AdminProductsPage() {
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 bg-slate-50 p-2 rounded border border-slate-200">
                       {/* Existing Uploaded Images */}
                       {form.images.map((img, idx) => (
-                        <div key={`existing-${idx}`} className="relative group rounded border border-slate-300 overflow-hidden aspect-video bg-white">
-                          <img src={img.url} alt="" className="w-full h-full object-cover" />
+                        <div
+                          key={`existing-${idx}`}
+                          className="relative group rounded border border-slate-300 overflow-hidden aspect-video bg-white"
+                        >
+                          <img
+                            src={img.url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
                           <button
                             type="button"
                             onClick={() =>
@@ -650,15 +855,24 @@ export default function AdminProductsPage() {
 
                       {/* Staged New Local Images */}
                       {localGalleryFiles.map((item, idx) => (
-                        <div key={`staged-${idx}`} className="relative group rounded border-2 border-dashed border-sky-600 overflow-hidden aspect-video bg-white">
-                          <img src={item.preview} alt="" className="w-full h-full object-cover" />
+                        <div
+                          key={`staged-${idx}`}
+                          className="relative group rounded border-2 border-dashed border-sky-600 overflow-hidden aspect-video bg-white"
+                        >
+                          <img
+                            src={item.preview}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
                           <span className="absolute bottom-0 inset-x-0 bg-sky-700 text-white text-[8px] text-center font-bold">
                             NEW
                           </span>
                           <button
                             type="button"
                             onClick={() =>
-                              setLocalGalleryFiles((prev) => prev.filter((_, i) => i !== idx))
+                              setLocalGalleryFiles((prev) =>
+                                prev.filter((_, i) => i !== idx),
+                              )
                             }
                             className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded"
                           >
@@ -681,61 +895,85 @@ export default function AdminProductsPage() {
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Power</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Power
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. 45 kW"
                       value={form.power}
-                      onChange={(e) => setForm({ ...form, power: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, power: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Material</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Material
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. SS 304 Stainless"
                       value={form.material}
-                      onChange={(e) => setForm({ ...form, material: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, material: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Automation</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Automation
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. Fully Automatic"
                       value={form.automationType}
-                      onChange={(e) => setForm({ ...form, automationType: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, automationType: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Dimensions</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Dimensions
+                    </label>
                     <input
                       type="text"
                       placeholder="L x W x H"
                       value={form.dimensions}
-                      onChange={(e) => setForm({ ...form, dimensions: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, dimensions: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Warranty</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Warranty
+                    </label>
                     <input
                       type="text"
                       value={form.warranty}
-                      onChange={(e) => setForm({ ...form, warranty: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, warranty: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">Primary Capacity</label>
+                    <label className="block text-[10px] font-semibold text-slate-600 mb-0.5">
+                      Primary Capacity
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. 500 kg/hr"
                       value={form.capacity}
-                      onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, capacity: e.target.value })
+                      }
                       className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
                     />
                   </div>
@@ -744,7 +982,8 @@ export default function AdminProductsPage() {
                 {/* Multiple Standard Capacities */}
                 <div className="pt-1">
                   <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
-                    Multiple Standard Capacities (e.g. 100 kg/hr, 200 kg/hr, 500 kg/hr)
+                    Multiple Standard Capacities (e.g. 100 kg/hr, 200 kg/hr, 500
+                    kg/hr)
                   </label>
                   <div className="flex gap-1.5 mb-1.5">
                     <input
@@ -758,8 +997,11 @@ export default function AdminProductsPage() {
                       type="button"
                       onClick={() => {
                         if (!tempCapacity.trim()) return;
-                        setForm({ ...form, capacities: [...form.capacities, tempCapacity.trim()] });
-                        setTempCapacity('');
+                        setForm({
+                          ...form,
+                          capacities: [...form.capacities, tempCapacity.trim()],
+                        });
+                        setTempCapacity("");
                       }}
                       className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                     >
@@ -768,9 +1010,25 @@ export default function AdminProductsPage() {
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {form.capacities.map((cap, idx) => (
-                      <span key={idx} className="inline-flex items-center gap-1 bg-slate-100 border border-slate-300 text-slate-800 px-2 py-0.5 rounded text-[10.5px]">
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 bg-slate-100 border border-slate-300 text-slate-800 px-2 py-0.5 rounded text-[10.5px]"
+                      >
                         • {cap}
-                        <button type="button" onClick={() => setForm({ ...form, capacities: form.capacities.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">×</button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              capacities: form.capacities.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
+                          className="text-slate-400 hover:text-rose-600"
+                        >
+                          ×
+                        </button>
                       </span>
                     ))}
                   </div>
@@ -800,10 +1058,14 @@ export default function AdminProductsPage() {
                         ...form,
                         processFlow: [
                           ...form.processFlow,
-                          { title: tempFlowTitle.trim(), description: '', order: form.processFlow.length + 1 },
+                          {
+                            title: tempFlowTitle.trim(),
+                            description: "",
+                            order: form.processFlow.length + 1,
+                          },
                         ],
                       });
-                      setTempFlowTitle('');
+                      setTempFlowTitle("");
                     }}
                     className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                   >
@@ -812,14 +1074,30 @@ export default function AdminProductsPage() {
                 </div>
                 <div className="space-y-1">
                   {form.processFlow.map((step, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-1.5 bg-slate-50 border border-slate-200 rounded text-[11px]">
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-1.5 bg-slate-50 border border-slate-200 rounded text-[11px]"
+                    >
                       <div className="flex items-center gap-1.5">
                         <span className="w-4 h-4 rounded-full bg-sky-100 text-sky-800 text-[9px] font-bold flex items-center justify-center">
                           {idx + 1}
                         </span>
-                        <span className="text-slate-800 font-medium">{typeof step === 'string' ? step : step.title}</span>
+                        <span className="text-slate-800 font-medium">
+                          {typeof step === "string" ? step : step.title}
+                        </span>
                       </div>
-                      <button type="button" onClick={() => setForm({ ...form, processFlow: form.processFlow.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            processFlow: form.processFlow.filter(
+                              (_, i) => i !== idx,
+                            ),
+                          })
+                        }
+                        className="text-slate-400 hover:text-rose-600"
+                      >
                         <Trash2 size={12} />
                       </button>
                     </div>
@@ -837,7 +1115,9 @@ export default function AdminProductsPage() {
 
                 {/* Advantages */}
                 <div>
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">Advantages</label>
+                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    Advantages
+                  </label>
                   <div className="flex gap-1.5 mb-1.5">
                     <input
                       type="text"
@@ -850,8 +1130,14 @@ export default function AdminProductsPage() {
                       type="button"
                       onClick={() => {
                         if (!tempAdvantage.trim()) return;
-                        setForm({ ...form, advantages: [...form.advantages, tempAdvantage.trim()] });
-                        setTempAdvantage('');
+                        setForm({
+                          ...form,
+                          advantages: [
+                            ...form.advantages,
+                            tempAdvantage.trim(),
+                          ],
+                        });
+                        setTempAdvantage("");
                       }}
                       className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                     >
@@ -860,9 +1146,25 @@ export default function AdminProductsPage() {
                   </div>
                   <div className="space-y-1">
                     {form.advantages.map((adv, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-[11px] text-slate-700 bg-slate-50 p-1 rounded border border-slate-200">
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between text-[11px] text-slate-700 bg-slate-50 p-1 rounded border border-slate-200"
+                      >
                         <span>» {adv}</span>
-                        <button type="button" onClick={() => setForm({ ...form, advantages: form.advantages.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">×</button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              advantages: form.advantages.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
+                          className="text-slate-400 hover:text-rose-600"
+                        >
+                          ×
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -870,7 +1172,9 @@ export default function AdminProductsPage() {
 
                 {/* Features */}
                 <div className="pt-2 border-t border-slate-200">
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">Features (Title + Description)</label>
+                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    Features (Title + Description)
+                  </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1.5">
                     <input
                       type="text"
@@ -893,10 +1197,16 @@ export default function AdminProductsPage() {
                           if (!tempFeatureTitle.trim()) return;
                           setForm({
                             ...form,
-                            features: [...form.features, { title: tempFeatureTitle.trim(), description: tempFeatureDesc.trim() }],
+                            features: [
+                              ...form.features,
+                              {
+                                title: tempFeatureTitle.trim(),
+                                description: tempFeatureDesc.trim(),
+                              },
+                            ],
                           });
-                          setTempFeatureTitle('');
-                          setTempFeatureDesc('');
+                          setTempFeatureTitle("");
+                          setTempFeatureDesc("");
                         }}
                         className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                       >
@@ -906,12 +1216,32 @@ export default function AdminProductsPage() {
                   </div>
                   <div className="space-y-1">
                     {form.features.map((feat, idx) => (
-                      <div key={idx} className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]">
+                      <div
+                        key={idx}
+                        className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]"
+                      >
                         <div>
-                          <strong className="text-slate-900 block">{typeof feat === 'string' ? feat : feat.title}</strong>
-                          {feat.description && <p className="text-[10px] text-slate-500">{feat.description}</p>}
+                          <strong className="text-slate-900 block">
+                            {typeof feat === "string" ? feat : feat.title}
+                          </strong>
+                          {feat.description && (
+                            <p className="text-[10px] text-slate-500">
+                              {feat.description}
+                            </p>
+                          )}
                         </div>
-                        <button type="button" onClick={() => setForm({ ...form, features: form.features.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              features: form.features.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
+                          className="text-slate-400 hover:text-rose-600"
+                        >
                           <Trash2 size={12} />
                         </button>
                       </div>
@@ -921,7 +1251,9 @@ export default function AdminProductsPage() {
 
                 {/* Applications */}
                 <div className="pt-2 border-t border-slate-200">
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">Applications (e.g. Potato Chips, Cassava, Sweet Potato)</label>
+                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
+                    Applications (e.g. Potato Chips, Cassava, Sweet Potato)
+                  </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1.5">
                     <input
                       type="text"
@@ -944,10 +1276,16 @@ export default function AdminProductsPage() {
                           if (!tempAppTitle.trim()) return;
                           setForm({
                             ...form,
-                            applications: [...form.applications, { title: tempAppTitle.trim(), description: tempAppDesc.trim() }],
+                            applications: [
+                              ...form.applications,
+                              {
+                                title: tempAppTitle.trim(),
+                                description: tempAppDesc.trim(),
+                              },
+                            ],
                           });
-                          setTempAppTitle('');
-                          setTempAppDesc('');
+                          setTempAppTitle("");
+                          setTempAppDesc("");
                         }}
                         className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                       >
@@ -957,12 +1295,32 @@ export default function AdminProductsPage() {
                   </div>
                   <div className="space-y-1">
                     {form.applications.map((app, idx) => (
-                      <div key={idx} className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]">
+                      <div
+                        key={idx}
+                        className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]"
+                      >
                         <div>
-                          <strong className="text-slate-900 block">{typeof app === 'string' ? app : app.title}</strong>
-                          {app.description && <p className="text-[10px] text-slate-500">{app.description}</p>}
+                          <strong className="text-slate-900 block">
+                            {typeof app === "string" ? app : app.title}
+                          </strong>
+                          {app.description && (
+                            <p className="text-[10px] text-slate-500">
+                              {app.description}
+                            </p>
+                          )}
                         </div>
-                        <button type="button" onClick={() => setForm({ ...form, applications: form.applications.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              applications: form.applications.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
+                          className="text-slate-400 hover:text-rose-600"
+                        >
                           <Trash2 size={12} />
                         </button>
                       </div>
@@ -1000,10 +1358,16 @@ export default function AdminProductsPage() {
                         if (!tempSpecKey.trim() || !tempSpecVal.trim()) return;
                         setForm({
                           ...form,
-                          specifications: [...form.specifications, { key: tempSpecKey.trim(), value: tempSpecVal.trim() }],
+                          specifications: [
+                            ...form.specifications,
+                            {
+                              key: tempSpecKey.trim(),
+                              value: tempSpecVal.trim(),
+                            },
+                          ],
                         });
-                        setTempSpecKey('');
-                        setTempSpecVal('');
+                        setTempSpecKey("");
+                        setTempSpecVal("");
                       }}
                       className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
                     >
@@ -1014,11 +1378,29 @@ export default function AdminProductsPage() {
 
                 <div className="divide-y divide-slate-200 bg-slate-50 rounded border border-slate-200 overflow-hidden">
                   {form.specifications.map((s, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-1.5 text-[11px]">
-                      <span className="text-slate-600 font-semibold">{s.key}</span>
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-1.5 text-[11px]"
+                    >
+                      <span className="text-slate-600 font-semibold">
+                        {s.key}
+                      </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-900 font-medium">{s.value}</span>
-                        <button type="button" onClick={() => setForm({ ...form, specifications: form.specifications.filter((_, i) => i !== idx) })} className="text-slate-400 hover:text-rose-600">
+                        <span className="text-slate-900 font-medium">
+                          {s.value}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              specifications: form.specifications.filter(
+                                (_, i) => i !== idx,
+                              ),
+                            })
+                          }
+                          className="text-slate-400 hover:text-rose-600"
+                        >
                           <Trash2 size={12} />
                         </button>
                       </div>
@@ -1030,142 +1412,29 @@ export default function AdminProductsPage() {
               {/* Form Bottom Actions */}
               <div className="flex items-center justify-end gap-2 pt-2">
                 {editingId && (
-                  <button type="button" onClick={cancelEditing} className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold"
+                  >
                     Cancel
                   </button>
                 )}
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-sky-700 hover:bg-sky-800 text-white rounded text-xs font-bold shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-green-700 hover:bg-green-800 text-white rounded text-xs font-bold shadow-sm"
                 >
-                  <Check size={14} /> {saving ? 'Uploading & Saving...' : editingId ? 'Update Machinery System' : 'Publish Product'}
+                  <Check size={14} />{" "}
+                  {saving
+                    ? "Uploading & Saving..."
+                    : editingId
+                      ? "Update Machinery System"
+                      : "Publish Product"}
                 </button>
               </div>
             </form>
           </div>
-
-          {/* ══════════════════════════════════════════════════════════════
-              RIGHT COLUMN (35%): LIVE CATALOGUE LIST & ACTIONS
-             ══════════════════════════════════════════════════════════════ */}
-          <div className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-16 space-y-3">
-            <div className="bg-white border border-slate-300 rounded p-3.5 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2.5">
-                <div className="flex items-center gap-1.5">
-                  <Package size={14} className="text-sky-700" />
-                  <h3 className="text-[11px] font-bold text-slate-900 uppercase tracking-wider">
-                    Existing Products ({filteredProducts.length})
-                  </h3>
-                </div>
-                <button type="button" onClick={loadData} className="text-slate-500 hover:text-slate-900 p-1" title="Reload">
-                  <RefreshCw size={12} className={loadingList ? 'animate-spin' : ''} />
-                </button>
-              </div>
-
-              {/* Search & Category Filter */}
-              <div className="space-y-1.5 mb-2.5">
-                <div className="relative">
-                  <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search equipment..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-slate-50 border border-slate-300 rounded pl-7 pr-2 py-1 text-[11px] text-slate-900"
-                  />
-                </div>
-
-                <select
-                  value={selectedCategoryFilter}
-                  onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-300 rounded px-2 py-1 text-[11px] text-slate-700"
-                >
-                  <option value="ALL">All Categories</option>
-                  {categories.map((c) => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Scrollable Products List */}
-              <div className="max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-slate-100 space-y-1 pr-0.5">
-                {loadingList ? (
-                  <div className="py-8 text-center text-slate-400 text-[11px]">Loading machinery list...</div>
-                ) : filteredProducts.length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 text-[11px]">No matching machinery found.</div>
-                ) : (
-                  filteredProducts.map((p) => {
-                    const isCurrent = editingId === p._id;
-                    return (
-                      <div
-                        key={p._id}
-                        className={`p-2 rounded border transition-all ${
-                          isCurrent
-                            ? 'bg-sky-50 border-sky-600 shadow-sm'
-                            : 'bg-slate-50/50 border-slate-200 hover:bg-slate-100/70'
-                        }`}
-                      >
-                        <div className="flex items-start gap-2">
-                          <img
-                            src={
-                              p.mainImage?.url ||
-                              p.images?.[0]?.url ||
-                              'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=120&q=80'
-                            }
-                            alt=""
-                            className="w-9 h-9 rounded border border-slate-200 bg-white object-cover shrink-0"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-1">
-                              <strong className="text-slate-900 block truncate text-[11px]">
-                                {p.name}
-                              </strong>
-                              <span
-                                className={`text-[8.5px] font-bold px-1 py-0.2 rounded ${
-                                  p.active
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-rose-100 text-rose-800'
-                                }`}
-                              >
-                                {p.active ? 'ACTIVE' : 'OFF'}
-                              </span>
-                            </div>
-                            <span className="text-[10px] text-slate-500 block truncate">
-                              {p.category?.name || 'Uncategorized'} • {p.slug}
-                            </span>
-                            <div className="flex items-center gap-1.5 mt-1.5">
-                              <button
-                                type="button"
-                                onClick={() => startEditing(p)}
-                                className="inline-flex items-center gap-0.5 text-[10px] font-bold text-sky-700 hover:text-sky-900 px-1.5 py-0.5 bg-white rounded border border-slate-300 shadow-sm"
-                              >
-                                <Pencil size={10} /> Edit
-                              </button>
-                              <Link
-                                href={`/products/${p.slug || p._id}`}
-                                target="_blank"
-                                className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 hover:text-slate-900 px-1 py-0.5"
-                              >
-                                <ExternalLink size={10} /> View
-                              </Link>
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(p._id)}
-                                className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 ml-auto"
-                              >
-                                <Trash2 size={11} />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

@@ -8,16 +8,14 @@ import {
   AlertCircle,
   Mail,
   Phone,
-  MapPin,
   Clock,
-  ShieldCheck,
-  Building2,
-  User,
 } from "lucide-react";
 
 export default function ContactSection() {
   const searchParams = useSearchParams();
   const requestedProduct = searchParams?.get("product") || "";
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
   const [form, setForm] = useState({
     name: "",
@@ -29,6 +27,36 @@ export default function ContactSection() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Dynamic Contact Information from Admin Settings
+  const [contactInfo, setContactInfo] = useState({
+    salesPhoneNumber: "+91 98765 43210",
+    inquiryEmail: "contact@machina.industries",
+  });
+
+  // Fetch dynamic phone & email from database
+  useEffect(() => {
+    async function fetchContactSettings() {
+      try {
+        const res = await fetch(`${apiUrl}/settings/contact`, {
+          cache: "no-store",
+        });
+        const json = await res.json();
+        if (res.ok && json.data) {
+          setContactInfo({
+            salesPhoneNumber:
+              json.data.salesPhoneNumber || "+91 98765 43210",
+            inquiryEmail:
+              json.data.inquiryEmail || "contact@machina.industries",
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load contact settings:", err);
+      }
+    }
+
+    fetchContactSettings();
+  }, [apiUrl]);
 
   useEffect(() => {
     if (requestedProduct) {
@@ -45,9 +73,6 @@ export default function ContactSection() {
     e.preventDefault();
     setLoading(true);
     setError("");
-
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
     try {
       const res = await fetch(`${apiUrl}/enquiries/contact`, {
@@ -66,12 +91,12 @@ export default function ContactSection() {
         setForm({ name: "", email: "", phone: "", company: "", message: "" });
       } else {
         setError(
-          json.message || "Unable to process your request. Please try again.",
+          json.message || "Unable to process your request. Please try again."
         );
       }
     } catch {
       setError(
-        "Connection to server failed. Please check your internet or retry shortly.",
+        "Connection to server failed. Please check your internet or retry shortly."
       );
     } finally {
       setLoading(false);
@@ -153,7 +178,7 @@ export default function ContactSection() {
             </div>
           )}
 
-          {/* Quick Contact & Facility Details */}
+          {/* ─── Fully Dynamic Contact Details ─── */}
           <div
             style={{
               display: "flex",
@@ -162,6 +187,7 @@ export default function ContactSection() {
               paddingTop: "0.5rem",
             }}
           >
+            {/* Dynamic Phone */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -191,7 +217,7 @@ export default function ContactSection() {
                   Sales & Engineering
                 </span>
                 <a
-                  href="tel:+919876543210"
+                  href={`tel:${contactInfo.salesPhoneNumber.replace(/\s+/g, "")}`}
                   style={{
                     color: "#f1f5f9",
                     fontSize: "0.95rem",
@@ -199,11 +225,12 @@ export default function ContactSection() {
                     textDecoration: "none",
                   }}
                 >
-                  +91 98765 43210
+                  {contactInfo.salesPhoneNumber}
                 </a>
               </div>
             </div>
 
+            {/* Dynamic Email */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -233,7 +260,7 @@ export default function ContactSection() {
                   Inquiry Desk
                 </span>
                 <a
-                  href="mailto:contact@machina.industries"
+                  href={`mailto:${contactInfo.inquiryEmail}`}
                   style={{
                     color: "#f1f5f9",
                     fontSize: "0.95rem",
@@ -241,11 +268,12 @@ export default function ContactSection() {
                     textDecoration: "none",
                   }}
                 >
-                  contact@machina.industries
+                  {contactInfo.inquiryEmail}
                 </a>
               </div>
             </div>
 
+            {/* Response SLA */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -286,22 +314,6 @@ export default function ContactSection() {
               </div>
             </div>
           </div>
-
-          {/* Guarantee Badges */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              color: "#10b981",
-              fontSize: "0.82rem",
-              borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-              paddingTop: "1.25rem",
-            }}
-          >
-            <ShieldCheck size={16} /> Commercial NDA & Data Confidentiality
-            Assured
-          </div>
         </div>
 
         {/* Right Side: Professional Structured Form */}
@@ -328,7 +340,6 @@ export default function ContactSection() {
                 justifyContent: "center",
               }}
             >
-              {/* Success Checkmark Icon */}
               <div
                 style={{
                   width: "64px",
@@ -347,7 +358,6 @@ export default function ContactSection() {
                 <CheckCircle2 size={32} />
               </div>
 
-              {/* Heading */}
               <h3
                 style={{
                   fontSize: "1.5rem",
@@ -360,7 +370,6 @@ export default function ContactSection() {
                 Enquiry Received
               </h3>
 
-              {/* Message */}
               <p
                 style={{
                   color: "#94a3b8",
@@ -370,12 +379,11 @@ export default function ContactSection() {
                   marginBottom: "2rem",
                 }}
               >
-                Thank you for reaching out to AFP Technologieshina. A confirmation email has
+                Thank you for reaching out to AFP Technologies. A confirmation email has
                 been dispatched to your inbox, and our engineering desk is
                 preparing your proposal.
               </p>
 
-              {/* High Contrast Visible Button */}
               <button
                 type="button"
                 onClick={() => setSubmitted(false)}
@@ -402,7 +410,8 @@ export default function ContactSection() {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.backgroundColor = "#1e293b";
-                  e.currentTarget.style.borderColor = "rgba(56, 189, 248, 0.4)";
+                  e.currentTarget.style.borderColor =
+                    "rgba(56, 189, 248, 0.4)";
                   e.currentTarget.style.color = "#f8fafc";
                 }}
               >
@@ -547,7 +556,7 @@ export default function ContactSection() {
                 </label>
               </div>
 
-              {/* Row 3: Message / Scope */}
+              {/* Row 3: Message */}
               <label
                 style={{
                   display: "flex",
@@ -578,7 +587,7 @@ export default function ContactSection() {
                 />
               </label>
 
-              {/* Error Toast */}
+              {/* Error Alert */}
               {error && (
                 <div
                   style={{

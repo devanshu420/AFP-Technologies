@@ -1,27 +1,47 @@
 'use client';
 
-import { RefreshCw } from 'lucide-react';
+import ContactSettingsPanel from './ContactSettingsPanel';
 
-export default function AdminHeading({ adminName = 'operator', onRefresh }) {
+export default function AdminHeading({ adminName = 'Administrator' }) {
   return (
-    <div className="admin-heading">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '12px',
+        margin: '1.5rem 0',
+      }}
+    >
+      {/* Left: Heading Title */}
       <div>
-        <p className="kicker dark">
-          <span /> CONTROL ROOM
-        </p>
-        <h1>
-          Welcome back,
-          <br />
-          <em>{adminName}.</em>
+        <h1
+          style={{
+            fontSize: '1.65rem',
+            fontWeight: 800,
+            color: '#f8fafc',
+            margin: 0,
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Control Panel
         </h1>
+        <p
+          style={{
+            fontSize: '0.85rem',
+            color: '#94a3b8',
+            margin: '4px 0 0 0',
+          }}
+        >
+          Welcome back, <strong style={{ color: '#38bdf8' }}>{adminName}</strong>
+        </p>
       </div>
-      <button
-        className="icon-button refresh"
-        onClick={onRefresh}
-        aria-label="Refresh dashboard"
-      >
-        <RefreshCw size={18} />
-      </button>
+
+      {/* Right: Direct Edit Contact Info Button */}
+      <div>
+        <ContactSettingsPanel />
+      </div>
     </div>
   );
 }
