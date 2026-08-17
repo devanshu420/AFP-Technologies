@@ -9,6 +9,7 @@ import {
   Mail,
   Phone,
   Clock,
+  MessageSquare,
 } from "lucide-react";
 
 export default function ContactSection() {
@@ -69,6 +70,21 @@ export default function ContactSection() {
     }
   }, [requestedProduct]);
 
+  // ── Clean dynamic number for WhatsApp Redirect ──
+  // Removes all +, spaces, dashes, brackets etc.
+  const rawCleanPhone = contactInfo.salesPhoneNumber.replace(/\D/g, "");
+  // Default country code 91 if user only provided 10 digits
+  const whatsappNumber = rawCleanPhone.length === 10 ? `91${rawCleanPhone}` : rawCleanPhone;
+
+  // Custom pre-filled message for WhatsApp
+  const whatsappCustomMessage = encodeURIComponent(
+    requestedProduct
+      ? `Hello AFP Technologies, I want to inquire about: ${requestedProduct}.`
+      : `Hello AFP Technologies, I would like to consult about your industrial machinery solutions.`
+  );
+
+  const whatsappRedirectUrl = `https://wa.me/${whatsappNumber}?text=${whatsappCustomMessage}`;
+
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -116,7 +132,7 @@ export default function ContactSection() {
         {/* Left Side: Context, Trust Pointers & Direct Contact Info */}
         <div
           className="contact-info-panel"
-          style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}
+          style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
           <div>
             <p className="kicker">
@@ -178,16 +194,91 @@ export default function ContactSection() {
             </div>
           )}
 
-          {/* ─── Fully Dynamic Contact Details ─── */}
+          {/* ─── Fully Dynamic Contact Details + WhatsApp CTA ─── */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               gap: "1rem",
-              paddingTop: "0.5rem",
+              paddingTop: "0.25rem",
             }}
           >
-            {/* Dynamic Phone */}
+            {/* 1. Dynamic WhatsApp Quick Connect Card */}
+            <a
+              href={whatsappRedirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "12px",
+                padding: "10px 14px",
+                backgroundColor: "rgba(37, 211, 102, 0.08)",
+                border: "1px solid rgba(37, 211, 102, 0.35)",
+                borderRadius: "10px",
+                textDecoration: "none",
+                transition: "all 0.2s ease",
+                maxWidth: "380px",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(37, 211, 102, 0.16)";
+                e.currentTarget.style.borderColor = "#25d366";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(37, 211, 102, 0.08)";
+                e.currentTarget.style.borderColor = "rgba(37, 211, 102, 0.35)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div
+                  style={{
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "8px",
+                    backgroundColor: "#25d366",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#ffffff",
+                    flexShrink: 0,
+                    boxShadow: "0 0 12px rgba(37, 211, 102, 0.35)",
+                  }}
+                >
+                  {/* WhatsApp SVG Icon */}
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.014.376-.101c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.926l-1.564 5.717 5.867-1.539c1.703.931 3.659 1.478 5.741 1.478 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z" />
+                  </svg>
+                </div>
+                <div>
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: "0.72rem",
+                      color: "#86efac",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Instant WhatsApp Chat
+                  </span>
+                  <span style={{ color: "#ffffff", fontSize: "0.88rem", fontWeight: 600 }}>
+                    Message Sales Desk
+                  </span>
+                </div>
+              </div>
+              <ArrowRight size={15} color="#25d366" />
+            </a>
+
+            {/* 2. Dynamic Phone */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -200,6 +291,7 @@ export default function ContactSection() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#38bdf8",
+                  flexShrink: 0,
                 }}
               >
                 <Phone size={17} />
@@ -230,7 +322,7 @@ export default function ContactSection() {
               </div>
             </div>
 
-            {/* Dynamic Email */}
+            {/* 3. Dynamic Email */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -243,6 +335,7 @@ export default function ContactSection() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#38bdf8",
+                  flexShrink: 0,
                 }}
               >
                 <Mail size={17} />
@@ -273,7 +366,7 @@ export default function ContactSection() {
               </div>
             </div>
 
-            {/* Response SLA */}
+            {/* 4. Response SLA */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div
                 style={{
@@ -286,6 +379,7 @@ export default function ContactSection() {
                   alignItems: "center",
                   justifyContent: "center",
                   color: "#38bdf8",
+                  flexShrink: 0,
                 }}
               >
                 <Clock size={17} />
@@ -376,13 +470,35 @@ export default function ContactSection() {
                   fontSize: "0.95rem",
                   lineHeight: 1.65,
                   maxWidth: "420px",
-                  marginBottom: "2rem",
+                  marginBottom: "1.75rem",
                 }}
               >
-                Thank you for reaching out to AFP Technologies. A confirmation email has
-                been dispatched to your inbox, and our engineering desk is
-                preparing your proposal.
+                Thank you for reaching out to AFP Technologies. Our engineering desk
+                is reviewing your requirement and will contact you shortly.
               </p>
+
+              {/* Instant WhatsApp Quick Connect Option after submission */}
+              <a
+                href={whatsappRedirectUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "0.75rem 1.5rem",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  color: "#ffffff",
+                  backgroundColor: "#25d366",
+                  borderRadius: "8px",
+                  textDecoration: "none",
+                  marginBottom: "1rem",
+                  boxShadow: "0 4px 15px rgba(37, 211, 102, 0.3)",
+                }}
+              >
+                <MessageSquare size={16} /> Fast-Track on WhatsApp
+              </a>
 
               <button
                 type="button"
@@ -392,27 +508,15 @@ export default function ContactSection() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  padding: "0.75rem 1.5rem",
-                  fontSize: "0.9rem",
+                  padding: "0.65rem 1.25rem",
+                  fontSize: "0.85rem",
                   fontWeight: 600,
-                  color: "#f8fafc",
-                  backgroundColor: "#1e293b",
-                  border: "1px solid rgba(56, 189, 248, 0.4)",
+                  color: "#94a3b8",
+                  backgroundColor: "transparent",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
                   borderRadius: "8px",
                   cursor: "pointer",
                   transition: "all 0.2s ease",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#0284c7";
-                  e.currentTarget.style.borderColor = "#38bdf8";
-                  e.currentTarget.style.color = "#ffffff";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "#1e293b";
-                  e.currentTarget.style.borderColor =
-                    "rgba(56, 189, 248, 0.4)";
-                  e.currentTarget.style.color = "#f8fafc";
                 }}
               >
                 Submit another enquiry

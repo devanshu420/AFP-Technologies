@@ -195,86 +195,37 @@ export default function HeroSection() {
               </div>
 
               {/* Stats Metrics */}
-              <div
-                className="hero-stats"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "1rem",
-                  borderTop: "1px solid rgba(255, 255, 255, 0.08)",
-                  paddingTop: "1.5rem",
-                }}
-              >
-                <div>
-                  <strong
-                    style={{
-                      display: "block",
-                      fontSize: "1.65rem",
-                      color: "#f8fafc",
-                      fontWeight: 800,
-                    }}
-                  >
-                    25+
-                  </strong>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#64748b",
-                      lineHeight: 1.4,
-                      display: "block",
-                      marginTop: "2px",
-                    }}
-                  >
-                    Years of engineering
-                  </span>
-                </div>
-                <div>
-                  <strong
-                    style={{
-                      display: "block",
-                      fontSize: "1.65rem",
-                      color: "#f8fafc",
-                      fontWeight: 800,
-                    }}
-                  >
-                    40
-                  </strong>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#64748b",
-                      lineHeight: 1.4,
-                      display: "block",
-                      marginTop: "2px",
-                    }}
-                  >
-                    Markets served
-                  </span>
-                </div>
-                <div>
-                  <strong
-                    style={{
-                      display: "block",
-                      fontSize: "1.65rem",
-                      color: "#38bdf8",
-                      fontWeight: 800,
-                    }}
-                  >
-                    98%
-                  </strong>
-                  <span
-                    style={{
-                      fontSize: "0.8rem",
-                      color: "#64748b",
-                      lineHeight: 1.4,
-                      display: "block",
-                      marginTop: "2px",
-                    }}
-                  >
-                    Customer retention
-                  </span>
-                </div>
-              </div>
+              <div className="w-full grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 border-t border-white/10 pt-4 sm:pt-6">
+  {/* Stat 1 */}
+  <div className="min-w-0">
+    <strong className="block text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight truncate">
+      25+
+    </strong>
+    <span className="block text-[11px] sm:text-xs md:text-sm text-slate-400 leading-snug sm:leading-normal mt-0.5 sm:mt-1">
+      Years of engineering
+    </span>
+  </div>
+
+  {/* Stat 2 */}
+  <div className="min-w-0">
+    <strong className="block text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight truncate">
+      40
+    </strong>
+    <span className="block text-[11px] sm:text-xs md:text-sm text-slate-400 leading-snug sm:leading-normal mt-0.5 sm:mt-1">
+      Markets served
+    </span>
+  </div>
+
+  {/* Stat 3 */}
+  <div className="min-w-0">
+    <strong className="block text-xl sm:text-2xl md:text-3xl font-extrabold text-sky-400 tracking-tight truncate">
+      98%
+    </strong>
+    <span className="block text-[11px] sm:text-xs md:text-sm text-slate-400 leading-snug sm:leading-normal mt-0.5 sm:mt-1">
+      Customer retention
+    </span>
+  </div>
+</div>
             </div>
 
             {/* Right Column: Machine Showcase Image */}

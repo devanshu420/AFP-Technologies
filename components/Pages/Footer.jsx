@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
@@ -11,12 +12,52 @@ import {
   Lock,
 } from 'lucide-react';
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-  const whatsappNumber = '919876543210'; // Aapka actual number
+
+  // Dynamic Contact Information from Admin Database
+  const [contactInfo, setContactInfo] = useState({
+    salesPhoneNumber: '+91 98765 43210',
+    inquiryEmail: 'contact@afptechnologies.com',
+  });
+
+  // Fetch dynamic phone & email from database
+  useEffect(() => {
+    async function fetchContactSettings() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/settings/contact`, {
+          cache: 'no-store',
+        });
+        const json = await res.json();
+        if (res.ok && json.data) {
+          setContactInfo({
+            salesPhoneNumber:
+              json.data.salesPhoneNumber || '+91 98765 43210',
+            inquiryEmail:
+              json.data.inquiryEmail || 'contact@afptechnologies.com',
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load contact settings in footer:', err);
+      }
+    }
+
+    fetchContactSettings();
+  }, []);
+
+  // ── Clean Dynamic Number for WhatsApp Redirect ──
+  const rawCleanPhone = contactInfo.salesPhoneNumber.replace(/\D/g, '');
+  const whatsappNumber =
+    rawCleanPhone.length === 10 ? `91${rawCleanPhone}` : rawCleanPhone;
+
   const whatsappMessage = encodeURIComponent(
-    'Hello AFP Technologies Industries, I would like to inquire about industrial machinery equipment.'
+    'Hello AFP Technologies, I would like to inquire about your industrial machinery and engineering solutions.'
   );
+
+  const whatsappRedirectUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   return (
     <footer
@@ -48,7 +89,8 @@ export default function Footer() {
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
-          padding: '4.5rem clamp(1.5rem, 4vw, 3.5rem) 3rem clamp(1.5rem, 4vw, 3.5rem)',
+          padding:
+            '4.5rem clamp(1.5rem, 4vw, 3.5rem) 3rem clamp(1.5rem, 4vw, 3.5rem)',
         }}
       >
         <div
@@ -87,7 +129,7 @@ export default function Footer() {
                   boxShadow: '0 0 15px rgba(2, 132, 199, 0.4)',
                 }}
               >
-                M
+                A
               </span>
               <span
                 style={{
@@ -241,7 +283,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Contact & Direct Connect */}
+          {/* Column 4: Contact & Dynamic Direct Connect */}
           <div>
             <h4
               style={{
@@ -265,26 +307,29 @@ export default function Footer() {
                 marginBottom: '1.5rem',
               }}
             >
+              {/* Dynamic Phone Link */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Phone size={15} color="#38bdf8" />
                 <a
-                  href="tel:+919876543210"
+                  href={`tel:${contactInfo.salesPhoneNumber.replace(/\s+/g, '')}`}
                   style={{ color: '#cbd5e1', textDecoration: 'none' }}
                 >
-                  +91 98765 43210
+                  {contactInfo.salesPhoneNumber}
                 </a>
               </div>
 
+              {/* Dynamic Email Link */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Mail size={15} color="#38bdf8" />
                 <a
-                  href="mailto:contact@machina.industries"
+                  href={`mailto:${contactInfo.inquiryEmail}`}
                   style={{ color: '#cbd5e1', textDecoration: 'none' }}
                 >
-                  contact@machina.industries
+                  {contactInfo.inquiryEmail}
                 </a>
               </div>
 
+              {/* Physical Location */}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                 <MapPin size={15} color="#38bdf8" style={{ marginTop: '3px', flexShrink: 0 }} />
                 <span style={{ color: '#94a3b8', lineHeight: 1.4 }}>
@@ -293,9 +338,9 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Direct WhatsApp Action Link */}
+            {/* Direct Dynamic WhatsApp Action Link */}
             <a
-              href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
+              href={whatsappRedirectUrl}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -321,7 +366,12 @@ export default function Footer() {
                 e.currentTarget.style.color = '#34d399';
               }}
             >
-              WhatsApp Consultation <ArrowRight size={14} />
+              {/* WhatsApp Icon */}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.014.376-.101c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.178 1.564 5.926l-1.564 5.717 5.867-1.539c1.703.931 3.659 1.478 5.741 1.478 6.627 0 12-5.373 12-12 0-6.627-5.373-12-12-12z" />
+              </svg>
+              <span>WhatsApp Consultation</span>
+              <ArrowRight size={14} />
             </a>
           </div>
         </div>
@@ -341,13 +391,12 @@ export default function Footer() {
           }}
         >
           <div>
-            © {currentYear} <strong style={{ color: '#94a3b8' }}>Machina Industries</strong>. All
-            rights reserved.
+            © {currentYear} <strong style={{ color: '#94a3b8' }}>AFP Technologies</strong>. All rights reserved.
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck size={14} color="#10b981" /> Industrial Security & NDA Assured
+              <ShieldCheck size={14} color="#10b981" /> Industrial Security &amp; NDA Assured
             </span>
             <span style={{ color: '#334155' }}>|</span>
             <span style={{ color: '#94a3b8' }}>Precision. Performance. Progress.</span>
@@ -356,4 +405,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-} 
+}
