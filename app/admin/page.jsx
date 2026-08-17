@@ -7,31 +7,31 @@ import AdminHeading from '../../components/Admin/AdminHeading';
 import AdminStatsGrid from '../../components/Admin/AdminStatsGrid';
 import ProductPanel from '../../components/Admin/ProductPanel';
 import EnquiryPanel from '../../components/Admin/EnquiryPanel';
+import PdfPanel from '../../components/Admin/PdfPanel';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function AdminPage() {
-  const [session, setSession] = useState(null); // null = checking, false = locked, true = verified
+  const [session, setSession] = useState(null);
   const [adminUser, setAdminUser] = useState(null);
-  const [stats, setStats] = useState({ products: 0, newEnquiries: 0 });
+  const [stats, setStats] = useState({ products: 0, newEnquiries: 0, totalPdfs: 0 });
 
   // 1. Strict Token Verification on Mount
   const verifyAdminToken = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
         method: 'GET',
-        credentials: 'include', // HttpOnly cookie sath jayegi
-        cache: 'no-store',      // Browser cache ko strictly disable kiya
+        credentials: 'include',
+        cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
+          Pragma: 'no-cache',
         },
       });
 
       const json = await res.json();
 
-      // Token sahi hai aur admin active hai tabhi access milega
       if (res.ok && json.success && json.data) {
         setAdminUser(json.data);
         setSession(true);
@@ -39,8 +39,7 @@ export default function AdminPage() {
         setAdminUser(null);
         setSession(false);
       }
-    } catch (err) {
-      // Backend error ya token invalid hone par seedha login screen
+    } catch {
       setAdminUser(null);
       setSession(false);
     }
@@ -50,7 +49,19 @@ export default function AdminPage() {
     verifyAdminToken();
   }, [verifyAdminToken]);
 
-  // 2. Logout Handler (Cookie clear karega aur state lock karega)
+  // Stable Handlers for child components (stops infinite re-renders)
+  const handleProductCountChange = useCallback((count) => {
+    setStats((prev) => (prev.products === count ? prev : { ...prev, products: count }));
+  }, []);
+
+  const handleEnquiryCountChange = useCallback((count) => {
+    setStats((prev) => (prev.newEnquiries === count ? prev : { ...prev, newEnquiries: count }));
+  }, []);
+
+  const handlePdfCountChange = useCallback((count) => {
+    setStats((prev) => (prev.totalPdfs === count ? prev : { ...prev, totalPdfs: count }));
+  }, []);
+
   async function handleLogout() {
     try {
       await fetch(`${API_BASE_URL}/auth/admin/logout`, {
@@ -60,11 +71,10 @@ export default function AdminPage() {
     } finally {
       setSession(false);
       setAdminUser(null);
-      window.location.reload(); // Clean state refresh
+      window.location.reload();
     }
   }
 
-  // --- CASE 1: Verification In Progress (Protected Skeleton/Loader) ---
   if (session === null) {
     return (
       <main className="admin-shell">
@@ -78,7 +88,6 @@ export default function AdminPage() {
     );
   }
 
-  // --- CASE 2: Token Missing ya Invalid (Sirf Login Form Dikhega) ---
   if (!session) {
     return (
       <main className="admin-shell">
@@ -92,7 +101,6 @@ export default function AdminPage() {
     );
   }
 
-  // --- CASE 3: Token Verified (Sirf Authorized Admin ko Access) ---
   return (
     <main className="admin-shell">
       <AdminHeader adminRole={adminUser?.role} onLogout={handleLogout} />
@@ -102,17 +110,13 @@ export default function AdminPage() {
 
         <AdminStatsGrid stats={stats} />
 
-        <div className="admin-grid">
-          <ProductPanel
-            onProductCountChange={(count) =>
-              setStats((prev) => ({ ...prev, products: count }))
-            }
-          />
-          <EnquiryPanel
-            onEnquiryCountChange={(count) =>
-              setStats((prev) => ({ ...prev, newEnquiries: count }))
-            }
-          />
+        <div className="admin-grid" style={{ marginBottom: '24px' }}>
+          <ProductPanel onProductCountChange={handleProductCountChange} />
+          <EnquiryPanel onEnquiryCountChange={handleEnquiryCountChange} />
+        </div>
+
+        <div style={{ marginTop: '20px' }}>
+          <PdfPanel onPdfCountChange={handlePdfCountChange} />
         </div>
       </div>
     </main>

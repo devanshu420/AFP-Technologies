@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Product from '../models/Product.js';
+import Pdf from '../models/Pdf.js';
 import { imagekit } from '../config/imagekit.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import { isValidObjectId } from '../utils/validations.js';
@@ -12,6 +13,35 @@ export const generateSlug = (text) =>
     .replace(/\s+/g, '-')
     .replace(/[^\w-]+/g, '')
     .replace(/--+/g, '-');
+
+// Helper function: Sync Product PDF with Pdf Collection
+async function syncProductPdf(product) {
+  if (!product) return;
+
+  try {
+    if (product.pdf?.url && product.pdf.url.trim() !== '') {
+      await Pdf.findOneAndUpdate(
+        { productId: product._id },
+        {
+          title: `${product.name} - Datasheet`,
+          description: product.description || `Official technical specifications and catalogue for ${product.name}`,
+          category: 'Machinery Datasheet',
+          fileUrl: product.pdf.url,
+          fileId: product.pdf.fileId || '',
+          fileName: product.pdf.name || `${product.name}-datasheet.pdf`,
+          productId: product._id,
+          active: product.active !== undefined ? product.active : true,
+        },
+        { upsert: true, new: true }
+      );
+    } else {
+      // Agar product me se PDF hta di gayi hai toh collection se bhi clean karein
+      await Pdf.findOneAndDelete({ productId: product._id });
+    }
+  } catch (err) {
+    console.error('Error syncing PDF to Pdf collection:', err.message);
+  }
+}
 
 // 1. GET /api/products
 export async function getAllProducts(req, res) {
@@ -80,6 +110,12 @@ export async function createProduct(req, res) {
     payload.slug = slug;
 
     const product = await Product.create(payload);
+
+    // Sync to Pdf collection
+    if (product.pdf?.url) {
+      await syncProductPdf(product);
+    }
+
     return successResponse(res, product, 201);
   } catch (err) {
     return errorResponse(res, err.message, 500);
@@ -115,13 +151,16 @@ export async function updateProduct(req, res) {
       runValidators: true,
     }).populate('category', 'name slug');
 
+    // Sync changes to Pdf collection
+    await syncProductPdf(updated);
+
     return successResponse(res, updated);
   } catch (err) {
     return errorResponse(res, err.message, 500);
   }
 }
 
-// 5. DELETE /api/products/:id (Delete Product + ImageKit Cleanup)
+// 5. DELETE /api/products/:id (Delete Product + ImageKit & Pdf Cleanup)
 export async function deleteProduct(req, res) {
   try {
     const { id } = req.params;
@@ -130,7 +169,10 @@ export async function deleteProduct(req, res) {
     const product = await Product.findOne(query);
     if (!product) return errorResponse(res, 'Product not found', 404);
 
-    // PDF delete karein
+    // Delete linked entry from Pdf collection
+    await Pdf.findOneAndDelete({ productId: product._id });
+
+    // PDF delete karein ImageKit se
     if (product.pdf?.fileId) {
       try {
         await imagekit.deleteFile(product.pdf.fileId);
@@ -139,7 +181,7 @@ export async function deleteProduct(req, res) {
       }
     }
 
-    // Images delete karein
+    // Images delete karein ImageKit se
     const fileIds = [
       product.mainImage?.fileId,
       ...(product.images?.map((i) => i.fileId) || []),

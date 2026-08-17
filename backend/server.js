@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes.js';
 import productRoutes from './routes/product.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import enquiryRoutes from './routes/enquiry.routes.js';
+import downloadRoutes from './routes/download.routes.js';
 // import cmsRoutes from './routes/cms.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 
@@ -38,6 +39,7 @@ app.use('/api/auth/admin', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/enquiries', enquiryRoutes);
+app.use('/api/downloads',downloadRoutes);
 // app.use('/api/cms', cmsRoutes);
 app.use('/api/uploads', uploadRoutes);
 
