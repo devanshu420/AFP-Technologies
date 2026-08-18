@@ -42,7 +42,7 @@ export default function PdfPanel({ onPdfCountChange }) {
       setLoading(true);
       const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
         method: 'GET',
-        credentials: 'include',
+        credentials: 'include', 
         cache: 'no-store',
       });
 

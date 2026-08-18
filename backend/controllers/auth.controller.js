@@ -84,9 +84,10 @@ export async function login(req, res) {
     // Jaise hi browser / tab close hoga, cookie automatically destroy ho jayegi
     res.cookie(COOKIE_NAME, token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       path: '/',
+      maxAge: 8 * 60 * 60 * 1000,
       // maxAge intentionally omitted for browser session lifecycle
     });
 
