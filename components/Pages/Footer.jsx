@@ -20,7 +20,7 @@ export default function Footer() {
   // Dynamic Contact Information from Admin Database
   const [contactInfo, setContactInfo] = useState({
     salesPhoneNumber: '+91 98765 43210',
-    inquiryEmail: 'contact@afptechnologies.com',
+    inquiryEmail: 'afptechsupport@gmail.com',
   });
 
   // Fetch dynamic phone & email from database
@@ -36,7 +36,7 @@ export default function Footer() {
             salesPhoneNumber:
               json.data.salesPhoneNumber || '+91 98765 43210',
             inquiryEmail:
-              json.data.inquiryEmail || 'contact@afptechnologies.com',
+              json.data.inquiryEmail || 'afptechsupport@gmail.com',
           });
         }
       } catch (err) {
@@ -239,7 +239,6 @@ export default function Footer() {
                 { name: 'Live Systems Catalogue', href: '/products' },
                 { name: 'Request Commercial Quote', href: '/contact' },
                 { name: 'Engineering Support', href: '/contact' },
-                { name: 'Admin Portal', href: '/admin/login', icon: true },
               ].map((item) => (
                 <li key={item.name}>
                   <Link
