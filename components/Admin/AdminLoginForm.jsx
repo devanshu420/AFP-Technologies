@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation'; // 🟢 Added Router
 import { ShieldCheck, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 
 const API_BASE_URL =
@@ -11,6 +12,7 @@ export default function AdminLoginForm({ onLoginSuccess }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const router = useRouter(); // 🟢 Initialize router
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -44,6 +46,10 @@ export default function AdminLoginForm({ onLoginSuccess }) {
         if (onLoginSuccess) {
           onLoginSuccess(json.data.admin || json.data);
         }
+
+        // 🟢 Redirect to Admin Dashboard / Products after successful login
+        router.push('/admin');
+        router.refresh();
       } else {
         setMessage(json?.message || 'Invalid email or password');
       }
