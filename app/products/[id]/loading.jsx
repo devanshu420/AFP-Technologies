@@ -1,90 +1,38 @@
 export default function ProductLoading() {
   return (
-    <div
-      style={{
-        backgroundColor: '#030a16',
-        minHeight: '100vh',
-        padding: '2rem 1.25rem',
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1440px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: '240px 1fr 220px',
-          gap: '1.75rem',
-        }}
-      >
-        {/* Left Sidebar Skeleton */}
-        <div
-          style={{
-            height: '420px',
-            backgroundColor: '#071526',
-            borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.06)',
-            animation: 'pulse 1.5s infinite ease-in-out',
-          }}
-        />
+    <div className="min-h-screen bg-slate-100 py-6 sm:py-10 px-3 sm:px-6 lg:px-8 animate-pulse">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Top Navbar Skeleton */}
+        <div className="h-12 bg-white rounded-xl border border-slate-200/80 w-48" />
 
-        {/* Center Main Skeleton */}
-        <div>
-          <div
-            style={{
-              width: '180px',
-              height: '24px',
-              backgroundColor: '#071526',
-              borderRadius: '9999px',
-              marginBottom: '1rem',
-            }}
-          />
-          <div
-            style={{
-              width: '60%',
-              height: '40px',
-              backgroundColor: '#071526',
-              borderRadius: '8px',
-              marginBottom: '1.5rem',
-            }}
-          />
-          <div
-            style={{
-              width: '100%',
-              aspectRatio: '16/9',
-              backgroundColor: '#071526',
-              borderRadius: '16px',
-              marginBottom: '2rem',
-              animation: 'pulse 1.5s infinite ease-in-out',
-            }}
-          />
-          <div
-            style={{
-              width: '100%',
-              height: '100px',
-              backgroundColor: '#071526',
-              borderRadius: '10px',
-            }}
-          />
+        {/* Main Grid Layout Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Sidebar Skeleton */}
+          <div className="lg:col-span-3 bg-white rounded-2xl border border-slate-200/80 h-[500px] p-4 space-y-3 hidden lg:block">
+            <div className="h-4 bg-slate-200 rounded w-1/2 mb-4" />
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-9 bg-slate-100 rounded-lg w-full" />
+            ))}
+          </div>
+
+          {/* Center Details Skeleton */}
+          <div className="lg:col-span-9 bg-white rounded-2xl border border-slate-200/80 h-[650px] p-6 space-y-6">
+            <div className="h-6 bg-slate-200 rounded w-1/4" />
+            <div className="h-8 bg-slate-200 rounded w-3/4" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
+              <div className="h-72 bg-slate-100 rounded-xl" />
+              <div className="space-y-4">
+                <div className="h-4 bg-slate-200 rounded w-full" />
+                <div className="h-4 bg-slate-200 rounded w-5/6" />
+                <div className="h-4 bg-slate-200 rounded w-2/3" />
+                <div className="h-10 bg-slate-200 rounded-xl w-full mt-6" />
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Right Sidebar Skeleton */}
-        <div
-          style={{
-            height: '350px',
-            backgroundColor: '#071526',
-            borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.06)',
-            animation: 'pulse 1.5s infinite ease-in-out',
-          }}
-        />
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 0.3; }
-        }
-      `}</style>
     </div>
   );
 }

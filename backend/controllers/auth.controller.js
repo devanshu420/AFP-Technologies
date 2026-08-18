@@ -63,7 +63,7 @@ export async function login(req, res) {
     admin.lastLoginAt = new Date();
     await admin.save();
 
-    // Sign JWT Token with payload
+    // Generate Session Token
     const token = generateSessionToken({
       id: admin._id.toString(),
       email: admin.email,
@@ -80,13 +80,14 @@ export async function login(req, res) {
       req,
     });
 
-    // Set secure JWT cookie
+    // 🔒 PURE SESSION COOKIE (NO maxAge / NO expires)
+    // Jaise hi browser / tab close hoga, cookie automatically destroy ho jayegi
     res.cookie(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+      // maxAge intentionally omitted for browser session lifecycle
     });
 
     return successResponse(
@@ -100,19 +101,19 @@ export async function login(req, res) {
           role: admin.role,
         },
       },
-      'Admin authenticated successfully'
+      'Admin session created successfully'
     );
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }
 }
 
-// 2. GET /api/auth/admin/me (Verify active JWT session)
+// 2. GET /api/auth/admin/me (Verify active session)
 export async function getMe(req, res) {
   try {
     const admin = await Admin.findById(req.admin.id).select('-passwordHash');
     if (!admin || !admin.active) {
-      return errorResponse(res, 'Admin account inactive or removed', 401, 'UNAUTHORIZED');
+      return errorResponse(res, 'Admin session invalid or expired', 401, 'UNAUTHORIZED');
     }
 
     return successResponse(res, {

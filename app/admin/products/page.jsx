@@ -714,19 +714,40 @@ export default function AdminProductsPage() {
                   <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
                     2. Product Images & PDF Brochure
                   </h2>
-                  {/* <span className="text-[10px] text-amber-700 font-medium">
-                    Files upload to ImageKit on Publish
-                  </span> */}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Main Image */}
                   <div className="bg-slate-50 border border-slate-200 rounded p-2.5">
-                    <span className="block text-[10.5px] font-semibold text-slate-700 mb-1.5">
-                      Main Product Image *
-                    </span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="block text-[10.5px] font-semibold text-slate-700">
+                        Main Product Image *
+                      </span>
+                      {/* Remove Main Image Button */}
+                      {(localMainFile || form.mainImage?.url) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (mainFileInputRef.current)
+                              mainFileInputRef.current.value = "";
+                            if (typeof setLocalMainFile === "function")
+                              setLocalMainFile(null);
+                            if (typeof setLocalMainPreview === "function")
+                              setLocalMainPreview("");
+                            setForm({
+                              ...form,
+                              mainImage: { url: "", fileId: "" },
+                            });
+                          }}
+                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                        >
+                          <X size={11} /> Remove
+                        </button>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-2.5">
-                      <div className="w-14 h-14 rounded border border-slate-300 bg-white overflow-hidden shrink-0 flex items-center justify-center">
+                      <div className="relative w-14 h-14 rounded border border-slate-300 bg-white overflow-hidden shrink-0 flex items-center justify-center">
                         {localMainPreview || form.mainImage?.url ? (
                           <img
                             src={localMainPreview || form.mainImage.url}
@@ -755,7 +776,9 @@ export default function AdminProductsPage() {
                           <Upload size={12} />{" "}
                           {localMainFile
                             ? "Change Local Image"
-                            : "Choose Main Image"}
+                            : form.mainImage?.url
+                              ? "Change Image"
+                              : "Choose Main Image"}
                         </button>
                         {localMainFile && (
                           <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
@@ -768,9 +791,31 @@ export default function AdminProductsPage() {
 
                   {/* PDF Brochure */}
                   <div className="bg-slate-50 border border-slate-200 rounded p-2.5">
-                    <span className="block text-[10.5px] font-semibold text-slate-700 mb-1.5">
-                      Technical PDF Brochure (Saved to products/pdf)
-                    </span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="block text-[10.5px] font-semibold text-slate-700">
+                        Technical PDF Brochure
+                      </span>
+                      {/* Remove PDF Button */}
+                      {(localPdfFile || form.pdf?.url || form.pdf?.name) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (pdfFileInputRef.current)
+                              pdfFileInputRef.current.value = "";
+                            if (typeof setLocalPdfFile === "function")
+                              setLocalPdfFile(null);
+                            setForm({
+                              ...form,
+                              pdf: { url: "", name: "", fileId: "" },
+                            });
+                          }}
+                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                        >
+                          <X size={11} /> Remove
+                        </button>
+                      )}
+                    </div>
+
                     <input
                       type="file"
                       accept=".pdf"
@@ -846,7 +891,7 @@ export default function AdminProductsPage() {
                                 images: form.images.filter((_, i) => i !== idx),
                               })
                             }
-                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100"
+                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                             <X size={10} />
                           </button>

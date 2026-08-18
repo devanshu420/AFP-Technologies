@@ -26,7 +26,7 @@ async function fetchAllActiveProducts() {
     });
     if (!res.ok) return [];
     const json = await res.json();
-    return json?.data?.products || [];
+    return json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
   } catch (error) {
     console.error('Error fetching catalogue for sidebar:', error);
     return [];
@@ -35,7 +35,10 @@ async function fetchAllActiveProducts() {
 
 // Dynamic SEO metadata generation
 export async function generateMetadata({ params }) {
-  const { id } = await params;
+  const resolvedParams = await params;
+  const id = resolvedParams?.id;
+  if (!id) return { title: 'Product Not Found | AFP Technologies' };
+
   const product = await fetchProduct(id);
 
   if (!product) {
@@ -51,7 +54,7 @@ export async function generateMetadata({ params }) {
   const description =
     product.seo?.description ||
     product.shortDescription ||
-    product.description?.slice(0, 160) ||
+    (typeof product.description === 'string' ? product.description.slice(0, 160) : '') ||
     'High-efficiency food processing line engineered for maximum operational throughput.';
   const keywords =
     product.seo?.keywords && product.seo.keywords.length > 0
@@ -77,7 +80,12 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProductPage({ params }) {
-  const { id } = await params;
+  const resolvedParams = await params;
+  const id = resolvedParams?.id;
+
+  if (!id) {
+    notFound();
+  }
 
   const [product, allProducts] = await Promise.all([
     fetchProduct(id),

@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <main>
       <Nav />
-      <div style={{ paddingTop: '6rem' }}>
+      <div >
         <AboutSection />
         <TrustSection />
       </div>

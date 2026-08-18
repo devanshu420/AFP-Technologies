@@ -12,9 +12,9 @@ export default function Home() {
     <main id="top">
       <Nav />
       <HeroSection />
-      <AboutSection />
       <ProductsSection />
       <EquipmentSection />
+      <AboutSection />
       <TrustSection />
       <ContactSection />
       <Footer />

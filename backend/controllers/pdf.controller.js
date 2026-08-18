@@ -1,5 +1,13 @@
 import Pdf from '../models/Pdf.js';
+import ImageKit from 'imagekit';
 import { successResponse, errorResponse } from '../utils/response.js';
+
+// Initialize ImageKit (Ensure your env keys are set)
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY,
+  privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+});
 
 // Public: Get all active PDFs for /downloads page
 export async function getPublicPdfs(req, res) {
@@ -11,7 +19,7 @@ export async function getPublicPdfs(req, res) {
       filter.category = category;
     }
 
-    if (search) {   
+    if (search) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
@@ -38,25 +46,42 @@ export async function getAllAdminPdfs(req, res) {
 // Admin: Create standalone PDF
 export async function createPdf(req, res) {
   try {
-    const { title, description, category, fileUrl, fileId, fileName, fileSize, active } = req.body;
+    let { title, description, category, fileUrl, fileId, fileName, fileSize, active } = req.body;
+
+    // Handle uploaded file from multer (whether sent as 'file', 'pdf', or any field via upload.any())
+    const uploadedFile = req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+
+    if (uploadedFile) {
+      const uploadResponse = await imagekit.upload({
+        file: uploadedFile.buffer,
+        fileName: uploadedFile.originalname,
+        folder: '/products/pdf/',
+      });
+
+      fileUrl = uploadResponse.url;
+      fileId = uploadResponse.fileId;
+      fileName = uploadResponse.name;
+      fileSize = uploadedFile.size;
+    }
 
     if (!title || !fileUrl) {
-      return errorResponse(res, 'Title and PDF File URL are required', 400);
+      return errorResponse(res, 'Title and PDF file attachment are required', 400);
     }
 
     const pdf = await Pdf.create({
-      title,
-      description,
-      category: category || 'General',
+      title: title.trim(),
+      description: description || '',
+      category: category || 'Machinery Datasheet',
       fileUrl,
       fileId,
       fileName,
       fileSize,
-      active: active !== undefined ? active : true,
+      active: active !== undefined ? String(active) === 'true' : true,
     });
 
     return successResponse(res, pdf, 'PDF uploaded successfully', 201);
   } catch (error) {
+    console.error('[PDF Create Error]', error);
     return errorResponse(res, error.message, 500);
   }
 }
@@ -65,21 +90,36 @@ export async function createPdf(req, res) {
 export async function updatePdf(req, res) {
   try {
     const { id } = req.params;
-    const { title, description, category, fileUrl, fileId, fileName, fileSize, active } = req.body;
+    let { title, description, category, fileUrl, fileId, fileName, fileSize, active } = req.body;
 
     const pdf = await Pdf.findById(id);
     if (!pdf) {
       return errorResponse(res, 'PDF not found', 404);
     }
 
-    if (title) pdf.title = title;
+    const uploadedFile = req.file || (req.files && req.files.length > 0 ? req.files[0] : null);
+
+    if (uploadedFile) {
+      const uploadResponse = await imagekit.upload({
+        file: uploadedFile.buffer,
+        fileName: uploadedFile.originalname,
+        folder: '/products/pdf/',
+      });
+
+      fileUrl = uploadResponse.url;
+      fileId = uploadResponse.fileId;
+      fileName = uploadResponse.name;
+      fileSize = uploadedFile.size;
+    }
+
+    if (title) pdf.title = title.trim();
     if (description !== undefined) pdf.description = description;
     if (category) pdf.category = category;
     if (fileUrl) pdf.fileUrl = fileUrl;
     if (fileId !== undefined) pdf.fileId = fileId;
     if (fileName !== undefined) pdf.fileName = fileName;
     if (fileSize !== undefined) pdf.fileSize = fileSize;
-    if (active !== undefined) pdf.active = active;
+    if (active !== undefined) pdf.active = String(active) === 'true';
 
     await pdf.save();
     return successResponse(res, pdf, 'PDF updated successfully');

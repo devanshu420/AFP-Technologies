@@ -1,80 +1,77 @@
 'use client';
 
-import { Package, ShieldCheck, Users } from 'lucide-react';
+import { Package, Users, FileText, ShieldCheck } from 'lucide-react';
 
 export default function AdminStatsGrid({ stats }) {
   const statItems = [
-    ['Catalogue Systems', stats?.products ?? 0, Package],
-    ['New Enquiries', stats?.newEnquiries ?? 0, Users],
-    ['Active Database', 'Connected', ShieldCheck],
+    {
+      label: 'Total Products',
+      value: stats?.products ?? 0,
+      subValue: 'In catalog',
+      icon: Package,
+      iconColor: 'text-sky-600',
+      bgLight: 'bg-sky-50',
+    },
+    {
+      label: 'Total Inquiries',
+      value: stats?.totalEnquiries ?? 0,
+      subValue: `${stats?.newEnquiries ?? 0} Unread leads`,
+      highlightSub: (stats?.newEnquiries ?? 0) > 0,
+      icon: Users,
+      iconColor: 'text-amber-600',
+      bgLight: 'bg-amber-50',
+    },
+    {
+      label: 'Total PDFs',
+      value: stats?.totalPdfs ?? 0,
+      subValue: 'Datasheets',
+      icon: FileText,
+      iconColor: 'text-emerald-600',
+      bgLight: 'bg-emerald-50',
+    },
+    {
+      label: 'Database Status',
+      value: 'Connected',
+      subValue: 'Live MongoDB',
+      icon: ShieldCheck,
+      iconColor: 'text-indigo-600',
+      bgLight: 'bg-indigo-50',
+    },
   ];
 
   return (
-    <div
-      className="stats-grid"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', // Strict 1x3 Grid on all screens
-        gap: 'clamp(6px, 1.5vw, 16px)',
-        width: '100%',
-      }}
-    >
-      {statItems.map(([label, value, Icon]) => (
-        <div
-          className="stat-card"
-          key={label}
-          style={{
-            minWidth: 0,
-            padding: 'clamp(8px, 2vw, 18px)',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full">
+      {statItems.map((item) => {
+        const Icon = item.icon;
+        return (
           <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: '#38bdf8',
-              marginBottom: '4px',
-            }}
+            key={item.label}
+            className="bg-white border border-slate-200 rounded-xl p-3.5 sm:p-4 shadow-xs flex items-center gap-3"
           >
-            <Icon className="shrink-0 w-4 h-4 sm:w-5 sm:h-5" />
+            <div className={`p-2.5 rounded-lg ${item.bgLight} ${item.iconColor} shrink-0`}>
+              <Icon size={20} />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] font-medium text-slate-500 truncate" title={item.label}>
+                {item.label}
+              </span>
+              <strong className="block text-lg sm:text-xl font-bold text-slate-900 leading-tight truncate">
+                {item.value}
+              </strong>
+              <span
+                className={`block text-[10px] font-medium mt-0.5 truncate ${
+                  item.highlightSub
+                    ? 'text-amber-600 font-semibold'
+                    : 'text-slate-400'
+                }`}
+              >
+                {item.subValue}
+              </span>
+            </div>
           </div>
-
-          <span
-            style={{
-              display: 'block',
-              fontSize: 'clamp(9px, 1.8vw, 12px)',
-              color: '#94a3b8',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              lineHeight: 1.2,
-            }}
-            title={label}
-          >
-            {label}
-          </span>
-
-          <strong
-            style={{
-              display: 'block',
-              fontSize: 'clamp(13px, 2.8vw, 22px)',
-              fontWeight: 700,
-              color: '#f8fafc',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              marginTop: '2px',
-            }}
-          >
-            {value}
-          </strong>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

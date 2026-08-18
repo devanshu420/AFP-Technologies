@@ -2,10 +2,26 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 const equipmentData = [
-  { name: 'Injection moulding', detail: 'Precision at scale' },
-  { name: 'CNC machining', detail: 'Accuracy redefined' },
-  { name: 'Packaging & assembly', detail: 'Built for throughput' },
-  { name: 'Material handling', detail: 'Move with confidence' },
+  {
+    name: 'Automatic Potato Chips Processing Line',
+    detail: 'Washing, peeling, precision slicing & continuous dewatering',
+  },
+  {
+    name: 'French Fries Production & Cutting Line',
+    detail: 'High-speed industrial cutting, blanching & freezing prep',
+  },
+  {
+    name: 'Continuous Snack Frying & Seasoning Systems',
+    detail: 'Automated temperature control & uniform flavour coating',
+  },
+  {
+    name: 'Noodle & Pasta Production Lines',
+    detail: 'Automated dough mixing, extruding, steaming & cutting',
+  },
+  {
+    name: 'Momo, Dumpling & Spring Roll Automation',
+    detail: 'Precision multi-shape forming, filling & wrapper handling',
+  },
 ];
 
 export default function EquipmentSection() {
@@ -15,27 +31,34 @@ export default function EquipmentSection() {
         <div className="section-heading">
           <div>
             <p className="kicker">
-              <span /> THE AFP Technologies RANGE
+              <span /> THE AFP TECHNOLOGIES RANGE
             </p>
             <h2>
               One partner.
               <br />
-              <em>Every possibility.</em>
+              <em>Every food processing solution.</em>
             </h2>
           </div>
           <p className="section-note">
-            From first concept to full-scale production, our equipment portfolio
-            is designed to meet the real demands of modern manufacturing.
+            From single washing & slicing units to complete automated potato chips,
+            french fries, and snack lines, our engineered systems deliver maximum
+            yield and reliability for industrial production floors.
           </p>
         </div>
 
         <div className="equipment-list">
           {equipmentData.map((item, i) => (
-            <Link href="/products" className="equipment-row" key={item.name}>
-              <span className="row-number">0{i + 1}</span>
+            <Link
+              href="/products"
+              className="equipment-row"
+              key={item.name}
+            >
+              <span className="row-number">
+                {String(i + 1).padStart(2, '0')}
+              </span>
               <strong>{item.name}</strong>
               <span className="row-detail">{item.detail}</span>
-              <ArrowRight />
+              <ArrowRight size={18} />
             </Link>
           ))}
         </div>

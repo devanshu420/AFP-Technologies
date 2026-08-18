@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProductShare from "../../../components/Pages/Products/ProductShare";
 import {
   ChevronRight,
   Home,
@@ -15,6 +16,7 @@ import {
   FileText,
   Download,
   ExternalLink,
+  Share2,
 } from "lucide-react";
 
 export default function ProductDetailClient({
@@ -130,6 +132,7 @@ export default function ProductDetailClient({
                 </span>
               </>
             )}
+
             <ChevronRight size={10} className="text-slate-400" />
             <span className="text-sky-800 font-semibold truncate max-w-xs">
               {product.name}
@@ -235,91 +238,136 @@ export default function ProductDetailClient({
           {/* ─── COLUMN 2: CENTER PRODUCT DETAILS ─── */}
           <main className="min-w-0 bg-white border border-slate-300 rounded p-4 sm:p-5 shadow-sm">
             {/* Title & Badge */}
-           <div className="border-b border-slate-200 pb-3 mb-4">
-  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-    
-    {/* 1. Product Information (Left) */}
-    <div className="flex flex-col items-start min-w-0 flex-1">
-      {product.category?.name && (
-        <span className="inline-block bg-sky-100 text-sky-800 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-1">
-          {product.category.name}
-        </span>
-      )}
+            <div className="border-b border-slate-200 pb-3 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                {/* 1. Product Information (Left) */}
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  {product.category?.name && (
+                    <span className="inline-block bg-sky-100 text-sky-800 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-1">
+                      {product.category.name}
+                    </span>
+                  )}
 
-      <h1 className="text-[20px] sm:text-[24px] font-bold text-slate-900 tracking-tight leading-snug">
-        {product.name}
-      </h1>
+                  <h1 className="text-[20px] sm:text-[24px] font-bold text-slate-900 tracking-tight leading-snug">
+                    {product.name}
+                  </h1>
 
-      {product.shortDescription && (
-        <p className="mt-1 text-[12.5px] text-slate-600 leading-relaxed max-w-2xl">
-          {product.shortDescription}
-        </p>
-      )}
-    </div>
+                  {product.shortDescription && (
+                    <p className="mt-1 text-[12.5px] text-slate-600 leading-relaxed max-w-2xl">
+                      {product.shortDescription}
+                    </p>
+                  )}
+                </div>
 
-    {/* 2. PDF Floating Compact Widget (Right) */}
-    {product.pdf?.url && (
-      <div className="shrink-0 self-start sm:self-auto bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-md p-1.5 flex items-center gap-2 shadow-sm transition-all">
-        {/* PDF Icon & Label */}
-        <div className="flex items-center gap-1.5 pl-0.5">
-          <div className="w-6 h-6 rounded bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
-            <FileText size={13} />
-          </div>
-          <div className="hidden md:block">
-            <span className="text-[10px] font-bold text-slate-800 block leading-none">
-              Datasheet
-            </span>
-            <span className="text-[8.5px] text-slate-400 block leading-none mt-0.5">
-              PDF Spec
-            </span>
-          </div>
-        </div>
+                {/* 2. PDF Floating Compact Widget (Right) */}
+                {/* Top Right Actions: Datasheet PDF + Share Button */}
+                <div className="shrink-0 self-start sm:self-auto flex items-center gap-2">
+                  {/* 1. PDF Datasheet Box */}
+                  {product.pdf?.url && (
+                    <div className="bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-md p-1.5 flex items-center gap-2 shadow-xs transition-all">
+                      {/* PDF Icon & Label */}
+                      <div className="flex items-center gap-1.5 pl-0.5">
+                        <div className="w-6 h-6 rounded bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
+                          <FileText size={13} />
+                        </div>
+                        <div className="hidden md:block">
+                          <span className="text-[10px] font-bold text-slate-800 block leading-none">
+                            Datasheet
+                          </span>
+                          <span className="text-[8.5px] text-slate-400 block leading-none mt-0.5">
+                            PDF Spec
+                          </span>
+                        </div>
+                      </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-1">
-          {/* View in Browser */}
-          <a
-            href={product.pdf.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="View PDF in new tab"
-            className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold rounded shadow-2xs transition-colors whitespace-nowrap"
-          >
-            <ExternalLink size={11} />
-            <span>View</span>
-          </a>
+                      {/* PDF Action Buttons */}
+                      <div className="flex items-center gap-1">
+                        {/* View in Browser */}
+                        <a
+                          href={product.pdf.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="View PDF in new tab"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold rounded shadow-2xs transition-colors whitespace-nowrap"
+                        >
+                          <ExternalLink size={11} />
+                          <span>View</span>
+                        </a>
 
-          {/* Download Trigger */}
-          {(() => {
-            // PDF name format: "[OriginalName]-afptechnologies.pdf"
-            const rawName = (product.pdf.name || product.slug || product.name || 'machinery-specification')
-              .replace(/\.pdf$/i, '')
-              .trim()
-              .replace(/\s+/g, '-');
-            const downloadFileName = `${rawName}-afptechnologies.pdf`;
+                        {/* Download Trigger */}
+                        {(() => {
+                          const rawName = (
+                            product.pdf.name ||
+                            product.slug ||
+                            product.name ||
+                            "machinery-specification"
+                          )
+                            .replace(/\.pdf$/i, "")
+                            .trim()
+                            .replace(/\s+/g, "-");
+                          const downloadFileName = `${rawName}-afptechnologies.pdf`;
 
-            return (
-              <a
-                href={`${product.pdf.url}${
-                  product.pdf.url.includes('?') ? '&' : '?'
-                }ik-attachment=true&response-content-disposition=attachment;filename=${encodeURIComponent(
-                  downloadFileName
-                )}`}
-                download={downloadFileName}
-                title={`Download ${downloadFileName}`}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-sky-700 hover:bg-sky-800 text-white text-[10px] font-bold rounded shadow-2xs transition-colors whitespace-nowrap"
-              >
-                <Download size={11} />
-                <span>Download</span>
-              </a>
-            );
-          })()}
-        </div>
-      </div>
-    )}
+                          return (
+                            <a
+                              href={`${product.pdf.url}${
+                                product.pdf.url.includes("?") ? "&" : "?"
+                              }ik-attachment=true&response-content-disposition=attachment;filename=${encodeURIComponent(
+                                downloadFileName,
+                              )}`}
+                              download={downloadFileName}
+                              title={`Download ${downloadFileName}`}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-sky-700 hover:bg-sky-800 text-white text-[10px] font-bold rounded shadow-2xs transition-colors whitespace-nowrap"
+                            >
+                              <Download size={11} />
+                              <span>Download</span>
+                            </a>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
 
-  </div>
-</div>
+                  {/* 2. Direct Share Product Button */}
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const shareUrl =
+                        typeof window !== "undefined"
+                          ? window.location.href
+                          : "";
+                      const shareTitle = `${product.name} | AFP Technologies`;
+                      const shareText = `Explore specifications for ${product.name} at AFP Technologies.`;
+
+                      if (navigator.share) {
+                        try {
+                          await navigator.share({
+                            title: shareTitle,
+                            text: shareText,
+                            url: shareUrl,
+                          });
+                        } catch (err) {
+                          if (
+                            err.name !== "AbortError" &&
+                            navigator.clipboard
+                          ) {
+                            navigator.clipboard.writeText(shareUrl);
+                            alert("Product link copied to clipboard!");
+                          }
+                        }
+                      } else if (navigator.clipboard) {
+                        navigator.clipboard.writeText(shareUrl);
+                        alert("Product link copied to clipboard!");
+                      }
+                    }}
+                    title="Share this product"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 text-[11px] font-semibold rounded-md shadow-xs transition-all cursor-pointer whitespace-nowrap active:scale-95"
+                  >
+                    <Share2 size={13} className="text-sky-600 shrink-0" />
+                    <span>Share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
 
             {/* Product Image Gallery Frame */}
             <div className="border border-slate-200 rounded p-1.5 bg-slate-50 mb-4">

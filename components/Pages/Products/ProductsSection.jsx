@@ -116,10 +116,25 @@ export default function ProductsSection({ isStandalone = false }) {
           </label>
         </div>
 
-        {/* Loading / Grid */}
+        {/* Loading Skeleton Grid / Product Grid */}
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '4rem 1rem', opacity: 0.7 }}>
-            <p className="admin-muted">Fetching latest systems from database...</p>
+          <div className="product-grid">
+            {[1, 2, 3, 4, 5, 6].map((skeletonId) => (
+              <div
+                key={skeletonId}
+                className="animate-pulse bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between"
+                style={{ minHeight: '340px' }}
+              >
+                {/* Image Placeholder */}
+                <div className="w-full h-48 bg-slate-800/80 rounded-xl mb-4" />
+                {/* Text Line 1 */}
+                <div className="w-3/4 h-5 bg-slate-800/80 rounded mb-2" />
+                {/* Text Line 2 */}
+                <div className="w-1/2 h-4 bg-slate-800/60 rounded mb-4" />
+                {/* Button Placeholder */}
+                <div className="w-full h-10 bg-slate-800/80 rounded-lg mt-auto" />
+              </div>
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>

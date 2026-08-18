@@ -13,6 +13,7 @@ import downloadRoutes from './routes/download.routes.js';
 // import cmsRoutes from './routes/cms.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
+import announcementRoutes from './routes/announcement.routes.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use('/api/downloads',downloadRoutes);
 // app.use('/api/cms', cmsRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/announcements', announcementRoutes);
 
 // Centralized 404
 app.use((req, res) => {

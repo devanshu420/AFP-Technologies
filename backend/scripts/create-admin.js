@@ -1,58 +1,87 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
-import readline from 'readline';
 import dotenv from 'dotenv';
-import Admin from '../models/Admin.js';
+import readline from 'readline';
 
 dotenv.config();
+
+const AdminSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  passwordHash: { type: String, required: true },
+  name: { type: String, required: true },
+  role: { type: String, default: 'admin' },
+  active: { type: Boolean, default: true },
+  lastLoginAt: { type: Date },
+}, { timestamps: true });
+
+const Admin = mongoose.models.Admin || mongoose.model('Admin', AdminSchema);
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-async function main() {
-  if (!process.env.MONGODB_URI) {
-    console.error('Error: MONGODB_URI not found in environment.');
-    process.exit(1);
-  }
+const question = (q) => new Promise((resolve) => rl.question(q, resolve));
 
-  await mongoose.connect(process.env.MONGODB_URI);
-  console.log('--- AFP Technologies Admin Provisioning Tool ---');
+async function createAdmin() {
+  try {
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+      console.error('❌ Error: MONGODB_URI .env file me set nahi hai.');
+      process.exit(1);
+    }
 
-  rl.question('Admin Name: ', (name) => {
-    rl.question('Admin Email: ', (email) => {
-      rl.question('Admin Password: ', async (password) => {
-        try {
-          const cleanEmail = email.trim().toLowerCase();
-          const existing = await Admin.findOne({ email: cleanEmail });
+    await mongoose.connect(mongoUri);
+    console.log('✅ Connected to MongoDB database.\n');
 
-          if (existing) {
-            console.error('\nError: Admin user with this email already exists.');
-            process.exit(1);
-          }
+    const name = (await question('Enter Admin Name: ')).trim();
+    const email = (await question('Enter Admin Email: ')).trim().toLowerCase();
+    const password = (await question('Enter Admin Password: ')).trim();
 
-          const salt = await bcrypt.genSalt(12);
-          const passwordHash = await bcrypt.hash(password.trim(), salt);
+    if (!name || !email || !password) {
+      console.log('❌ All fields (Name, Email, Password) are required.');
+      process.exit(1);
+    }
 
-          await Admin.create({
-            name: name.trim(),
-            email: cleanEmail,
-            passwordHash,
-            role: 'superadmin',
-            active: true,
-          });
+    // Check existing email
+    const existing = await Admin.findOne({ email });
+    if (existing) {
+      console.log(`⚠️ Admin with email "${email}" already exists!`);
+      const update = await question('Do you want to update password? (y/n): ');
+      if (update.toLowerCase() === 'y') {
+        existing.passwordHash = await bcrypt.hash(password, 12);
+        existing.name = name;
+        existing.active = true;
+        await existing.save();
+        console.log(`✅ Admin "${email}" updated successfully!`);
+      }
+      process.exit(0);
+    }
 
-          console.log(`\nSuccess: Admin account "${cleanEmail}" provisioned successfully.`);
-        } catch (err) {
-          console.error('\nProvisioning failed:', err.message);
-        } finally {
-          rl.close();
-          await mongoose.disconnect();
-        }
-      });
+    // Hash password with bcrypt (salt rounds: 12)
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    const newAdmin = await Admin.create({
+      name,
+      email,
+      passwordHash,
+      role: 'admin',
+      active: true,
     });
-  });
+
+    console.log('\n======================================');
+    console.log('🎉 New Admin Created Successfully!');
+    console.log(`👤 Name:     ${newAdmin.name}`);
+    console.log(`📧 Email:    ${newAdmin.email}`);
+    console.log(`🛡️ Role:     ${newAdmin.role}`);
+    console.log('======================================\n');
+  } catch (err) {
+    console.error('❌ Error creating admin:', err.message);
+  } finally {
+    rl.close();
+    await mongoose.disconnect();
+    process.exit(0);
+  }
 }
 
-main();
+createAdmin();
