@@ -12,6 +12,9 @@ const mono = JetBrains_Mono({
   variable: '--font-mono-family',
 });
 
+export const dynamic = 'force-dynamic';
+
+
 export const metadata = {
   title: 'AFP Technologies. | Industrial machinery for what is next',
   description:
