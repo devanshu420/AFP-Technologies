@@ -38,26 +38,31 @@ export default function PdfPanel({ onPdfCountChange }) {
   });
 
   async function fetchPdfs() {
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
-        method: 'GET',
-        credentials: 'include', 
-        cache: 'no-store',
-      });
+  try {
+    setLoading(true);
+    const token = sessionStorage.getItem('admin_jwt_token');
 
-      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+    const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      cache: 'no-store',
+    });
 
-      const json = await res.json();
-      const list = Array.isArray(json?.data) ? json.data : [];
-      setPdfs(list);
-      if (onPdfCountChange) onPdfCountChange(list.length);
-    } catch (err) {
-      console.error('Error fetching admin PDFs:', err);
-    } finally {
-      setLoading(false);
-    }
+    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+
+    const json = await res.json();
+    const list = Array.isArray(json?.data) ? json.data : [];
+    setPdfs(list);
+    if (onPdfCountChange) onPdfCountChange(list.length);
+  } catch (err) {
+    console.error('Error fetching admin PDFs:', err);
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     fetchPdfs();

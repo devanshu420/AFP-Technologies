@@ -23,29 +23,35 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
   async function loadEnquiries() {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/enquiries?limit=100`, {
-        credentials: 'include',
-        cache: 'no-store',
-      });
-      const data = await res.json();
-      const list =
-        data?.data?.enquiries ||
-        (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []);
-      setEnquiries(list);
+  setLoading(true);
+  try {
+    const token = sessionStorage.getItem('admin_jwt_token');
 
-      if (onEnquiryCountChange) {
-        const newCount = list.filter((e) => e.status === 'new').length;
-        onEnquiryCountChange({ total: list.length, unread: newCount });
-      }
-    } catch (err) {
-      console.error('Failed to load enquiries', err);
-    } finally {
-      setLoading(false);
+    const res = await fetch(`${API_BASE_URL}/enquiries?limit=100`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      cache: 'no-store',
+    });
+
+    const data = await res.json();
+    const list =
+      data?.data?.enquiries ||
+      (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []);
+    setEnquiries(list);
+
+    if (onEnquiryCountChange) {
+      const newCount = list.filter((e) => e.status === 'new').length;
+      onEnquiryCountChange({ total: list.length, unread: newCount });
     }
+  } catch (err) {
+    console.error('Failed to load enquiries', err);
+  } finally {
+    setLoading(false);
   }
-
+}
   useEffect(() => {
     loadEnquiries();
   }, []);

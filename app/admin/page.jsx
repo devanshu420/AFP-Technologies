@@ -51,101 +51,138 @@ export default function AdminPage() {
   const [recentPdfs, setRecentPdfs] = useState([]);
 
   // Session verification
-  const verifySession = useCallback(async () => {
-    try {
-      const storedSession = sessionStorage.getItem("admin_session_user");
-      if (!storedSession) {
-        setAdminUser(null);
-        setSession(false);
-        return;
-      }
+  // const verifySession = useCallback(async () => {
+  //   try {
+  //     const storedSession = sessionStorage.getItem("admin_session_user");
+  //     if (!storedSession) {
+  //       setAdminUser(null);
+  //       setSession(false);
+  //       return;
+  //     }
 
-      const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
-        method: "GET",
-        credentials: "include",
-        cache: "no-store",
-      });
-      const json = await res.json();
+  //     const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+  //       method: "GET",
+  //       credentials: "include",
+  //       cache: "no-store",
+  //     });
+  //     const json = await res.json();
 
-      if (res.ok && json.success && json.data) {
-        setAdminUser(json.data);
-        setSession(true);
-      } else {
-        sessionStorage.removeItem("admin_session_user");
-        setAdminUser(null);
-        setSession(false);
-      }
-    } catch {
-      sessionStorage.removeItem("admin_session_user");
-      setAdminUser(null);
+  //     if (res.ok && json.success && json.data) {
+  //       setAdminUser(json.data);
+  //       setSession(true);
+  //     } else {
+  //       sessionStorage.removeItem("admin_session_user");
+  //       setAdminUser(null);
+  //       setSession(false);
+  //     }
+  //   } catch {
+  //     sessionStorage.removeItem("admin_session_user");
+  //     setAdminUser(null);
+  //     setSession(false);
+  //   }
+  // }, []);
+
+  const verifyAdminToken = useCallback(async () => {
+  try {
+    const token = sessionStorage.getItem('admin_jwt_token'); // 🟢 sessionStorage se token lein
+
+    const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}), // 🟢 Header me token pass karein
+      },
+      cache: 'no-store',
+    });
+
+    const json = await res.json();
+    if (res.ok && json.success) {
+      setSession(true);
+      setAdminUser(json.data);
+    } else {
       setSession(false);
+      sessionStorage.removeItem('admin_jwt_token'); // Invalid hone par clear kar dein
     }
-  }, []);
+  } catch (err) {
+    console.error('Auth verification failed:', err);
+    setSession(false);
+  }
+}, []);
 
   useEffect(() => {
-    verifySession();
-  }, [verifySession]);
+    verifyAdminToken();
+  }, [verifyAdminToken]);
 
   // Master Initial Fetch for Dashboard
   const fetchDashboardData = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      const [prodRes, enqRes, pdfRes] = await Promise.allSettled([
-        fetch(`${API_BASE_URL}/products?limit=10`, {
-          credentials: "include",
-          cache: "no-store",
-        }),
-        fetch(`${API_BASE_URL}/enquiries?limit=100`, {
-          credentials: "include",
-          cache: "no-store",
-        }),
-        fetch(`${API_BASE_URL}/downloads/admin/all`, {
-          credentials: "include",
-          cache: "no-store",
-        }),
-      ]);
+  setIsRefreshing(true);
+  try {
+    const token = sessionStorage.getItem('admin_jwt_token'); // 🟢 Fetch token from sessionStorage
 
-      let productsCount = 0;
-      let totalEnqCount = 0;
-      let newEnqCount = 0;
-      let pdfsCount = 0;
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    };
 
-      if (prodRes.status === "fulfilled" && prodRes.value.ok) {
-        const d = await prodRes.value.json();
-        const list =
-          d?.data?.products || (Array.isArray(d?.data) ? d.data : []);
-        productsCount = d?.data?.pagination?.total || list.length;
-        setRecentProducts(list.slice(0, 5));
-      }
+    const [prodRes, enqRes, pdfRes] = await Promise.allSettled([
+      fetch(`${API_BASE_URL}/products?limit=10`, {
+        method: 'GET',
+        headers,
+        cache: "no-store",
+      }),
+      fetch(`${API_BASE_URL}/enquiries?limit=100`, {
+        method: 'GET',
+        headers,
+        cache: "no-store",
+      }),
+      fetch(`${API_BASE_URL}/downloads/admin/all`, {
+        method: 'GET',
+        headers,
+        cache: "no-store",
+      }),
+    ]);
 
-      if (enqRes.status === "fulfilled" && enqRes.value.ok) {
-        const d = await enqRes.value.json();
-        const list =
-          d?.data?.enquiries || (Array.isArray(d?.data) ? d.data : []);
-        totalEnqCount = list.length;
-        newEnqCount = list.filter((e) => e.status === "new").length;
-        setRecentEnquiries(list.slice(0, 5));
-      }
+    let productsCount = 0;
+    let totalEnqCount = 0;
+    let newEnqCount = 0;
+    let pdfsCount = 0;
 
-      if (pdfRes.status === "fulfilled" && pdfRes.value.ok) {
-        const d = await pdfRes.value.json();
-        const list = Array.isArray(d?.data) ? d.data : [];
-        pdfsCount = list.length;
-        setRecentPdfs(list.slice(0, 5));
-      }
-
-      setStats({
-        products: productsCount,
-        totalEnquiries: totalEnqCount,
-        newEnquiries: newEnqCount,
-        totalPdfs: pdfsCount,
-      });
-    } catch (err) {
-      console.error("Dashboard initial sync error:", err);
-    } finally {
-      setIsRefreshing(false);
+    if (prodRes.status === "fulfilled" && prodRes.value.ok) {
+      const d = await prodRes.value.json();
+      const list =
+        d?.data?.products || (Array.isArray(d?.data) ? d.data : []);
+      productsCount = d?.data?.pagination?.total || list.length;
+      setRecentProducts(list.slice(0, 5));
     }
-  }, []);
+
+    if (enqRes.status === "fulfilled" && enqRes.value.ok) {
+      const d = await enqRes.value.json();
+      const list =
+        d?.data?.enquiries || (Array.isArray(d?.data) ? d.data : []);
+      totalEnqCount = list.length;
+      newEnqCount = list.filter((e) => e.status === "new").length;
+      setRecentEnquiries(list.slice(0, 5));
+    }
+
+    if (pdfRes.status === "fulfilled" && pdfRes.value.ok) {
+      const d = await pdfRes.value.json();
+      const list = Array.isArray(d?.data) ? d.data : [];
+      pdfsCount = list.length;
+      setRecentPdfs(list.slice(0, 5));
+    }
+
+    setStats({
+      products: productsCount,
+      totalEnquiries: totalEnqCount,
+      newEnquiries: newEnqCount,
+      totalPdfs: pdfsCount,
+    });
+  } catch (err) {
+    console.error("Dashboard initial sync error:", err);
+  } finally {
+    setIsRefreshing(false);
+  }
+}, []);
 
   useEffect(() => {
     if (session) {
@@ -187,6 +224,7 @@ export default function AdminPage() {
       console.error("Logout error:", err);
     } finally {
       sessionStorage.removeItem("admin_session_user");
+      sessionStorage.removeItem("admin_jwt_token");
       setSession(false);
       setAdminUser(null);
       window.location.reload();
@@ -270,7 +308,7 @@ export default function AdminPage() {
     { id: 'categories', label: 'Product Categories', icon: FolderTree },
     {
       id: "products",
-      label: "Product Catalog",
+      label: "Products",
       icon: Package,
       badge: stats.products,
     },

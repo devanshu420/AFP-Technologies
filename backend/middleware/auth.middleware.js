@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { errorResponse } from '../utils/response.js';
 
-export const COOKIE_NAME = 'machina_admin_session';
 const JWT_SECRET = process.env.JWT_SECRET || process.env.AUTH_SECRET || 'fallback-secret-key-min-32-chars';
 
-// 1. Generate JWT Token (8 hours validity)
+// 1. Generate JWT Token
 export function generateSessionToken(payload) {
   return jwt.sign(payload, JWT_SECRET, {
     expiresIn: '8h',
@@ -23,12 +22,11 @@ export function verifySessionToken(token) {
   }
 }
 
-// 3. Admin Authentication Middleware
+// 3. Admin Authentication Middleware (Bearer Header Validation)
 export function requireAdmin(req, res, next) {
-  // Token either from HttpOnly cookie or Authorization Header
-  let token = req.cookies?.[COOKIE_NAME];
+  let token = null;
 
-  if (!token && req.headers.authorization) {
+  if (req.headers.authorization) {
     if (req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
     }

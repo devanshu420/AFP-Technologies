@@ -1,11 +1,18 @@
-import bcrypt from 'bcryptjs';
-import Admin from '../models/Admin.js';
-import AuditLog from '../models/AuditLog.js';
-import { generateSessionToken, COOKIE_NAME } from '../middleware/auth.middleware.js';
-import { successResponse, errorResponse } from '../utils/response.js';
+import bcrypt from "bcryptjs";
+import Admin from "../models/Admin.js";
+import AuditLog from "../models/AuditLog.js";
+import { generateSessionToken } from "../middleware/auth.middleware.js";
+import { successResponse, errorResponse } from "../utils/response.js";
 
 // Helper: Record Audit Log
-async function recordAuditLog({ adminEmail, action, entity, entityId, req, details = {} }) {
+async function recordAuditLog({
+  adminEmail,
+  action,
+  entity,
+  entityId,
+  req,
+  details = {},
+}) {
   try {
     await AuditLog.create({
       adminEmail,
@@ -13,11 +20,12 @@ async function recordAuditLog({ adminEmail, action, entity, entityId, req, detai
       entity,
       entityId,
       details,
-      ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-      userAgent: req.headers['user-agent'],
+      ipAddress:
+        req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+      userAgent: req.headers["user-agent"],
     });
   } catch (err) {
-    console.warn('AuditLog creation failed:', err.message);
+    console.warn("AuditLog creation failed:", err.message);
   }
 }
 
@@ -25,86 +33,51 @@ async function recordAuditLog({ adminEmail, action, entity, entityId, req, detai
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
-    console.log(email,password);
-    
-
     if (!email || !password) {
-      return errorResponse(res, 'Email and password are required', 400, 'VALIDATION_ERROR');
+      return errorResponse(
+        res,
+        "Email and password required",
+        400,
+        "VALIDATION_ERROR",
+      );
     }
 
     const admin = await Admin.findOne({
-      email: email.toLowerCase().trim(),
+      email: email.toLowerCase(),
       active: true,
     });
-
     if (!admin) {
-      await recordAuditLog({
-        adminEmail: email.toLowerCase().trim(),
-        action: 'FAILED_LOGIN',
-        entity: 'Admin',
-        details: { reason: 'User not found or inactive' },
-        req,
-      });
-      return errorResponse(res, 'Invalid credentials', 401, 'AUTH_FAILED');
+      return errorResponse(res, "Invalid credentials", 401, "AUTH_FAILED");
     }
 
     const isValid = await bcrypt.compare(password, admin.passwordHash);
     if (!isValid) {
-      await recordAuditLog({
-        adminEmail: admin.email,
-        action: 'FAILED_LOGIN',
-        entity: 'Admin',
-        entityId: admin._id.toString(),
-        details: { reason: 'Incorrect password' },
-        req,
-      });
-      return errorResponse(res, 'Invalid credentials', 401, 'AUTH_FAILED');
+      return errorResponse(res, "Invalid credentials", 401, "AUTH_FAILED");
     }
 
-    // Update last login timestamp
     admin.lastLoginAt = new Date();
     await admin.save();
 
-    // Generate Session Token
     const token = generateSessionToken({
-      id: admin._id.toString(),
+      id: admin._id,
       email: admin.email,
-      name: admin.name,
       role: admin.role,
     });
 
-    // Record successful audit log
-    await recordAuditLog({
+    await AuditLog.create({
       adminEmail: admin.email,
-      action: 'LOGIN',
-      entity: 'Admin',
+      action: "LOGIN",
+      entity: "Admin",
       entityId: admin._id.toString(),
-      req,
-    });
-
-    // 🔒 PURE SESSION COOKIE (NO maxAge / NO expires)
-    // Jaise hi browser / tab close hoga, cookie automatically destroy ho jayegi
-    res.cookie(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      maxAge: 8 * 60 * 60 * 1000,
-      // maxAge intentionally omitted for browser session lifecycle
     });
 
     return successResponse(
       res,
       {
+        admin: { email: admin.email, name: admin.name, role: admin.role },
         token,
-        admin: {
-          id: admin._id,
-          email: admin.email,
-          name: admin.name,
-          role: admin.role,
-        },
       },
-      'Admin session created successfully'
+      "Authenticated",
     );
   } catch (error) {
     return errorResponse(res, error.message, 500);
@@ -114,9 +87,14 @@ export async function login(req, res) {
 // 2. GET /api/auth/admin/me (Verify active session)
 export async function getMe(req, res) {
   try {
-    const admin = await Admin.findById(req.admin.id).select('-passwordHash');
+    const admin = await Admin.findById(req.admin.id).select("-passwordHash");
     if (!admin || !admin.active) {
-      return errorResponse(res, 'Admin session invalid or expired', 401, 'UNAUTHORIZED');
+      return errorResponse(
+        res,
+        "Admin session invalid or expired",
+        401,
+        "UNAUTHORIZED",
+      );
     }
 
     return successResponse(res, {
@@ -136,8 +114,8 @@ export async function logout(req, res) {
     if (req.admin?.email) {
       await recordAuditLog({
         adminEmail: req.admin.email,
-        action: 'LOGOUT',
-        entity: 'Admin',
+        action: "LOGOUT",
+        entity: "Admin",
         entityId: req.admin.id || null,
         req,
       });
@@ -145,12 +123,12 @@ export async function logout(req, res) {
 
     res.clearCookie(COOKIE_NAME, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
     });
 
-    return successResponse(res, null, 'Logged out successfully');
+    return successResponse(res, null, "Logged out successfully");
   } catch (error) {
     return errorResponse(res, error.message, 500);
   }

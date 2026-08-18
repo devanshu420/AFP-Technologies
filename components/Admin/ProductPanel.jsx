@@ -21,30 +21,37 @@ export default function ProductPanel({ onProductCountChange }) {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  async function fetchSummary() {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/products?limit=8`, {
-        credentials: "include",
-        cache: "no-store",
-      });
-      const json = await res.json();
-      const list =
-        json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
-      const total = json?.data?.pagination?.total ?? list.length;
+async function fetchSummary() {
+  setLoading(true);
+  try {
+    const token = sessionStorage.getItem('admin_jwt_token');
 
-      setProducts(list);
-      setTotalCount(total);
+    const res = await fetch(`${API_BASE_URL}/products?limit=8`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      cache: 'no-store',
+    });
 
-      if (onProductCountChange) {
-        onProductCountChange(total);
-      }
-    } catch {
-      // silent fallback
-    } finally {
-      setLoading(false);
+    const json = await res.json();
+    const list =
+      json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
+    const total = json?.data?.pagination?.total ?? list.length;
+
+    setProducts(list);
+    setTotalCount(total);
+
+    if (onProductCountChange) {
+      onProductCountChange(total);
     }
+  } catch (err) {
+    console.error('Error fetching summary:', err);
+  } finally {
+    setLoading(false);
   }
+}
 
   useEffect(() => {
     fetchSummary();

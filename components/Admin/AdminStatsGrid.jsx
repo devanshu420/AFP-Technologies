@@ -30,9 +30,9 @@ export default function AdminStatsGrid({ stats }) {
       bgLight: 'bg-emerald-50',
     },
     {
-      label: 'Database Status',
-      value: 'Connected',
-      subValue: 'Live MongoDB',
+      label: '',
+      value: 'Admin',
+      subValue: '',
       icon: ShieldCheck,
       iconColor: 'text-indigo-600',
       bgLight: 'bg-indigo-50',
