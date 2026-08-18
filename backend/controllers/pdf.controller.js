@@ -113,7 +113,6 @@ export async function updatePdf(req, res) {
     }
 
     if (title) pdf.title = title.trim();
-    if (description !== undefined) pdf.description = description;
     if (category) pdf.category = category;
     if (fileUrl) pdf.fileUrl = fileUrl;
     if (fileId !== undefined) pdf.fileId = fileId;

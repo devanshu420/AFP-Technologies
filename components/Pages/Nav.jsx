@@ -40,7 +40,7 @@ export default function Nav() {
           <Link href="/about" onClick={() => setOpen(false)}>
             About us
           </Link>
-          <Link href="/downloads" onClick={() => setOpen(false)}>
+          <Link href="/downloads-pdf" onClick={() => setOpen(false)}>
             Downloads
           </Link>
           <Link

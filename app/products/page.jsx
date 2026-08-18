@@ -13,11 +13,11 @@ export const metadata = {
 export default function ProductsPage() {
   return (
     <main>
-      <Nav />
+     
       <div>
         <ProductsSection isStandalone={true} />
       </div>
-      <Footer />
+      
     </main>
   );
 }

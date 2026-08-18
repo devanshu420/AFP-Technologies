@@ -190,7 +190,7 @@ export default function PdfPanel({ onPdfCountChange }) {
     setErrorMessage('');
     setFormData({
       title: pdf.title || '',
-      description: pdf.description || '',
+
       category: pdf.category || 'Machinery Datasheet',
       fileUrl: pdf.fileUrl || pdf.url || '',
       fileName: pdf.fileName || '',

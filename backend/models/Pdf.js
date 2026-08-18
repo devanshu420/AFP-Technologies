@@ -7,11 +7,11 @@ const pdfSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    description: {
-      type: String,
-      default: '',
-      trim: true,
-    },
+    // description: {
+    //   type: String,
+    //   default: '',
+    //   trim: true,
+    // },
     category: {
       type: String,
       default: 'General',

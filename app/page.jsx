@@ -6,6 +6,7 @@ import ProductsSection from '../components/Pages/Products/ProductsSection';
 import EquipmentSection from '../components/Pages/EquipmentSection';
 import TrustSection from '../components/Pages/TrustSection';
 import ContactSection from '../components/Pages/ContactSection';
+import DownloadSection from '../components/Pages/DownloadSection';
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       <HeroSection />
       <ProductsSection />
       <EquipmentSection />
+      <DownloadSection />
       <AboutSection />
       <TrustSection />
       <ContactSection />

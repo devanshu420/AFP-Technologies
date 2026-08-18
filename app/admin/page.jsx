@@ -10,7 +10,6 @@ import {
   FileText,
   PhoneCall,
   LogOut,
-  ShieldCheck,
   ChevronRight,
   ArrowUpRight,
   ExternalLink,
@@ -50,139 +49,112 @@ export default function AdminPage() {
   const [recentEnquiries, setRecentEnquiries] = useState([]);
   const [recentPdfs, setRecentPdfs] = useState([]);
 
-  // Session verification
-  // const verifySession = useCallback(async () => {
-  //   try {
-  //     const storedSession = sessionStorage.getItem("admin_session_user");
-  //     if (!storedSession) {
-  //       setAdminUser(null);
-  //       setSession(false);
-  //       return;
-  //     }
-
-  //     const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
-  //       method: "GET",
-  //       credentials: "include",
-  //       cache: "no-store",
-  //     });
-  //     const json = await res.json();
-
-  //     if (res.ok && json.success && json.data) {
-  //       setAdminUser(json.data);
-  //       setSession(true);
-  //     } else {
-  //       sessionStorage.removeItem("admin_session_user");
-  //       setAdminUser(null);
-  //       setSession(false);
-  //     }
-  //   } catch {
-  //     sessionStorage.removeItem("admin_session_user");
-  //     setAdminUser(null);
-  //     setSession(false);
-  //   }
-  // }, []);
-
+  // Token Verification using sessionStorage & Bearer Header
   const verifyAdminToken = useCallback(async () => {
-  try {
-    const token = sessionStorage.getItem('admin_jwt_token'); // 🟢 sessionStorage se token lein
+    try {
+      const token = sessionStorage.getItem('admin_jwt_token');
+      if (!token) {
+        setSession(false);
+        return;
+      }
 
-    const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}), // 🟢 Header me token pass karein
-      },
-      cache: 'no-store',
-    });
+      const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
 
-    const json = await res.json();
-    if (res.ok && json.success) {
-      setSession(true);
-      setAdminUser(json.data);
-    } else {
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setSession(true);
+        setAdminUser(json.data);
+      } else {
+        setSession(false);
+        sessionStorage.removeItem('admin_jwt_token');
+        sessionStorage.removeItem('admin_session_user');
+      }
+    } catch (err) {
+      console.error('Auth verification failed:', err);
       setSession(false);
-      sessionStorage.removeItem('admin_jwt_token'); // Invalid hone par clear kar dein
     }
-  } catch (err) {
-    console.error('Auth verification failed:', err);
-    setSession(false);
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     verifyAdminToken();
   }, [verifyAdminToken]);
 
-  // Master Initial Fetch for Dashboard
+  // Master Initial Fetch for Dashboard Data with Authorization Header
   const fetchDashboardData = useCallback(async () => {
-  setIsRefreshing(true);
-  try {
-    const token = sessionStorage.getItem('admin_jwt_token'); // 🟢 Fetch token from sessionStorage
+    setIsRefreshing(true);
+    try {
+      const token = sessionStorage.getItem('admin_jwt_token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      };
 
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-    };
+      const [prodRes, enqRes, pdfRes] = await Promise.allSettled([
+        fetch(`${API_BASE_URL}/products?limit=10`, {
+          method: 'GET',
+          headers,
+          cache: "no-store",
+        }),
+        fetch(`${API_BASE_URL}/enquiries?limit=100`, {
+          method: 'GET',
+          headers,
+          cache: "no-store",
+        }),
+        fetch(`${API_BASE_URL}/downloads/admin/all`, {
+          method: 'GET',
+          headers,
+          cache: "no-store",
+        }),
+      ]);
 
-    const [prodRes, enqRes, pdfRes] = await Promise.allSettled([
-      fetch(`${API_BASE_URL}/products?limit=10`, {
-        method: 'GET',
-        headers,
-        cache: "no-store",
-      }),
-      fetch(`${API_BASE_URL}/enquiries?limit=100`, {
-        method: 'GET',
-        headers,
-        cache: "no-store",
-      }),
-      fetch(`${API_BASE_URL}/downloads/admin/all`, {
-        method: 'GET',
-        headers,
-        cache: "no-store",
-      }),
-    ]);
+      let productsCount = 0;
+      let totalEnqCount = 0;
+      let newEnqCount = 0;
+      let pdfsCount = 0;
 
-    let productsCount = 0;
-    let totalEnqCount = 0;
-    let newEnqCount = 0;
-    let pdfsCount = 0;
+      if (prodRes.status === "fulfilled" && prodRes.value.ok) {
+        const d = await prodRes.value.json();
+        const list =
+          d?.data?.products || (Array.isArray(d?.data) ? d.data : []);
+        productsCount = d?.data?.pagination?.total || list.length;
+        setRecentProducts(list.slice(0, 5));
+      }
 
-    if (prodRes.status === "fulfilled" && prodRes.value.ok) {
-      const d = await prodRes.value.json();
-      const list =
-        d?.data?.products || (Array.isArray(d?.data) ? d.data : []);
-      productsCount = d?.data?.pagination?.total || list.length;
-      setRecentProducts(list.slice(0, 5));
+      if (enqRes.status === "fulfilled" && enqRes.value.ok) {
+        const d = await enqRes.value.json();
+        const list =
+          d?.data?.enquiries || (Array.isArray(d?.data) ? d.data : []);
+        totalEnqCount = list.length;
+        newEnqCount = list.filter((e) => e.status === "new").length;
+        setRecentEnquiries(list.slice(0, 5));
+      }
+
+      if (pdfRes.status === "fulfilled" && pdfRes.value.ok) {
+        const d = await pdfRes.value.json();
+        const list = Array.isArray(d?.data) ? d.data : [];
+        pdfsCount = list.length;
+        setRecentPdfs(list.slice(0, 5));
+      }
+
+      setStats({
+        products: productsCount,
+        totalEnquiries: totalEnqCount,
+        newEnquiries: newEnqCount,
+        totalPdfs: pdfsCount,
+      });
+    } catch (err) {
+      console.error("Dashboard initial sync error:", err);
+    } finally {
+      setIsRefreshing(false);
     }
-
-    if (enqRes.status === "fulfilled" && enqRes.value.ok) {
-      const d = await enqRes.value.json();
-      const list =
-        d?.data?.enquiries || (Array.isArray(d?.data) ? d.data : []);
-      totalEnqCount = list.length;
-      newEnqCount = list.filter((e) => e.status === "new").length;
-      setRecentEnquiries(list.slice(0, 5));
-    }
-
-    if (pdfRes.status === "fulfilled" && pdfRes.value.ok) {
-      const d = await pdfRes.value.json();
-      const list = Array.isArray(d?.data) ? d.data : [];
-      pdfsCount = list.length;
-      setRecentPdfs(list.slice(0, 5));
-    }
-
-    setStats({
-      products: productsCount,
-      totalEnquiries: totalEnqCount,
-      newEnquiries: newEnqCount,
-      totalPdfs: pdfsCount,
-    });
-  } catch (err) {
-    console.error("Dashboard initial sync error:", err);
-  } finally {
-    setIsRefreshing(false);
-  }
-}, []);
+  }, []);
 
   useEffect(() => {
     if (session) {
@@ -216,9 +188,13 @@ export default function AdminPage() {
 
   async function handleLogout() {
     try {
+      const token = sessionStorage.getItem('admin_jwt_token');
       await fetch(`${API_BASE_URL}/auth/admin/logout`, {
         method: "POST",
-        credentials: "include",
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
       });
     } catch (err) {
       console.error("Logout error:", err);
@@ -227,16 +203,14 @@ export default function AdminPage() {
       sessionStorage.removeItem("admin_jwt_token");
       setSession(false);
       setAdminUser(null);
-      window.location.reload();
+      window.location.href = "/admin";
     }
   }
 
-  // Loading Screen
-  // Loading State with Full Admin Dashboard Skeleton
+  // Loading Screen Skeleton
   if (session === null) {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row animate-pulse">
-        {/* Sidebar Skeleton */}
         <aside className="hidden md:flex w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0 p-4 space-y-4">
           <div className="h-10 bg-slate-800 rounded-lg w-3/4 mb-6" />
           <div className="space-y-2">
@@ -245,42 +219,16 @@ export default function AdminPage() {
             ))}
           </div>
         </aside>
-
-        {/* Main Content Skeleton Area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Top Navbar Skeleton */}
           <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
             <div className="h-5 bg-slate-200 rounded w-32" />
             <div className="h-8 bg-slate-200 rounded-full w-24" />
           </header>
-
-          {/* Body Skeleton */}
           <main className="flex-1 p-4 sm:p-6 space-y-6">
-            {/* Heading Banner Skeleton */}
             <div className="h-20 bg-white rounded-xl border border-slate-200" />
-
-            {/* Stats Grid Skeleton */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-24 bg-white rounded-xl border border-slate-200 p-4"
-                />
-              ))}
-            </div>
-
-            {/* Recent Activity Cards Skeleton */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-72 bg-white rounded-xl border border-slate-200 p-4 space-y-3"
-                >
-                  <div className="h-6 bg-slate-200 rounded w-1/2 mb-4" />
-                  <div className="h-12 bg-slate-100 rounded-lg w-full" />
-                  <div className="h-12 bg-slate-100 rounded-lg w-full" />
-                  <div className="h-12 bg-slate-100 rounded-lg w-full" />
-                </div>
+                <div key={i} className="h-24 bg-white rounded-xl border border-slate-200 p-4" />
               ))}
             </div>
           </main>
@@ -338,7 +286,7 @@ export default function AdminPage() {
       {isSidebarOpen && (
         <div
           onClick={() => setIsSidebarOpen(false)}
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 md:hidden"
+          className="fixed inset-0 bg-slate-950/65 backdrop-blur-xs z-40 md:hidden"
         />
       )}
 
@@ -348,7 +296,6 @@ export default function AdminPage() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:w-64 shrink-0`}
       >
-        {/* Sidebar Header */}
         <div className="h-16 flex items-center justify-between px-5 bg-slate-900 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-black text-xs tracking-wider shadow-sm shrink-0">
@@ -374,7 +321,6 @@ export default function AdminPage() {
           </button>
         </div>
 
-        {/* Navigation Items */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
             Navigation
@@ -390,7 +336,7 @@ export default function AdminPage() {
                   setActiveTab(item.id);
                   setIsSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   isActive
                     ? "bg-sky-600 text-white shadow-sm"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
@@ -416,7 +362,6 @@ export default function AdminPage() {
           })}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="p-3 border-t border-slate-800 bg-slate-900/50">
           <div className="px-3 py-2 mb-2 rounded-md bg-slate-800/40">
             <span className="block text-[10px] text-slate-400">
@@ -439,13 +384,12 @@ export default function AdminPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-        {/* Top Navbar */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-xs">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden"
+              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 md:hidden cursor-pointer"
               aria-label="Open Navigation Menu"
             >
               <Menu size={20} />
@@ -503,15 +447,12 @@ export default function AdminPage() {
                   </span>
                 </div>
 
-                {/* 3-Column Compact Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {/* 1. Recent Products */}
+                  {/* Recent Products */}
                   <div className="bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col">
                     <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-xl">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-md bg-sky-50 text-sky-600">
-                          <Package size={16} />
-                        </div>
+                      <div className="p-1.5 rounded-md bg-sky-50 text-sky-600 flex items-center gap-2">
+                        <Package size={16} />
                         <span className="text-xs font-bold text-slate-800">
                           Recent Products
                         </span>
@@ -582,13 +523,11 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* 2. Recent Inquiries */}
+                  {/* Recent Inquiries */}
                   <div className="bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col">
                     <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-xl">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-md bg-amber-50 text-amber-600">
-                          <Inbox size={16} />
-                        </div>
+                      <div className="p-1.5 rounded-md bg-amber-50 text-amber-600 flex items-center gap-2">
+                        <Inbox size={16} />
                         <span className="text-xs font-bold text-slate-800">
                           Recent Inquiries
                         </span>
@@ -639,13 +578,11 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* 3. Recent PDF Documents */}
+                  {/* Recent PDF Documents */}
                   <div className="bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col md:col-span-2 xl:col-span-1">
                     <div className="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 rounded-t-xl">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-md bg-rose-50 text-rose-600">
-                          <FileText size={16} />
-                        </div>
+                      <div className="p-1.5 rounded-md bg-rose-50 text-rose-600 flex items-center gap-2">
+                        <FileText size={16} />
                         <span className="text-xs font-bold text-slate-800">
                           Recent PDFs
                         </span>
@@ -710,30 +647,28 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* TAB 2: PRODUCT CATALOG */}
+          {/* TAB: PRODUCTS */}
           {activeTab === "products" && (
             <div className="max-w-7xl mx-auto">
               <ProductPanel onProductCountChange={handleProductCountChange} />
             </div>
           )}
 
-          
-
-          {/* TAB 3: CUSTOMER INQUIRIES */}
+          {/* TAB: ENQUIRIES */}
           {activeTab === "enquiries" && (
             <div className="max-w-7xl mx-auto">
               <EnquiryPanel onEnquiryCountChange={handleEnquiryCountChange} />
             </div>
           )}
 
-          {/* TAB 4: PDF DOCUMENTS */}
+          {/* TAB: PDFS */}
           {activeTab === "pdfs" && (
             <div className="max-w-7xl mx-auto">
               <PdfPanel onPdfCountChange={handlePdfCountChange} />
             </div>
           )}
 
-          {/* TAB 5: CONTACT SETTINGS */}
+          {/* TAB: CONTACT SETTINGS */}
           {activeTab === "contact" && (
             <div className="max-w-3xl mx-auto space-y-4">
               <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
@@ -741,13 +676,14 @@ export default function AdminPage() {
                   Website Contact Details
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 mb-4">
-                  Manage the sales phone numbers and email addresses displayed
-                  in the website header, footer, and inquiry sections.
+                  Manage sales phone numbers and email addresses displayed across the website.
                 </p>
                 <ContactSettingsPanel />
               </div>
             </div>
           )}
+
+          {/* TAB: ANNOUNCEMENTS */}
           {activeTab === "announcements" && (
             <div className="max-w-4xl mx-auto">
               <AnnouncementPanel />

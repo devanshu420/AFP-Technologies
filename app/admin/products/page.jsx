@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Check,
@@ -18,10 +19,8 @@ import {
   CheckCircle2,
   ExternalLink,
   Package,
+  Loader2,
 } from "lucide-react";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 const emptyFormState = {
   name: "",
@@ -51,6 +50,11 @@ const emptyFormState = {
 };
 
 export default function AdminProductsPage() {
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const router = useRouter();
+
+  // 1. ALL HOOKS DECLARED AT THE TOP (Strict Consistent Order)
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
@@ -62,10 +66,10 @@ export default function AdminProductsPage() {
   const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState({ type: "", text: "" });
 
-  // ─── Local Files State (Uploaded ONLY on Form Submit) ───
+  // Local Files State
   const [localMainFile, setLocalMainFile] = useState(null);
   const [localMainPreview, setLocalMainPreview] = useState("");
-  const [localGalleryFiles, setLocalGalleryFiles] = useState([]); // [{ file, preview }]
+  const [localGalleryFiles, setLocalGalleryFiles] = useState([]);
   const [localPdfFile, setLocalPdfFile] = useState(null);
 
   // Temporary inputs
@@ -83,12 +87,62 @@ export default function AdminProductsPage() {
   const galleryFileInputRef = useRef(null);
   const pdfFileInputRef = useRef(null);
 
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // 2. Auth Check Effect
+  useEffect(() => {
+    async function checkAuth() {
+      const token = sessionStorage.getItem("admin_jwt_token");
+
+      if (!token) {
+        router.push("/admin?auth=required");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+          setAuthorized(true);
+        } else {
+          sessionStorage.removeItem("admin_jwt_token");
+          sessionStorage.removeItem("admin_session_user");
+          router.push("/admin?auth=required");
+        }
+      } catch (err) {
+        console.error("Auth check failed:", err);
+        router.push("/admin?auth=required");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, [router, API_BASE_URL]);
+
+  // 3. Load Data Function
   async function loadData() {
     setLoadingList(true);
     try {
+      const token = sessionStorage.getItem("admin_jwt_token");
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+
       const [prodRes, catRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/products?limit=150`, { credentials: "include" }),
-        fetch(`${API_BASE_URL}/categories`, { credentials: "include" }),
+        fetch(`${API_BASE_URL}/products?limit=150`, { headers, cache: "no-store" }),
+        fetch(`${API_BASE_URL}/categories`, { headers, cache: "no-store" }),
       ]);
 
       const [prodJson, catJson] = await Promise.all([
@@ -112,16 +166,18 @@ export default function AdminProductsPage() {
     }
   }
 
+  // 4. Data Load Effect
   useEffect(() => {
-    loadData();
-  }, []);
+    if (authorized) {
+      loadData();
+    }
+  }, [authorized]);
 
   function showToast(type, text) {
     setToast({ type, text });
     setTimeout(() => setToast({ type: "", text: "" }), 4000);
   }
 
-  // 1. Local Selection Handler (No Immediate API Upload)
   function handleMainFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -148,14 +204,16 @@ export default function AdminProductsPage() {
     setLocalPdfFile(file);
   }
 
-  // 2. Upload Helper (Called sequentially on Submit)
   async function uploadFileToServer(file, type = "image") {
     const formData = new FormData();
     formData.append(type === "image" ? "image" : "file", file);
+    const token = sessionStorage.getItem("admin_jwt_token");
 
     const res = await fetch(`${API_BASE_URL}/uploads/${type}`, {
       method: "POST",
-      credentials: "include",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: formData,
     });
 
@@ -166,7 +224,6 @@ export default function AdminProductsPage() {
     return json.data;
   }
 
-  // 3. Edit Existing Product
   function startEditing(prod) {
     setEditingId(prod._id);
     setForm({
@@ -202,7 +259,6 @@ export default function AdminProductsPage() {
       },
     });
 
-    // Reset local staging
     setLocalMainFile(null);
     setLocalMainPreview("");
     setLocalGalleryFiles([]);
@@ -222,7 +278,6 @@ export default function AdminProductsPage() {
     setLocalPdfFile(null);
   }
 
-  // 4. Save Product to MongoDB (Uploads staged files to ImageKit first)
   async function handleSave(e) {
     e.preventDefault();
 
@@ -250,7 +305,6 @@ export default function AdminProductsPage() {
       let finalGalleryImages = [...form.images];
       let finalPdf = { ...form.pdf };
 
-      // Step A: Upload staged Main Image if new file selected
       if (localMainFile) {
         const uploaded = await uploadFileToServer(localMainFile, "image");
         finalMainImage = {
@@ -260,7 +314,6 @@ export default function AdminProductsPage() {
         };
       }
 
-      // Step B: Upload staged Gallery Images
       if (localGalleryFiles.length > 0) {
         for (const item of localGalleryFiles) {
           const uploaded = await uploadFileToServer(item.file, "image");
@@ -273,7 +326,6 @@ export default function AdminProductsPage() {
         }
       }
 
-      // Step C: Upload staged PDF if selected
       if (localPdfFile) {
         const uploaded = await uploadFileToServer(localPdfFile, "file");
         finalPdf = {
@@ -302,11 +354,14 @@ export default function AdminProductsPage() {
         : `${API_BASE_URL}/products`;
 
       const method = editingId ? "PUT" : "POST";
+      const token = sessionStorage.getItem("admin_jwt_token");
 
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -319,7 +374,7 @@ export default function AdminProductsPage() {
         "success",
         editingId
           ? "Product updated successfully!"
-          : "Product published successfully!",
+          : "Product published successfully!"
       );
       cancelEditing();
       loadData();
@@ -330,14 +385,16 @@ export default function AdminProductsPage() {
     }
   }
 
-  // 5. Delete Product
   async function handleDelete(id) {
     if (!window.confirm("Are you sure you want to delete this machine?"))
       return;
     try {
+      const token = sessionStorage.getItem("admin_jwt_token");
       const res = await fetch(`${API_BASE_URL}/products/${id}`, {
         method: "DELETE",
-        credentials: "include",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
       const json = await res.json();
       if (res.ok && json.success) {
@@ -352,7 +409,6 @@ export default function AdminProductsPage() {
     }
   }
 
-  // Filter list
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
       selectedCategoryFilter === "ALL" ||
@@ -364,12 +420,27 @@ export default function AdminProductsPage() {
     return matchesCategory && matchesSearch;
   });
 
+  // 5. SAFE CONDITIONAL RETURNS (Placed after all Hooks)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-100 space-y-3">
+        <Loader2 size={32} className="animate-spin text-sky-500" />
+        <p className="text-xs font-semibold tracking-wider text-slate-400">
+          Verifying Admin Privileges...
+        </p>
+      </div>
+    );
+  }
+
+  if (!authorized) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-800 antialiased pb-16 font-sans text-xs">
-      {/* ─── TOP WORKSPACE HEADER ─── */}
+      {/* TOP WORKSPACE HEADER */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm px-3 sm:px-6 py-2 sm:py-2.5 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-          {/* Left: Back Link & Title */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Link
               href="/admin"
@@ -393,7 +464,6 @@ export default function AdminProductsPage() {
             </h1>
           </div>
 
-          {/* Right: Actions (Cancel & Save / Publish) */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {editingId && (
               <button
@@ -409,7 +479,7 @@ export default function AdminProductsPage() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-green-700 hover:bg-green-800 active:scale-95  text-white rounded text-[11px] sm:text-xs font-bold shadow-xs transition-all whitespace-nowrap cursor-pointer"
+              className="inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-green-700 hover:bg-green-800 active:scale-95 text-white rounded text-[11px] sm:text-xs font-bold shadow-xs transition-all whitespace-nowrap cursor-pointer"
             >
               <Check size={13} className="shrink-0" />
               <span>
@@ -421,7 +491,7 @@ export default function AdminProductsPage() {
         </div>
       </header>
 
-      {/* ─── TOAST NOTIFICATION ─── */}
+      {/* TOAST NOTIFICATION */}
       {toast.text && (
         <div
           className={`fixed bottom-4 right-4 z-50 px-3.5 py-2.5 rounded border text-xs font-semibold shadow-lg flex items-center gap-2 ${
@@ -439,12 +509,10 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* ─── MAIN 2-COLUMN DUAL WORKSPACE ─── */}
+      {/* MAIN 2-COLUMN DUAL WORKSPACE */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mt-4 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start">
-          {/* ══════════════════════════════════════════════════════════════
-              TOP ON MOBILE (lg:right): PRODUCTS LIST - ORDER FIRST
-             ══════════════════════════════════════════════════════════════ */}
+          {/* PRODUCTS LIST */}
           <div className="col-span-1 lg:col-span-5 xl:col-span-4 order-first lg:order-last lg:sticky lg:top-16">
             <div className="bg-white border border-slate-300 rounded p-3 sm:p-4 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2.5">
@@ -467,7 +535,6 @@ export default function AdminProductsPage() {
                 </button>
               </div>
 
-              {/* Search & Category Filter */}
               <div className="space-y-1.5 mb-2.5">
                 <div className="relative">
                   <Search
@@ -497,7 +564,6 @@ export default function AdminProductsPage() {
                 </select>
               </div>
 
-              {/* Scrollable Products List */}
               <div className="max-h-80 md:max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-slate-100 space-y-1 pr-0.5">
                 {loadingList ? (
                   <div className="py-8 text-center text-slate-400 text-[11px]">
@@ -580,9 +646,7 @@ export default function AdminProductsPage() {
             </div>
           </div>
 
-          {/* ══════════════════════════════════════════════════════════════
-              BOTTOM ON MOBILE (lg:left): CLEAN FORM (SAME COMPACT UI)
-             ══════════════════════════════════════════════════════════════ */}
+          {/* PRODUCT FORM */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-3 sm:space-y-4">
             <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
               {/* 1. BASIC MACHINE DETAILS */}
@@ -591,7 +655,6 @@ export default function AdminProductsPage() {
                   <h2 className="text-xs sm:text-[11px] font-bold text-sky-800 uppercase tracking-wider">
                     1. Basic Machine Details
                   </h2>
-                  {/* <span className="text-[10px] text-slate-400">Core database fields</span> */}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
@@ -708,7 +771,7 @@ export default function AdminProductsPage() {
                 </div>
               </section>
 
-              {/* 2. MEDIA: LOCAL STAGING ONLY (UPLOADS ON SUBMIT) */}
+              {/* 2. MEDIA */}
               <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
                   <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
@@ -723,17 +786,14 @@ export default function AdminProductsPage() {
                       <span className="block text-[10.5px] font-semibold text-slate-700">
                         Main Product Image *
                       </span>
-                      {/* Remove Main Image Button */}
                       {(localMainFile || form.mainImage?.url) && (
                         <button
                           type="button"
                           onClick={() => {
                             if (mainFileInputRef.current)
                               mainFileInputRef.current.value = "";
-                            if (typeof setLocalMainFile === "function")
-                              setLocalMainFile(null);
-                            if (typeof setLocalMainPreview === "function")
-                              setLocalMainPreview("");
+                            setLocalMainFile(null);
+                            setLocalMainPreview("");
                             setForm({
                               ...form,
                               mainImage: { url: "", fileId: "" },
@@ -777,8 +837,8 @@ export default function AdminProductsPage() {
                           {localMainFile
                             ? "Change Local Image"
                             : form.mainImage?.url
-                              ? "Change Image"
-                              : "Choose Main Image"}
+                            ? "Change Image"
+                            : "Choose Main Image"}
                         </button>
                         {localMainFile && (
                           <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
@@ -795,15 +855,13 @@ export default function AdminProductsPage() {
                       <span className="block text-[10.5px] font-semibold text-slate-700">
                         Technical PDF Brochure
                       </span>
-                      {/* Remove PDF Button */}
                       {(localPdfFile || form.pdf?.url || form.pdf?.name) && (
                         <button
                           type="button"
                           onClick={() => {
                             if (pdfFileInputRef.current)
                               pdfFileInputRef.current.value = "";
-                            if (typeof setLocalPdfFile === "function")
-                              setLocalPdfFile(null);
+                            setLocalPdfFile(null);
                             setForm({
                               ...form,
                               pdf: { url: "", name: "", fileId: "" },
@@ -833,8 +891,8 @@ export default function AdminProductsPage() {
                         {localPdfFile
                           ? "Change PDF"
                           : form.pdf?.url
-                            ? "Replace PDF"
-                            : "Select PDF"}
+                          ? "Replace PDF"
+                          : "Select PDF"}
                       </button>
                       <span className="block text-[10px] text-slate-600 truncate">
                         {localPdfFile
@@ -845,7 +903,7 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                {/* Multiple Gallery Images */}
+                {/* Gallery */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[10.5px] font-semibold text-slate-700">
@@ -869,10 +927,8 @@ export default function AdminProductsPage() {
                     </button>
                   </div>
 
-                  {/* Gallery Previews Box */}
                   {(form.images.length > 0 || localGalleryFiles.length > 0) && (
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 bg-slate-50 p-2 rounded border border-slate-200">
-                      {/* Existing Uploaded Images */}
                       {form.images.map((img, idx) => (
                         <div
                           key={`existing-${idx}`}
@@ -898,7 +954,6 @@ export default function AdminProductsPage() {
                         </div>
                       ))}
 
-                      {/* Staged New Local Images */}
                       {localGalleryFiles.map((item, idx) => (
                         <div
                           key={`staged-${idx}`}
@@ -930,7 +985,7 @@ export default function AdminProductsPage() {
                 </div>
               </section>
 
-              {/* 3. CAPACITIES & OEM SPECIFICATIONS */}
+              {/* 3. CAPACITIES & SPECIFICATIONS */}
               <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5">
                   <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
@@ -1024,11 +1079,9 @@ export default function AdminProductsPage() {
                   </div>
                 </div>
 
-                {/* Multiple Standard Capacities */}
                 <div className="pt-1">
                   <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
-                    Multiple Standard Capacities (e.g. 100 kg/hr, 200 kg/hr, 500
-                    kg/hr)
+                    Multiple Standard Capacities
                   </label>
                   <div className="flex gap-1.5 mb-1.5">
                     <input
@@ -1080,7 +1133,7 @@ export default function AdminProductsPage() {
                 </div>
               </section>
 
-              {/* 4. PROCESS FLOW (Right Sidebar Pipeline) */}
+              {/* 4. PROCESS FLOW */}
               <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5">
                   <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
@@ -1158,7 +1211,6 @@ export default function AdminProductsPage() {
                   </h2>
                 </div>
 
-                {/* Advantages */}
                 <div>
                   <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
                     Advantages
@@ -1166,7 +1218,7 @@ export default function AdminProductsPage() {
                   <div className="flex gap-1.5 mb-1.5">
                     <input
                       type="text"
-                      placeholder="e.g. Proven Technology with Low Oil Consumption"
+                      placeholder="e.g. Proven Technology"
                       value={tempAdvantage}
                       onChange={(e) => setTempAdvantage(e.target.value)}
                       className="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
@@ -1214,244 +1266,6 @@ export default function AdminProductsPage() {
                     ))}
                   </div>
                 </div>
-
-                {/* Features */}
-                <div className="pt-2 border-t border-slate-200">
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
-                    Features (Title + Description)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1.5">
-                    <input
-                      type="text"
-                      placeholder="Title (e.g. Single Operation Peeling)"
-                      value={tempFeatureTitle}
-                      onChange={(e) => setTempFeatureTitle(e.target.value)}
-                      className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                    />
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="Description (Optional)"
-                        value={tempFeatureDesc}
-                        onChange={(e) => setTempFeatureDesc(e.target.value)}
-                        className="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!tempFeatureTitle.trim()) return;
-                          setForm({
-                            ...form,
-                            features: [
-                              ...form.features,
-                              {
-                                title: tempFeatureTitle.trim(),
-                                description: tempFeatureDesc.trim(),
-                              },
-                            ],
-                          });
-                          setTempFeatureTitle("");
-                          setTempFeatureDesc("");
-                        }}
-                        className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    {form.features.map((feat, idx) => (
-                      <div
-                        key={idx}
-                        className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]"
-                      >
-                        <div>
-                          <strong className="text-slate-900 block">
-                            {typeof feat === "string" ? feat : feat.title}
-                          </strong>
-                          {feat.description && (
-                            <p className="text-[10px] text-slate-500">
-                              {feat.description}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              features: form.features.filter(
-                                (_, i) => i !== idx,
-                              ),
-                            })
-                          }
-                          className="text-slate-400 hover:text-rose-600"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Applications */}
-                <div className="pt-2 border-t border-slate-200">
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
-                    Applications (e.g. Potato Chips, Cassava, Sweet Potato)
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1.5">
-                    <input
-                      type="text"
-                      placeholder="Application Name"
-                      value={tempAppTitle}
-                      onChange={(e) => setTempAppTitle(e.target.value)}
-                      className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                    />
-                    <div className="flex gap-1.5">
-                      <input
-                        type="text"
-                        placeholder="Details (Optional)"
-                        value={tempAppDesc}
-                        onChange={(e) => setTempAppDesc(e.target.value)}
-                        className="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (!tempAppTitle.trim()) return;
-                          setForm({
-                            ...form,
-                            applications: [
-                              ...form.applications,
-                              {
-                                title: tempAppTitle.trim(),
-                                description: tempAppDesc.trim(),
-                              },
-                            ],
-                          });
-                          setTempAppTitle("");
-                          setTempAppDesc("");
-                        }}
-                        className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    {form.applications.map((app, idx) => (
-                      <div
-                        key={idx}
-                        className="p-1.5 bg-slate-50 border border-slate-200 rounded flex justify-between items-start text-[11px]"
-                      >
-                        <div>
-                          <strong className="text-slate-900 block">
-                            {typeof app === "string" ? app : app.title}
-                          </strong>
-                          {app.description && (
-                            <p className="text-[10px] text-slate-500">
-                              {app.description}
-                            </p>
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              applications: form.applications.filter(
-                                (_, i) => i !== idx,
-                              ),
-                            })
-                          }
-                          className="text-slate-400 hover:text-rose-600"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </section>
-
-              {/* 6. TECHNICAL SPECIFICATIONS TABLE */}
-              <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
-                <div className="border-b border-slate-200 pb-1.5">
-                  <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
-                    6. Custom Technical Specification Table
-                  </h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-1.5">
-                  <input
-                    type="text"
-                    placeholder="Key (e.g. Oil Tank Capacity)"
-                    value={tempSpecKey}
-                    onChange={(e) => setTempSpecKey(e.target.value)}
-                    className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                  />
-                  <div className="flex gap-1.5">
-                    <input
-                      type="text"
-                      placeholder="Value (e.g. 450 Litres)"
-                      value={tempSpecVal}
-                      onChange={(e) => setTempSpecVal(e.target.value)}
-                      className="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!tempSpecKey.trim() || !tempSpecVal.trim()) return;
-                        setForm({
-                          ...form,
-                          specifications: [
-                            ...form.specifications,
-                            {
-                              key: tempSpecKey.trim(),
-                              value: tempSpecVal.trim(),
-                            },
-                          ],
-                        });
-                        setTempSpecKey("");
-                        setTempSpecVal("");
-                      }}
-                      className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
-                    >
-                      Add Row
-                    </button>
-                  </div>
-                </div>
-
-                <div className="divide-y divide-slate-200 bg-slate-50 rounded border border-slate-200 overflow-hidden">
-                  {form.specifications.map((s, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-1.5 text-[11px]"
-                    >
-                      <span className="text-slate-600 font-semibold">
-                        {s.key}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-900 font-medium">
-                          {s.value}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              specifications: form.specifications.filter(
-                                (_, i) => i !== idx,
-                              ),
-                            })
-                          }
-                          className="text-slate-400 hover:text-rose-600"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </section>
 
               {/* Form Bottom Actions */}
@@ -1474,8 +1288,8 @@ export default function AdminProductsPage() {
                   {saving
                     ? "Uploading & Saving..."
                     : editingId
-                      ? "Update Machinery System"
-                      : "Publish Product"}
+                    ? "Update Machinery System"
+                    : "Publish Product"}
                 </button>
               </div>
             </form>
