@@ -29,7 +29,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'https://afp-technologies-six.vercel.app/', // Apna Vercel frontend domain yahan dalein
+      'https://afp-technologies-six.vercel.app', 
       process.env.CLIENT_URL || 'http://localhost:3000',
     ],
     credentials: true,
