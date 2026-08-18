@@ -60,8 +60,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: 'Internal server error' });
 });
 
-// For Local Development
-if (process.env.NODE_ENV !== 'production') {
+// 🟢 Local Development ke liye listener (Vercel par serverless handler kaam karega)
+if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`[AFP Technologies Backend] API Server listening on port ${PORT}`);
   });

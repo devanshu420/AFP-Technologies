@@ -25,6 +25,8 @@ async function recordAuditLog({ adminEmail, action, entity, entityId, req, detai
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
+    console.log(email,password);
+    
 
     if (!email || !password) {
       return errorResponse(res, 'Email and password are required', 400, 'VALIDATION_ERROR');

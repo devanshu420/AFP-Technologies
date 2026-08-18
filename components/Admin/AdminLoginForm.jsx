@@ -19,7 +19,7 @@ export default function AdminLoginForm({ onLoginSuccess }) {
     setMessage('');
     setLoading(true);
 
-    const cleanBaseUrl = API_BASE_URL.replace(/\/$/, '');
+    const cleanBaseUrl = API_BASE_URL;
 
     try {
       const res = await fetch(`${cleanBaseUrl}/auth/admin/login`, {
