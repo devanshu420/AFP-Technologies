@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   RefreshCw,
   Mail,
@@ -11,47 +11,52 @@ import {
   RotateCcw,
   ChevronRight,
   X,
-} from 'lucide-react';
+} from "lucide-react";
+import GearLoader from "../GearLoader";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function EnquiryPanel({ onEnquiryCountChange }) {
   const [enquiries, setEnquiries] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('new'); // 'new' | 'read' | 'all'
+  const [activeTab, setActiveTab] = useState("new"); // 'new' | 'read' | 'all'
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
 
   async function loadEnquiries() {
-  setLoading(true);
-  try {
-    const token = sessionStorage.getItem('admin_jwt_token');
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem("admin_jwt_token");
 
-    const res = await fetch(`${API_BASE_URL}/enquiries?limit=100`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      cache: 'no-store',
-    });
+      const res = await fetch(`${API_BASE_URL}/enquiries?limit=100`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: "no-store",
+      });
 
-    const data = await res.json();
-    const list =
-      data?.data?.enquiries ||
-      (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []);
-    setEnquiries(list);
+      const data = await res.json();
+      const list =
+        data?.data?.enquiries ||
+        (Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : []);
+      setEnquiries(list);
 
-    if (onEnquiryCountChange) {
-      const newCount = list.filter((e) => e.status === 'new').length;
-      onEnquiryCountChange({ total: list.length, unread: newCount });
+      if (onEnquiryCountChange) {
+        const newCount = list.filter((e) => e.status === "new").length;
+        onEnquiryCountChange({ total: list.length, unread: newCount });
+      }
+    } catch (err) {
+      console.error("Failed to load enquiries", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Failed to load enquiries', err);
-  } finally {
-    setLoading(false);
   }
-}
   useEffect(() => {
     loadEnquiries();
   }, []);
@@ -60,9 +65,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
   async function updateStatus(id, nextStatus) {
     try {
       const res = await fetch(`${API_BASE_URL}/enquiries/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ status: nextStatus }),
       });
 
@@ -70,14 +75,14 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
         let updatedList = [];
         setEnquiries((prev) => {
           updatedList = prev.map((item) =>
-            item._id === id ? { ...item, status: nextStatus } : item
+            item._id === id ? { ...item, status: nextStatus } : item,
           );
           return updatedList;
         });
 
         // 🔒 Trigger parent callback OUTSIDE the setState updater function to prevent React error
         if (onEnquiryCountChange) {
-          const newCount = updatedList.filter((e) => e.status === 'new').length;
+          const newCount = updatedList.filter((e) => e.status === "new").length;
           onEnquiryCountChange({ total: updatedList.length, unread: newCount });
         }
 
@@ -86,33 +91,33 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
         }
       }
     } catch (err) {
-      console.error('Failed to update enquiry status', err);
+      console.error("Failed to update enquiry status", err);
     }
   }
 
   // Auto mark as read on click
   const handleOpenEnquiry = (enquiry) => {
     setSelectedEnquiry(enquiry);
-    if (enquiry.status === 'new') {
-      updateStatus(enquiry._id, 'contacted');
+    if (enquiry.status === "new") {
+      updateStatus(enquiry._id, "contacted");
     }
   };
 
   // Toggle button inside row or modal
   const toggleStatus = (id, currentStatus, e) => {
     if (e) e.stopPropagation();
-    const nextStatus = currentStatus === 'new' ? 'contacted' : 'new';
+    const nextStatus = currentStatus === "new" ? "contacted" : "new";
     updateStatus(id, nextStatus);
   };
 
   const filteredEnquiries = enquiries.filter((item) => {
-    if (activeTab === 'new') return item.status === 'new';
-    if (activeTab === 'read') return item.status !== 'new';
+    if (activeTab === "new") return item.status === "new";
+    if (activeTab === "read") return item.status !== "new";
     return true;
   });
 
-  const unreadCount = enquiries.filter((e) => e.status === 'new').length;
-  const readCount = enquiries.filter((e) => e.status !== 'new').length;
+  const unreadCount = enquiries.filter((e) => e.status === "new").length;
+  const readCount = enquiries.filter((e) => e.status !== "new").length;
 
   return (
     <section className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 md:p-6 shadow-xl text-slate-100 flex flex-col justify-between transition-all">
@@ -150,7 +155,10 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 border border-slate-800 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
             title="Refresh inquiries"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin text-sky-400' : ''} />
+            <RefreshCw
+              size={14}
+              className={loading ? "animate-spin text-sky-400" : ""}
+            />
           </button>
         </div>
 
@@ -159,24 +167,24 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           {/* 1. New Tab */}
           <button
             type="button"
-            onClick={() => setActiveTab('new')}
+            onClick={() => setActiveTab("new")}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === 'new'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              activeTab === "new"
+                ? "bg-amber-600 text-white shadow-xs"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
             }`}
           >
             <span
               className={`w-2 h-2 rounded-full ${
-                activeTab === 'new' ? 'bg-white' : 'bg-amber-400'
+                activeTab === "new" ? "bg-white" : "bg-amber-400"
               }`}
             />
             <span>New Leads</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
-                activeTab === 'new'
-                  ? 'bg-amber-800 text-amber-100'
-                  : 'bg-slate-800 text-slate-300'
+                activeTab === "new"
+                  ? "bg-amber-800 text-amber-100"
+                  : "bg-slate-800 text-slate-300"
               }`}
             >
               {unreadCount}
@@ -186,14 +194,19 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           {/* 2. Reviewed Tab */}
           <button
             type="button"
-            onClick={() => setActiveTab('read')}
+            onClick={() => setActiveTab("read")}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === 'read'
-                ? 'bg-slate-800 text-white shadow-xs border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              activeTab === "read"
+                ? "bg-slate-800 text-white shadow-xs border border-slate-700"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
             }`}
           >
-            <Check size={12} className={activeTab === 'read' ? 'text-emerald-400' : 'text-slate-500'} />
+            <Check
+              size={12}
+              className={
+                activeTab === "read" ? "text-emerald-400" : "text-slate-500"
+              }
+            />
             <span>Reviewed</span>
             <span className="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-slate-900 text-slate-400 border border-slate-800">
               {readCount}
@@ -203,11 +216,11 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
           {/* 3. All Tab */}
           <button
             type="button"
-            onClick={() => setActiveTab('all')}
+            onClick={() => setActiveTab("all")}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-semibold transition-all shrink-0 cursor-pointer ${
-              activeTab === 'all'
-                ? 'bg-slate-800 text-white shadow-xs border border-slate-700'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+              activeTab === "all"
+                ? "bg-slate-800 text-white shadow-xs border border-slate-700"
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
             }`}
           >
             <span>All Leads</span>
@@ -220,25 +233,28 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
         {/* Enquiry Cards List */}
         <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
           {loading ? (
-            <div className="py-12 text-center text-xs text-slate-500 animate-pulse space-y-2">
-              <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p>Loading inquiries...</p>
+            <div className="py-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
+              <GearLoader fullScreen={false} text="Loading Enquiries..." />
             </div>
           ) : filteredEnquiries.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800/80 px-4">
-              <Inbox size={26} className="mx-auto mb-2 text-slate-600 opacity-60" />
+              <Inbox
+                size={26}
+                className="mx-auto mb-2 text-slate-600 opacity-60"
+              />
               <p className="font-semibold text-slate-400">
-                {activeTab === 'new'
-                  ? 'No unread inquiries in inbox'
-                  : 'No inquiries in this section'}
+                {activeTab === "new"
+                  ? "No unread inquiries in inbox"
+                  : "No inquiries in this section"}
               </p>
               <p className="text-[10px] text-slate-600 mt-0.5">
-                New submissions from your website contact forms will appear here.
+                New submissions from your website contact forms will appear
+                here.
               </p>
             </div>
           ) : (
             filteredEnquiries.map((enquiry) => {
-              const isNew = enquiry.status === 'new';
+              const isNew = enquiry.status === "new";
 
               return (
                 <div
@@ -246,24 +262,26 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                   onClick={() => handleOpenEnquiry(enquiry)}
                   className={`group relative flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                     isNew
-                      ? 'bg-amber-950/20 border-amber-500/30 hover:border-amber-400/60 hover:bg-amber-950/30'
-                      : 'bg-slate-950/40 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/40'
+                      ? "bg-amber-950/20 border-amber-500/30 hover:border-amber-400/60 hover:bg-amber-950/30"
+                      : "bg-slate-950/40 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/40"
                   }`}
                 >
                   <div
                     className={`absolute left-0 top-2 bottom-2 w-1 rounded-r-full ${
-                      isNew ? 'bg-amber-500' : 'bg-transparent'
+                      isNew ? "bg-amber-500" : "bg-transparent"
                     }`}
                   />
 
                   <div className="min-w-0 flex-1 pl-2.5 pr-2">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                       <strong className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-200 transition-colors truncate">
-                        {enquiry.name || 'Anonymous Buyer'}
+                        {enquiry.name || "Anonymous Buyer"}
                       </strong>
                       <span className="text-[10px] text-slate-500 flex items-center gap-1">
                         <Clock size={10} />
-                        {new Date(enquiry.createdAt || Date.now()).toLocaleDateString()}
+                        {new Date(
+                          enquiry.createdAt || Date.now(),
+                        ).toLocaleDateString()}
                       </span>
                     </div>
 
@@ -284,19 +302,23 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                     </div>
 
                     <p className="text-[11px] text-slate-400/80 mt-1 line-clamp-1">
-                      {enquiry.message || 'No requirement description provided'}
+                      {enquiry.message || "No requirement description provided"}
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
-                      onClick={(e) => toggleStatus(enquiry._id, enquiry.status, e)}
-                      title={isNew ? 'Click to mark as Read' : 'Click to mark as New'}
+                      onClick={(e) =>
+                        toggleStatus(enquiry._id, enquiry.status, e)
+                      }
+                      title={
+                        isNew ? "Click to mark as Read" : "Click to mark as New"
+                      }
                       className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
                         isNew
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
-                          : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-200'
+                          ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30"
+                          : "bg-slate-800 text-slate-400 border border-slate-700 hover:text-slate-200"
                       }`}
                     >
                       {isNew ? (
@@ -342,11 +364,13 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                     Lead Details
                   </span>
                   <span className="text-xs text-slate-500">
-                    {new Date(selectedEnquiry.createdAt || Date.now()).toLocaleString()}
+                    {new Date(
+                      selectedEnquiry.createdAt || Date.now(),
+                    ).toLocaleString()}
                   </span>
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-white mt-1">
-                  {selectedEnquiry.name || 'Anonymous Buyer'}
+                  {selectedEnquiry.name || "Anonymous Buyer"}
                 </h3>
               </div>
 
@@ -362,7 +386,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
             {/* Info Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
               <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="block text-[10px] font-semibold text-slate-400">Email Address</span>
+                <span className="block text-[10px] font-semibold text-slate-400">
+                  Email Address
+                </span>
                 <a
                   href={`mailto:${selectedEnquiry.email}`}
                   className="text-xs font-semibold text-sky-400 hover:underline break-all"
@@ -372,7 +398,9 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="block text-[10px] font-semibold text-slate-400">Phone Number</span>
+                <span className="block text-[10px] font-semibold text-slate-400">
+                  Phone Number
+                </span>
                 {selectedEnquiry.phone ? (
                   <a
                     href={`tel:${selectedEnquiry.phone}`}
@@ -386,16 +414,20 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="block text-[10px] font-semibold text-slate-400">Company / Plant</span>
+                <span className="block text-[10px] font-semibold text-slate-400">
+                  Company / Plant
+                </span>
                 <p className="text-xs font-semibold text-slate-200 truncate">
-                  {selectedEnquiry.company || 'Direct Buyer'}
+                  {selectedEnquiry.company || "Direct Buyer"}
                 </p>
               </div>
 
               <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
-                <span className="block text-[10px] font-semibold text-slate-400">Requested Product / Line</span>
+                <span className="block text-[10px] font-semibold text-slate-400">
+                  Requested Product / Line
+                </span>
                 <p className="text-xs font-semibold text-amber-300 truncate">
-                  {selectedEnquiry.product || 'General Technical Consultation'}
+                  {selectedEnquiry.product || "General Technical Consultation"}
                 </p>
               </div>
             </div>
@@ -406,7 +438,8 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 Client Requirement & Message:
               </span>
               <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-slate-200 leading-relaxed overflow-y-auto whitespace-pre-wrap flex-1 max-h-[180px]">
-                {selectedEnquiry.message || 'No additional message was submitted.'}
+                {selectedEnquiry.message ||
+                  "No additional message was submitted."}
               </div>
             </div>
 
@@ -419,7 +452,7 @@ export default function EnquiryPanel({ onEnquiryCountChange }) {
                 }
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors cursor-pointer border border-slate-700"
               >
-                {selectedEnquiry.status === 'new' ? (
+                {selectedEnquiry.status === "new" ? (
                   <>
                     <Check size={13} className="text-emerald-400" />
                     <span>Mark as Read</span>

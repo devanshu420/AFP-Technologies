@@ -1,4 +1,5 @@
-"use client";
+// components/pages/downloadSection.jsx
+'use client';
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -11,6 +12,7 @@ import {
   ArrowLeft,
   Briefcase,
 } from "lucide-react";
+import GearLoader from "../GearLoader";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -83,14 +85,6 @@ export default function DownloadSection() {
     }
   };
 
-  // const categories = [
-  //   "All",
-  //   "Machinery Datasheet",
-  //   "Brochure",
-  //   "Technical Manual",
-  //   "Corporate Profile",
-  // ];
-
   return (
     <div className="min-h-screen bg-slate-100/70 text-slate-800 py-6 sm:py-10 px-3 sm:px-6 lg:px-8 font-sans antialiased">
       <div className="max-w-7xl mx-auto space-y-6 sm:space-y-8">
@@ -142,14 +136,12 @@ export default function DownloadSection() {
           </div>
         </div>
 
-        {/* Main Content Area */}
+        {/* Main Content Area (Localized Loading inside grid area) */}
         <div>
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-3 bg-white rounded-3xl border border-slate-200/80">
-              <Loader2 className="animate-spin text-sky-600" size={30} />
-              <p className="text-xs font-semibold text-slate-500">
-                Loading documents library...
-              </p>
+            <div className="flex flex-col items-center justify-center py-24 bg-white rounded-3xl border border-slate-200/80 shadow-xs">
+              {/* 🟢 Localized GearLoader without fullScreen */}
+              <GearLoader fullScreen={false} text="Loading machine catalogues..." />
             </div>
           ) : pdfs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center px-4 bg-white rounded-3xl border border-slate-200/80">
@@ -187,8 +179,6 @@ export default function DownloadSection() {
                           {pdf.category || "Datasheet"}
                         </span>
                       </div>
-
-                      
                     </div>
 
                     <div className="p-3 flex-1 flex flex-col justify-between space-y-2.5">

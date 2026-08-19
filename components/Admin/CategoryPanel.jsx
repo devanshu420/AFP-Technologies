@@ -1,9 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { FolderTree, Plus, Edit2, Trash2, Save, X, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import {
+  FolderTree,
+  Plus,
+  Edit2,
+  Trash2,
+  Save,
+  X,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
+import GearLoader from "../GearLoader";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function CategoryPanel() {
   const [categories, setCategories] = useState([]);
@@ -11,21 +23,24 @@ export default function CategoryPanel() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
-  const [formData, setFormData] = useState({ name: '', description: '' });
+  const [successMsg, setSuccessMsg] = useState("");
+  const [formData, setFormData] = useState({ name: "", description: "" });
 
   // Custom Delete Modal & Error States
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState('');
+  const [deleteError, setDeleteError] = useState("");
 
   // Helper function to get auth headers from session storage
   const getAuthHeaders = () => {
-    const token = typeof window !== 'undefined' ? sessionStorage.getItem('admin_jwt_token') : '';
-    const headers = { 'Content-Type': 'application/json' };
+    const token =
+      typeof window !== "undefined"
+        ? sessionStorage.getItem("admin_jwt_token")
+        : "";
+    const headers = { "Content-Type": "application/json" };
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
     return headers;
   };
@@ -33,9 +48,9 @@ export default function CategoryPanel() {
   async function loadCategories() {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/categories`, { 
+      const res = await fetch(`${API_BASE_URL}/categories`, {
         headers: getAuthHeaders(),
-        cache: 'no-store' 
+        cache: "no-store",
       });
       const json = await res.json();
       if (res.ok) {
@@ -43,7 +58,7 @@ export default function CategoryPanel() {
         setCategories(list);
       }
     } catch (err) {
-      console.error('Failed to load categories', err);
+      console.error("Failed to load categories", err);
     } finally {
       setLoading(false);
     }
@@ -55,48 +70,52 @@ export default function CategoryPanel() {
 
   const handleOpenCreate = () => {
     setEditingCategory(null);
-    setFormData({ name: '', description: '' });
+    setFormData({ name: "", description: "" });
     setIsModalOpen(true);
   };
 
   const handleOpenEdit = (cat) => {
     setEditingCategory(cat);
     setFormData({
-      name: cat.name || '',
-      description: cat.description || '',
+      name: cat.name || "",
+      description: cat.description || "",
     });
     setIsModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setSuccessMsg('');
+    setSuccessMsg("");
     try {
       setSaving(true);
       const catId = editingCategory?._id || editingCategory?.id;
       const url = editingCategory
         ? `${API_BASE_URL}/categories/${catId}`
         : `${API_BASE_URL}/categories`;
-      const method = editingCategory ? 'PUT' : 'POST';
+      const method = editingCategory ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
       if (res.ok) {
         setIsModalOpen(false);
-        setSuccessMsg(editingCategory ? 'Category updated successfully!' : 'Category created successfully!');
+        setSuccessMsg(
+          editingCategory
+            ? "Category updated successfully!"
+            : "Category created successfully!",
+        );
         loadCategories();
-        setTimeout(() => setSuccessMsg(''), 4000);
+        setTimeout(() => setSuccessMsg(""), 4000);
       } else {
         const json = await res.json().catch(() => null);
-        alert(json?.message || 'Failed to save category');
+        alert(json?.message || "Failed to save category");
       }
     } catch (err) {
-      alert('Error saving category');
+      alert("Error saving category");
     } finally {
       setSaving(false);
     }
@@ -104,21 +123,21 @@ export default function CategoryPanel() {
 
   const confirmDelete = (cat) => {
     setCategoryToDelete(cat);
-    setDeleteError('');
+    setDeleteError("");
     setDeleteModalOpen(true);
   };
 
   const handleDeleteExecute = async () => {
     if (!categoryToDelete) return;
     const id = categoryToDelete._id || categoryToDelete.id;
-    setDeleteError('');
+    setDeleteError("");
 
     try {
       setDeleting(true);
       const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: getAuthHeaders(),
-        credentials: 'include',
+        credentials: "include",
       });
 
       const json = await res.json().catch(() => null);
@@ -126,19 +145,19 @@ export default function CategoryPanel() {
       if (res.ok) {
         setDeleteModalOpen(false);
         setCategoryToDelete(null);
-        setSuccessMsg('Category deleted successfully!');
+        setSuccessMsg("Category deleted successfully!");
         loadCategories();
-        setTimeout(() => setSuccessMsg(''), 4000);
+        setTimeout(() => setSuccessMsg(""), 4000);
       } else {
         // UI Friendly Warning Message as requested
         setDeleteError(
-          json?.message?.includes('referenced')
-            ? 'You cannot delete this category until you delete its associated products.'
-            : json?.message || 'Failed to delete category.'
+          json?.message?.includes("referenced")
+            ? "You cannot delete this category until you delete its associated products."
+            : json?.message || "Failed to delete category.",
         );
       }
     } catch (err) {
-      setDeleteError('Error connecting to backend server.');
+      setDeleteError("Error connecting to backend server.");
     } finally {
       setDeleting(false);
     }
@@ -186,15 +205,19 @@ export default function CategoryPanel() {
       {/* Categories List */}
       <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
         {loading ? (
-          <div className="py-12 text-center text-xs text-slate-500 animate-pulse space-y-2">
-            <div className="w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p>Loading categories...</p>
+          <div className="py-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
+            <GearLoader fullScreen={false} text="Loading categories..." />
           </div>
         ) : categories.length === 0 ? (
           <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800/80 px-4">
-            <FolderTree size={26} className="mx-auto mb-2 text-slate-600 opacity-60" />
+            <FolderTree
+              size={26}
+              className="mx-auto mb-2 text-slate-600 opacity-60"
+            />
             <p className="font-semibold text-slate-400">No categories found</p>
-            <p className="text-[10px] text-slate-600 mt-0.5">Click &quot;Add Category&quot; above to create one.</p>
+            <p className="text-[10px] text-slate-600 mt-0.5">
+              Click &quot;Add Category&quot; above to create one.
+            </p>
           </div>
         ) : (
           categories.map((cat) => {
@@ -205,7 +228,10 @@ export default function CategoryPanel() {
                 className="flex items-center justify-between p-3 rounded-xl border border-slate-800/80 bg-slate-950/40 hover:bg-slate-800/30 hover:border-slate-700/80 transition-all gap-3"
               >
                 <div className="min-w-0 flex-1">
-                  <h4 className="text-xs sm:text-sm font-bold text-white truncate" title={cat.name}>
+                  <h4
+                    className="text-xs sm:text-sm font-bold text-white truncate"
+                    title={cat.name}
+                  >
                     {cat.name}
                   </h4>
                   {cat.description && (
@@ -251,7 +277,7 @@ export default function CategoryPanel() {
           >
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <h3 className="text-base font-bold text-white">
-                {editingCategory ? 'Edit Product Category' : 'Add New Category'}
+                {editingCategory ? "Edit Product Category" : "Add New Category"}
               </h3>
               <button
                 type="button"
@@ -271,7 +297,9 @@ export default function CategoryPanel() {
                   type="text"
                   required
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   placeholder="e.g. Injection Moulding"
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs sm:text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                 />
@@ -284,7 +312,9 @@ export default function CategoryPanel() {
                 <textarea
                   rows={2}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   placeholder="Optional brief description..."
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-700/80 rounded-xl text-white text-xs sm:text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all"
                 />
@@ -332,9 +362,15 @@ export default function CategoryPanel() {
               <AlertTriangle size={24} />
             </div>
 
-            <h3 className="text-base font-bold text-white mb-1">Confirm Deletion</h3>
+            <h3 className="text-base font-bold text-white mb-1">
+              Confirm Deletion
+            </h3>
             <p className="text-xs text-slate-400 mb-4">
-              Are you sure you want to delete <strong className="text-white">&quot;{categoryToDelete?.name}&quot;</strong>?
+              Are you sure you want to delete{" "}
+              <strong className="text-white">
+                &quot;{categoryToDelete?.name}&quot;
+              </strong>
+              ?
             </p>
 
             {deleteError && (

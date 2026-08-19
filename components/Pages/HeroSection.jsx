@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   ArrowRight,
   Cpu,
@@ -9,10 +9,10 @@ import {
   Megaphone,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
+} from 'lucide-react';
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 export default function HeroSection() {
   const [isWaHovered, setIsWaHovered] = useState(false);
@@ -20,44 +20,44 @@ export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  // Fetch all active announcements (sorted newest first by backend)
+  // Fetch all active announcements
   useEffect(() => {
     async function loadAnnouncements() {
       try {
         const res = await fetch(`${API_BASE_URL}/announcements/public`, {
-          cache: "no-store",
+          cache: 'no-store',
         });
         const json = await res.json();
 
-        // Agar backend public route multiple active ads array return kare
         const list = Array.isArray(json?.data)
           ? json.data
           : json?.data
-            ? [json.data]
-            : [];
+          ? [json.data]
+          : [];
         const activeList = list.filter((ad) => ad.active);
 
         if (activeList.length > 0) {
+          setAnnouncements(activeList);
           const hasSeenModal = sessionStorage.getItem(
-            "has_seen_hero_announcements",
+            'has_seen_hero_announcements',
           );
           if (!hasSeenModal) {
-            setAnnouncements(activeList);
             setShowModal(true);
-            sessionStorage.setItem("has_seen_hero_announcements", "true");
+            sessionStorage.setItem('has_seen_hero_announcements', 'true');
           }
         }
       } catch (err) {
-        console.error("Failed to load hero announcements", err);
+        console.error('Failed to load hero announcements', err);
       }
     }
     loadAnnouncements();
   }, []);
 
-  const whatsappNumber = "919876543210";
+  const whatsappNumber = '919876543210';
   const whatsappMessage = encodeURIComponent(
-    "Hello AFP Technologies Industries, I am interested in inquiring about your machinery catalogue and specifications.",
+    'Hello AFP Technologies Industries, I am interested in inquiring about your machinery catalogue and specifications.',
   );
+  const whatsappRedirectUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   const currentAd = announcements[currentIndex];
 
@@ -65,7 +65,7 @@ export default function HeroSection() {
     if (currentIndex < announcements.length - 1) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      setCurrentIndex(0); // Loop back to start
+      setCurrentIndex(0);
     }
   };
 
@@ -432,108 +432,103 @@ export default function HeroSection() {
         </div>
       </section>
 
-     {/* 🟢 Multiple Announcements Popup Modal with Backdrop Blur & Slider Controls */}
-{showModal && currentAd && (
-  <div
-    className="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300"
-    onClick={() => setShowModal(false)}
-  >
-    <div
-      className="bg-slate-900/90 border border-slate-700/80 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl shadow-sky-950/40 text-slate-100 relative animate-in zoom-in-95 duration-200 overflow-hidden backdrop-blur-xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-      {/* Glowing Accent Gradient */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Modal Header */}
-      <div className="flex items-center justify-between mb-5 relative z-10">
-        <div className="inline-flex p-3 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 shadow-inner">
-          <Megaphone size={22} />
-        </div>
-        <div className="flex items-center gap-2.5">
-          {announcements.length > 1 && (
-            <span className="text-[11px] font-mono font-medium text-slate-300 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-full shadow-2xs">
-              {currentIndex + 1} / {announcements.length}
-            </span>
-          )}
-          <button
-            type="button"
-            onClick={() => setShowModal(false)}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all cursor-pointer"
-            title="Close"
+      {/* Announcement Modal Popup */}
+      {showModal && currentAd && (
+        <div
+          className="fixed inset-0 bg-slate-950/85 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-slate-900/90 border border-slate-700/80 rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl shadow-sky-950/40 text-slate-100 relative animate-in zoom-in-95 duration-200 overflow-hidden backdrop-blur-xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X size={18} />
-          </button>
-        </div>
-      </div>
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Modal Content Body */}
-      <div className="space-y-3 relative z-10 min-h-[115px]">
-        <div>
-          <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-sky-400 bg-sky-950/80 border border-sky-800/60 px-2.5 py-1 rounded-md shadow-2xs">
-            {currentAd.badgeText || "SPECIAL ANNOUNCEMENT"}
-          </span>
-        </div>
+            <div className="flex items-center justify-between mb-5 relative z-10">
+              <div className="inline-flex p-3 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-sky-400 shadow-inner">
+                <Megaphone size={22} />
+              </div>
+              <div className="flex items-center gap-2.5">
+                {announcements.length > 1 && (
+                  <span className="text-[11px] font-mono font-medium text-slate-300 bg-slate-800/80 border border-slate-700/60 px-2.5 py-1 rounded-full shadow-2xs">
+                    {currentIndex + 1} / {announcements.length}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-all cursor-pointer"
+                  title="Close"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
 
-        <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
-          {currentAd.title}
-        </h3>
+            <div className="space-y-3 relative z-10 min-h-[115px]">
+              <div>
+                <span className="inline-block text-[10px] font-extrabold uppercase tracking-widest text-sky-400 bg-sky-950/80 border border-sky-800/60 px-2.5 py-1 rounded-md shadow-2xs">
+                  {currentAd.badgeText || "SPECIAL ANNOUNCEMENT"}
+                </span>
+              </div>
 
-        <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed font-normal">
-          {currentAd.description}
-        </p>
-      </div>
+              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-snug">
+                {currentAd.title}
+              </h3>
 
-      {/* Footer Navigation / Actions */}
-      <div className="mt-7 pt-4 border-t border-slate-800/80 flex items-center justify-between relative z-10 gap-3">
-        {/* Prev / Next Buttons if multiple ads */}
-        {announcements.length > 1 ? (
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={handlePrev}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs"
-              title="Previous Announcement"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs"
-              title="Next Announcement"
-            >
-              <ChevronRight size={16} />
-            </button>
+              <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed font-normal">
+                {currentAd.description}
+              </p>
+            </div>
+
+            <div className="mt-7 pt-4 border-t border-slate-800/80 flex items-center justify-between relative z-10 gap-3">
+              {announcements.length > 1 ? (
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handlePrev}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs"
+                    title="Previous Announcement"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 text-slate-200 hover:text-white transition-all active:scale-95 cursor-pointer shadow-2xs"
+                    title="Next Announcement"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-3.5 py-2 rounded-xl border border-slate-700/80 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+                >
+                  Close
+                </button>
+                {currentAd.linkUrl && (
+                  <Link
+                    href={currentAd.linkUrl}
+                    onClick={() => setShowModal(false)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
+                  >
+                    <span>{currentAd.linkText || "Explore Now"}</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                )}
+              </div>
+            </div>
           </div>
-        ) : (
-          <div />
-        )}
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowModal(false)}
-            className="px-3.5 py-2 rounded-xl border border-slate-700/80 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
-          >
-            Close
-          </button>
-          {currentAd.linkUrl && (
-            <Link
-              href={currentAd.linkUrl}
-              onClick={() => setShowModal(false)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-sky-600/30 transition-all cursor-pointer"
-            >
-              <span>{currentAd.linkText || "Explore Now"}</span>
-              <ArrowRight size={14} />
-            </Link>
-          )}
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {/* WhatsApp Support Widget */}
       <aside

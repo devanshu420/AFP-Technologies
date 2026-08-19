@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 import {
   FileText,
   Trash2,
@@ -13,10 +13,11 @@ import {
   CheckCircle2,
   AlertCircle,
   FileCheck,
-} from 'lucide-react';
+} from "lucide-react";
+import GearLoader from "../GearLoader";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 export default function PdfPanel({ onPdfCountChange }) {
   const [pdfs, setPdfs] = useState([]);
@@ -25,62 +26,67 @@ export default function PdfPanel({ onPdfCountChange }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
   const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: 'Machinery Datasheet',
-    fileUrl: '',
-    fileName: '',
+    title: "",
+    description: "",
+    category: "Machinery Datasheet",
+    fileUrl: "",
+    fileName: "",
     active: true,
   });
 
   async function fetchPdfs() {
-  try {
-    setLoading(true);
-    const token = sessionStorage.getItem('admin_jwt_token');
+    try {
+      setLoading(true);
+      const token = sessionStorage.getItem("admin_jwt_token");
 
-    const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      cache: 'no-store',
-    });
+      const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: "no-store",
+      });
 
-    if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+      if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
 
-    const json = await res.json();
-    const list = Array.isArray(json?.data) ? json.data : [];
-    setPdfs(list);
-    if (onPdfCountChange) onPdfCountChange(list.length);
-  } catch (err) {
-    console.error('Error fetching admin PDFs:', err);
-  } finally {
-    setLoading(false);
+      const json = await res.json();
+      const list = Array.isArray(json?.data) ? json.data : [];
+      setPdfs(list);
+      if (onPdfCountChange) onPdfCountChange(list.length);
+    } catch (err) {
+      console.error("Error fetching admin PDFs:", err);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   useEffect(() => {
     fetchPdfs();
   }, []);
 
   const handleFileChange = (e) => {
-    setErrorMessage('');
+    setErrorMessage("");
     const file = e.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-        setErrorMessage('Please select a valid PDF (.pdf) file.');
+      if (
+        file.type !== "application/pdf" &&
+        !file.name.toLowerCase().endsWith(".pdf")
+      ) {
+        setErrorMessage("Please select a valid PDF (.pdf) file.");
         return;
       }
       setSelectedFile(file);
 
       // Auto populate title only if title input is currently empty
       if (!formData.title.trim()) {
-        const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        const cleanName = file.name
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[-_]/g, " ");
         setFormData((prev) => ({
           ...prev,
           title: cleanName,
@@ -97,16 +103,16 @@ export default function PdfPanel({ onPdfCountChange }) {
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessage("");
 
     const titleValue = formData.title.trim();
     if (!titleValue) {
-      setErrorMessage('Please enter document title.');
+      setErrorMessage("Please enter document title.");
       return;
     }
 
     if (!editingPdf && !selectedFile && !formData.fileUrl) {
-      setErrorMessage('Please upload a PDF file.');
+      setErrorMessage("Please upload a PDF file.");
       return;
     }
 
@@ -122,16 +128,16 @@ export default function PdfPanel({ onPdfCountChange }) {
 
       if (selectedFile) {
         const data = new FormData();
-        data.append('file', selectedFile);
-        data.append('pdf', selectedFile); // fallback key
-        data.append('title', titleValue);
-        data.append('description', formData.description || '');
-        data.append('category', formData.category || 'Machinery Datasheet');
-        data.append('fileName', selectedFile.name);
-        data.append('active', formData.active ? 'true' : 'false');
+        data.append("file", selectedFile);
+        data.append("pdf", selectedFile); // fallback key
+        data.append("title", titleValue);
+        data.append("description", formData.description || "");
+        data.append("category", formData.category || "Machinery Datasheet");
+        data.append("fileName", selectedFile.name);
+        data.append("active", formData.active ? "true" : "false");
         bodyData = data;
       } else {
-        headers['Content-Type'] = 'application/json';
+        headers["Content-Type"] = "application/json";
         bodyData = JSON.stringify({
           ...formData,
           title: titleValue,
@@ -139,8 +145,8 @@ export default function PdfPanel({ onPdfCountChange }) {
       }
 
       const res = await fetch(url, {
-        method: editingPdf ? 'PUT' : 'POST',
-        credentials: 'include',
+        method: editingPdf ? "PUT" : "POST",
+        credentials: "include",
         headers,
         body: bodyData,
       });
@@ -152,48 +158,50 @@ export default function PdfPanel({ onPdfCountChange }) {
         setEditingPdf(null);
         setSelectedFile(null);
         setFormData({
-          title: '',
-          description: '',
-          category: 'Machinery Datasheet',
-          fileUrl: '',
-          fileName: '',
+          title: "",
+          description: "",
+          category: "Machinery Datasheet",
+          fileUrl: "",
+          fileName: "",
           active: true,
         });
         fetchPdfs();
       } else {
-        setErrorMessage(json?.message || 'Failed to save PDF. Please check server logs.');
+        setErrorMessage(
+          json?.message || "Failed to save PDF. Please check server logs.",
+        );
       }
     } catch (err) {
       console.error(err);
-      setErrorMessage('Connection error while saving PDF.');
+      setErrorMessage("Connection error while saving PDF.");
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this PDF document?')) return;
+    if (!confirm("Are you sure you want to delete this PDF document?")) return;
     try {
       const res = await fetch(`${API_BASE_URL}/downloads/admin/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
       if (res.ok) fetchPdfs();
     } catch (err) {
-      alert('Delete failed');
+      alert("Delete failed");
     }
   };
 
   const openEdit = (pdf) => {
     setEditingPdf(pdf);
     setSelectedFile(null);
-    setErrorMessage('');
+    setErrorMessage("");
     setFormData({
-      title: pdf.title || '',
+      title: pdf.title || "",
 
-      category: pdf.category || 'Machinery Datasheet',
-      fileUrl: pdf.fileUrl || pdf.url || '',
-      fileName: pdf.fileName || '',
+      category: pdf.category || "Machinery Datasheet",
+      fileUrl: pdf.fileUrl || pdf.url || "",
+      fileName: pdf.fileName || "",
       active: pdf.active !== undefined ? pdf.active : true,
     });
     setShowAddModal(true);
@@ -229,13 +237,13 @@ export default function PdfPanel({ onPdfCountChange }) {
               onClick={() => {
                 setEditingPdf(null);
                 setSelectedFile(null);
-                setErrorMessage('');
+                setErrorMessage("");
                 setFormData({
-                  title: '',
-                  description: '',
-                  category: 'Machinery Datasheet',
-                  fileUrl: '',
-                  fileName: '',
+                  title: "",
+                  description: "",
+                  category: "Machinery Datasheet",
+                  fileUrl: "",
+                  fileName: "",
                   active: true,
                 });
                 setShowAddModal(true);
@@ -252,7 +260,10 @@ export default function PdfPanel({ onPdfCountChange }) {
               className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 border border-slate-800 transition-colors shrink-0 cursor-pointer disabled:opacity-50"
               title="Refresh PDF list"
             >
-              <Loader2 size={14} className={loading ? 'animate-spin text-sky-400' : 'hidden'} />
+              <Loader2
+                size={14}
+                className={loading ? "animate-spin text-sky-400" : "hidden"}
+              />
               {!loading && <FileText size={14} />}
             </button>
           </div>
@@ -261,14 +272,18 @@ export default function PdfPanel({ onPdfCountChange }) {
         {/* Content List Area */}
         <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
           {loading ? (
-            <div className="py-12 text-center text-xs text-slate-500 animate-pulse space-y-2">
-              <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p>Loading PDF records...</p>
+            <div className="py-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
+              <GearLoader fullScreen={false} text="Loading Pdfs..." />
             </div>
           ) : pdfs.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800/80 px-4">
-              <FileText size={26} className="mx-auto mb-2 text-slate-600 opacity-60" />
-              <p className="font-semibold text-slate-400">No PDF documents found</p>
+              <FileText
+                size={26}
+                className="mx-auto mb-2 text-slate-600 opacity-60"
+              />
+              <p className="font-semibold text-slate-400">
+                No PDF documents found
+              </p>
               <p className="text-[10px] text-slate-600 mt-0.5">
                 Upload your first technical brochure or catalog above.
               </p>
@@ -296,12 +311,12 @@ export default function PdfPanel({ onPdfCountChange }) {
                         className="text-xs sm:text-sm font-bold text-white truncate hover:text-sky-300 transition-colors"
                         title={pdf.title}
                       >
-                        {pdf.title || 'Untitled Document'}
+                        {pdf.title || "Untitled Document"}
                       </h4>
 
                       <div className="flex items-center gap-x-2.5 gap-y-0.5 text-[10.5px] text-slate-400 mt-0.5 flex-wrap">
                         <span className="text-sky-400 font-medium">
-                          {pdf.category || 'Machinery Datasheet'}
+                          {pdf.category || "Machinery Datasheet"}
                         </span>
                         <span className="text-slate-600">•</span>
                         <span className="text-slate-400">
@@ -310,10 +325,12 @@ export default function PdfPanel({ onPdfCountChange }) {
                         <span className="text-slate-600">•</span>
                         <span
                           className={
-                            pdf.active !== false ? 'text-emerald-400 font-semibold' : 'text-rose-400'
+                            pdf.active !== false
+                              ? "text-emerald-400 font-semibold"
+                              : "text-rose-400"
                           }
                         >
-                          {pdf.active !== false ? 'Active' : 'Hidden'}
+                          {pdf.active !== false ? "Active" : "Hidden"}
                         </span>
                       </div>
                     </div>
@@ -371,7 +388,7 @@ export default function PdfPanel({ onPdfCountChange }) {
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div>
                 <h3 className="text-base font-bold text-white">
-                  {editingPdf ? 'Edit PDF Document' : 'Upload Technical PDF'}
+                  {editingPdf ? "Edit PDF Document" : "Upload Technical PDF"}
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
                   Select your PDF file and provide title to upload to ImageKit.
@@ -413,8 +430,8 @@ export default function PdfPanel({ onPdfCountChange }) {
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-2 border-dashed rounded-xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group ${
                     selectedFile
-                      ? 'border-emerald-500/80 bg-emerald-950/20'
-                      : 'border-slate-700 hover:border-sky-500 bg-slate-950/60 hover:bg-slate-950'
+                      ? "border-emerald-500/80 bg-emerald-950/20"
+                      : "border-slate-700 hover:border-sky-500 bg-slate-950/60 hover:bg-slate-950"
                   }`}
                 >
                   {selectedFile ? (
@@ -425,7 +442,8 @@ export default function PdfPanel({ onPdfCountChange }) {
                           {selectedFile.name}
                         </p>
                         <span className="text-[10.5px] text-slate-400">
-                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Click to replace file
+                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB •
+                          Click to replace file
                         </span>
                       </div>
                     </div>
@@ -434,7 +452,7 @@ export default function PdfPanel({ onPdfCountChange }) {
                       <FileText size={26} className="shrink-0" />
                       <div className="text-left min-w-0">
                         <p className="text-xs font-semibold truncate max-w-[260px] text-slate-200">
-                          {formData.fileName || 'Existing PDF attached'}
+                          {formData.fileName || "Existing PDF attached"}
                         </p>
                         <span className="text-[10px] text-sky-400 underline">
                           Click to browse and change PDF
@@ -470,7 +488,7 @@ export default function PdfPanel({ onPdfCountChange }) {
                   value={formData.title}
                   onChange={(e) => {
                     setFormData({ ...formData, title: e.target.value });
-                    if (errorMessage) setErrorMessage('');
+                    if (errorMessage) setErrorMessage("");
                   }}
                   placeholder="e.g. Atlas 420 Technical Datasheet"
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs sm:text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all"
@@ -490,7 +508,9 @@ export default function PdfPanel({ onPdfCountChange }) {
                     }
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all cursor-pointer"
                   >
-                    <option value="Machinery Datasheet">Machinery Datasheet</option>
+                    <option value="Machinery Datasheet">
+                      Machinery Datasheet
+                    </option>
                     <option value="Brochure">Brochure</option>
                     <option value="Technical Manual">Technical Manual</option>
                     <option value="Corporate Profile">Corporate Profile</option>
@@ -502,9 +522,12 @@ export default function PdfPanel({ onPdfCountChange }) {
                     Visibility Status
                   </label>
                   <select
-                    value={formData.active ? 'true' : 'false'}
+                    value={formData.active ? "true" : "false"}
                     onChange={(e) =>
-                      setFormData({ ...formData, active: e.target.value === 'true' })
+                      setFormData({
+                        ...formData,
+                        active: e.target.value === "true",
+                      })
                     }
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-700 rounded-xl text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all cursor-pointer"
                   >

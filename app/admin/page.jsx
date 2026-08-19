@@ -27,6 +27,7 @@ import PdfPanel from "../../components/Admin/PdfPanel";
 import ContactSettingsPanel from "../../components/Admin/ContactSettingsPanel";
 import AnnouncementPanel from "../../components/Admin/AnnouncementPanel";
 import CategoryPanel from '../../components/Admin/CategoryPanel';
+import GearLoader from "../../components/GearLoader";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -207,32 +208,11 @@ export default function AdminPage() {
     }
   }
 
-  // Loading Screen Skeleton
+  // 🟢 Loading Screen with Custom GearLoader (Fixed error here)
   if (session === null) {
     return (
-      <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row animate-pulse">
-        <aside className="hidden md:flex w-64 bg-slate-900 border-r border-slate-800 flex-col shrink-0 p-4 space-y-4">
-          <div className="h-10 bg-slate-800 rounded-lg w-3/4 mb-6" />
-          <div className="space-y-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-10 bg-slate-800/60 rounded-lg w-full" />
-            ))}
-          </div>
-        </aside>
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0">
-            <div className="h-5 bg-slate-200 rounded w-32" />
-            <div className="h-8 bg-slate-200 rounded-full w-24" />
-          </header>
-          <main className="flex-1 p-4 sm:p-6 space-y-6">
-            <div className="h-20 bg-white rounded-xl border border-slate-200" />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-24 bg-white rounded-xl border border-slate-200 p-4" />
-              ))}
-            </div>
-          </main>
-        </div>
+      <div className="min-h-screen bg-[#071b32] flex items-center justify-center">
+        <GearLoader fullScreen={true} text="Authenticating Admin Portal..." />
       </div>
     );
   }

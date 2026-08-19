@@ -21,6 +21,8 @@ import {
   Package,
   Loader2,
 } from "lucide-react";
+import GearLoader from "../../../components/GearLoader";
+import { div } from "three/tsl";
 
 const emptyFormState = {
   name: "",
@@ -141,7 +143,10 @@ export default function AdminProductsPage() {
       };
 
       const [prodRes, catRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/products?limit=150`, { headers, cache: "no-store" }),
+        fetch(`${API_BASE_URL}/products?limit=150`, {
+          headers,
+          cache: "no-store",
+        }),
         fetch(`${API_BASE_URL}/categories`, { headers, cache: "no-store" }),
       ]);
 
@@ -374,7 +379,7 @@ export default function AdminProductsPage() {
         "success",
         editingId
           ? "Product updated successfully!"
-          : "Product published successfully!"
+          : "Product published successfully!",
       );
       cancelEditing();
       loadData();
@@ -421,13 +426,13 @@ export default function AdminProductsPage() {
   });
 
   // 5. SAFE CONDITIONAL RETURNS (Placed after all Hooks)
-  if (loading) {
+ if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-100 space-y-3">
-        <Loader2 size={32} className="animate-spin text-sky-500" />
-        <p className="text-xs font-semibold tracking-wider text-slate-400">
-          Verifying Admin Privileges...
-        </p>
+      <div>
+        {/* <GearLoader className ="items-center justify-center"
+          fullScreen={false}
+          text="Verifying Admin..."
+        /> */}
       </div>
     );
   }
@@ -566,11 +571,15 @@ export default function AdminProductsPage() {
 
               <div className="max-h-80 md:max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-slate-100 space-y-1 pr-0.5">
                 {loadingList ? (
-                  <div className="py-8 text-center text-slate-400 text-[11px]">
-                    Loading machinery list...
+                  <div className="py-12 min-h-[220px] flex flex-col items-center justify-center text-slate-400 text-[11px] gap-2">
+                    {/* Agar aap yahan GearLoader use karna chahein: */}
+                    <GearLoader
+                      fullScreen={false}
+                      text="Loading machinery list..."
+                    />
                   </div>
                 ) : filteredProducts.length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 text-[11px]">
+                  <div className="py-12 min-h-[220px] flex items-center justify-center text-center text-slate-400 text-[11px]">
                     No matching machinery found.
                   </div>
                 ) : (
@@ -837,8 +846,8 @@ export default function AdminProductsPage() {
                           {localMainFile
                             ? "Change Local Image"
                             : form.mainImage?.url
-                            ? "Change Image"
-                            : "Choose Main Image"}
+                              ? "Change Image"
+                              : "Choose Main Image"}
                         </button>
                         {localMainFile && (
                           <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
@@ -891,8 +900,8 @@ export default function AdminProductsPage() {
                         {localPdfFile
                           ? "Change PDF"
                           : form.pdf?.url
-                          ? "Replace PDF"
-                          : "Select PDF"}
+                            ? "Replace PDF"
+                            : "Select PDF"}
                       </button>
                       <span className="block text-[10px] text-slate-600 truncate">
                         {localPdfFile
@@ -1288,8 +1297,8 @@ export default function AdminProductsPage() {
                   {saving
                     ? "Uploading & Saving..."
                     : editingId
-                    ? "Update Machinery System"
-                    : "Publish Product"}
+                      ? "Update Machinery System"
+                      : "Publish Product"}
                 </button>
               </div>
             </form>

@@ -17,13 +17,13 @@ const API_BASE_URL =
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
-  // 1. Initial State jo database API se update hogi
+  // Dynamic Contact Information from Admin Database
   const [contactInfo, setContactInfo] = useState({
     salesPhoneNumber: '+91 98765 43210',
     inquiryEmail: 'afptechsupport@gmail.com',
   });
 
-  // 2. Admin database / settings API se live data fetch karna
+  // Fetch dynamic phone & email from database
   useEffect(() => {
     async function fetchContactSettings() {
       try {
@@ -49,7 +49,7 @@ export default function Footer() {
     fetchContactSettings();
   }, []);
 
-  // 3. Clean Dynamic Number for WhatsApp Redirect
+  // ── Clean Dynamic Number for WhatsApp Redirect ──
   const rawCleanPhone = contactInfo.salesPhoneNumber.replace(/\D/g, '');
   const whatsappNumber =
     rawCleanPhone.length === 10 ? `91${rawCleanPhone}` : rawCleanPhone;
@@ -84,14 +84,14 @@ export default function Footer() {
         }}
       />
 
-      {/* Main Footer Content */}
+      {/* Main Footer Content - Reduced top & bottom padding to remove extra space */}
       <div
         className="container"
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
           padding:
-            '4.5rem clamp(1.5rem, 4vw, 3.5rem) 3rem clamp(1.5rem, 4vw, 3.5rem)',
+            '3rem clamp(1.5rem, 4vw, 3.5rem) 1.5rem clamp(1.5rem, 4vw, 3.5rem)',
         }}
       >
         <div
@@ -99,7 +99,7 @@ export default function Footer() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
             gap: 'clamp(2rem, 4vw, 3.5rem)',
-            marginBottom: '3.5rem',
+            marginBottom: '2.5rem',
           }}
         >
           {/* Column 1: Brand Info & Mission */}
@@ -112,7 +112,7 @@ export default function Footer() {
                 alignItems: 'center',
                 gap: '10px',
                 textDecoration: 'none',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
               }}
             >
               <span
@@ -149,7 +149,7 @@ export default function Footer() {
                 fontSize: '0.9rem',
                 lineHeight: 1.65,
                 color: '#94a3b8',
-                marginBottom: '1.5rem',
+                marginBottom: '0',
               }}
             >
               Engineering high-throughput industrial machinery, automated CNC
@@ -167,7 +167,7 @@ export default function Footer() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
               }}
             >
               Equipment
@@ -179,7 +179,7 @@ export default function Footer() {
                 margin: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.75rem',
+                gap: '0.6rem',
                 fontSize: '0.9rem',
               }}
             >
@@ -218,7 +218,7 @@ export default function Footer() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
               }}
             >
               Company
@@ -230,7 +230,7 @@ export default function Footer() {
                 margin: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.75rem',
+                gap: '0.6rem',
                 fontSize: '0.9rem',
               }}
             >
@@ -270,7 +270,7 @@ export default function Footer() {
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
               }}
             >
               Sales &amp; Factory
@@ -280,12 +280,12 @@ export default function Footer() {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.9rem',
+                gap: '0.75rem',
                 fontSize: '0.88rem',
-                marginBottom: '1.5rem',
+                marginBottom: '1.2rem',
               }}
             >
-              {/* Dynamic Phone Link from API */}
+              {/* Dynamic Phone Link */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Phone size={15} color="#38bdf8" />
                 <a
@@ -296,7 +296,7 @@ export default function Footer() {
                 </a>
               </div>
 
-              {/* Dynamic Email Link from API */}
+              {/* Dynamic Email Link */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Mail size={15} color="#38bdf8" />
                 <a
@@ -328,7 +328,7 @@ export default function Footer() {
                 backgroundColor: 'rgba(37, 211, 102, 0.1)',
                 border: '1px solid rgba(37, 211, 102, 0.3)',
                 color: '#34d399',
-                padding: '0.6rem 1.1rem',
+                padding: '0.5rem 1rem',
                 borderRadius: '8px',
                 fontSize: '0.85rem',
                 fontWeight: 600,
@@ -345,8 +345,8 @@ export default function Footer() {
               }}
             >
               <svg 
-                width="24" 
-                height="24" 
+                width="20" 
+                height="20" 
                 viewBox="0 0 24 24" 
                 fill="currentColor" 
                 className="shrink-0"
@@ -362,7 +362,7 @@ export default function Footer() {
         {/* Bottom Bar: Copyright & Operational Guarantee */}
         <div
           style={{
-            paddingTop: '2rem',
+            paddingTop: '1.2rem',
             borderTop: '1px solid rgba(255, 255, 255, 0.06)',
             display: 'flex',
             justifyContent: 'space-between',

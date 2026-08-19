@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Eye,
 } from "lucide-react";
+import GearLoader from "../GearLoader";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -21,37 +22,37 @@ export default function ProductPanel({ onProductCountChange }) {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-async function fetchSummary() {
-  setLoading(true);
-  try {
-    const token = sessionStorage.getItem('admin_jwt_token');
+  async function fetchSummary() {
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem("admin_jwt_token");
 
-    const res = await fetch(`${API_BASE_URL}/products?limit=8`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-      },
-      cache: 'no-store',
-    });
+      const res = await fetch(`${API_BASE_URL}/products?limit=8`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: "no-store",
+      });
 
-    const json = await res.json();
-    const list =
-      json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
-    const total = json?.data?.pagination?.total ?? list.length;
+      const json = await res.json();
+      const list =
+        json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
+      const total = json?.data?.pagination?.total ?? list.length;
 
-    setProducts(list);
-    setTotalCount(total);
+      setProducts(list);
+      setTotalCount(total);
 
-    if (onProductCountChange) {
-      onProductCountChange(total);
+      if (onProductCountChange) {
+        onProductCountChange(total);
+      }
+    } catch (err) {
+      console.error("Error fetching summary:", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error('Error fetching summary:', err);
-  } finally {
-    setLoading(false);
   }
-}
 
   useEffect(() => {
     fetchSummary();
@@ -120,9 +121,8 @@ async function fetchSummary() {
           </div>
 
           {loading ? (
-            <div className="py-10 text-center text-xs text-slate-500 animate-pulse space-y-2">
-              <div className="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p>Loading machinery snapshot...</p>
+            <div className="py-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
+              <GearLoader fullScreen={false} text="Loading Products..." />
             </div>
           ) : products.length === 0 ? (
             <div className="py-10 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800/80 px-4">
