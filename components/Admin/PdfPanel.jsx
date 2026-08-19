@@ -10,7 +10,6 @@ import {
   Loader2,
   X,
   UploadCloud,
-  CheckCircle2,
   AlertCircle,
   FileCheck,
 } from "lucide-react";
@@ -38,17 +37,25 @@ export default function PdfPanel({ onPdfCountChange }) {
     active: true,
   });
 
+  // 🟢 Helper to get Bearer token headers securely from sessionStorage
+  const getAuthHeaders = (isMultipart = false) => {
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("admin_jwt_token") : "";
+    const headers = {};
+    if (!isMultipart) {
+      headers["Content-Type"] = "application/json";
+    }
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   async function fetchPdfs() {
     try {
       setLoading(true);
-      const token = sessionStorage.getItem("admin_jwt_token");
-
       const res = await fetch(`${API_BASE_URL}/downloads/admin/all`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: getAuthHeaders(false),
         cache: "no-store",
       });
 
@@ -124,12 +131,12 @@ export default function PdfPanel({ onPdfCountChange }) {
         : `${API_BASE_URL}/downloads/admin/create`;
 
       let bodyData;
-      let headers = {};
+      let headers = getAuthHeaders(selectedFile ? true : false);
 
       if (selectedFile) {
         const data = new FormData();
         data.append("file", selectedFile);
-        data.append("pdf", selectedFile); // fallback key
+        data.append("pdf", dataKeyFallback(selectedFile)); 
         data.append("title", titleValue);
         data.append("description", formData.description || "");
         data.append("category", formData.category || "Machinery Datasheet");
@@ -137,7 +144,6 @@ export default function PdfPanel({ onPdfCountChange }) {
         data.append("active", formData.active ? "true" : "false");
         bodyData = data;
       } else {
-        headers["Content-Type"] = "application/json";
         bodyData = JSON.stringify({
           ...formData,
           title: titleValue,
@@ -179,11 +185,17 @@ export default function PdfPanel({ onPdfCountChange }) {
     }
   };
 
+  // Helper fallback for multipart form file fields
+  function dataKeyFallback(file) {
+    return file;
+  }
+
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this PDF document?")) return;
     try {
       const res = await fetch(`${API_BASE_URL}/downloads/admin/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(false),
         credentials: "include",
       });
       if (res.ok) fetchPdfs();
@@ -198,7 +210,7 @@ export default function PdfPanel({ onPdfCountChange }) {
     setErrorMessage("");
     setFormData({
       title: pdf.title || "",
-
+      description: pdf.description || "",
       category: pdf.category || "Machinery Datasheet",
       fileUrl: pdf.fileUrl || pdf.url || "",
       fileName: pdf.fileName || "",
@@ -272,8 +284,8 @@ export default function PdfPanel({ onPdfCountChange }) {
         {/* Content List Area */}
         <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
           {loading ? (
-            <div className="py-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
-              <GearLoader fullScreen={false} text="Loading Pdfs..." />
+            <div className="py-12 min-h-[220px] flex flex-col items-center justify-center bg-slate-950/40 rounded-xl border border-slate-800/80">
+              <GearLoader fullScreen={false} text="Loading PDFs..." />
             </div>
           ) : pdfs.length === 0 ? (
             <div className="py-12 text-center text-xs text-slate-500 bg-slate-950/40 rounded-xl border border-slate-800/80 px-4">
@@ -570,7 +582,7 @@ export default function PdfPanel({ onPdfCountChange }) {
                   {uploading ? (
                     <>
                       <Loader2 size={13} className="animate-spin" />
-                      <span>Uploading to ImageKit...</span>
+                      <span>Uploading...</span>
                     </>
                   ) : (
                     <span>Save & Upload PDF</span>
