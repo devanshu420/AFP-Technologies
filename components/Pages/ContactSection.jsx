@@ -31,7 +31,7 @@ export default function ContactSection() {
   // Dynamic Contact Information from Admin Settings
   const [contactInfo, setContactInfo] = useState({
     salesPhoneNumber: "+91 98765 43210",
-    inquiryEmail: "contact@machina.industries",
+    inquiryEmail: "afptechsupport@gmail.com",
   });
 
   // Fetch dynamic phone & email from database
@@ -46,7 +46,7 @@ export default function ContactSection() {
           setContactInfo({
             salesPhoneNumber: json.data.salesPhoneNumber || "+91 98765 43210",
             inquiryEmail:
-              json.data.inquiryEmail || "contact@machina.industries",
+              json.data.inquiryEmail || "afptechsupport@gmail.com",
           });
         }
       } catch (err) {

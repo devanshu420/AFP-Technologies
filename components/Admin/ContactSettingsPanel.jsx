@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Phone, Mail, Edit3, Save, X, Loader2 } from 'lucide-react';
+import { Phone, Mail, Edit3, Save, X, Loader2, CheckCircle2 } from 'lucide-react';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
@@ -9,19 +9,33 @@ const API_BASE_URL =
 export default function ContactSettingsPanel() {
   const [contact, setContact] = useState({
     salesPhoneNumber: '+91 98765 43210',
-    inquiryEmail: 'contact@machina.industries',
+    inquiryEmail: 'afptechsupport@gmail.com',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ salesPhoneNumber: '', inquiryEmail: '' });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(''); // 🟢 Success Notification State
+
+  // Helper function to include Authorization token from session storage
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('admin_jwt_token') : '';
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
 
   // Fetch current details
   useEffect(() => {
     async function loadContact() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/settings/contact`, { cache: 'no-store' });
+        const res = await fetch(`${API_BASE_URL}/settings/contact`, { 
+          headers: getAuthHeaders(),
+          cache: 'no-store' 
+        });
         const json = await res.json();
         if (res.ok && json.data) {
           setContact(json.data);
@@ -45,22 +59,25 @@ export default function ContactSettingsPanel() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    setSuccessMsg('');
     try {
       setSaving(true);
       const res = await fetch(`${API_BASE_URL}/settings/contact`, {
         method: 'PUT',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify(formData),
       });
       const json = await res.json();
       if (res.ok && json.data) {
         setContact(json.data);
         setIsModalOpen(false);
+        setSuccessMsg('Contact settings updated successfully!'); // 🟢 Success Notification Trigger
+        setTimeout(() => setSuccessMsg(''), 4000); // 4 seconds baad notification gayab ho jayegi
       } else {
-        alert('Failed to update contact settings');
+        alert(json?.message || 'Failed to update contact settings');
       }
-    } catch {
+    } catch (err) {
       alert('Error updating contact settings');
     } finally {
       setSaving(false);
@@ -68,7 +85,15 @@ export default function ContactSettingsPanel() {
   };
 
   return (
-    <>
+    <div className="w-full space-y-3">
+      {/* 🟢 Success Notification Banner */}
+      {successMsg && (
+        <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-emerald-300 text-xs flex items-center gap-2 animate-in fade-in duration-200">
+          <CheckCircle2 size={16} className="shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
       {/* Contact Badge Container */}
       <div className="bg-slate-900 border border-slate-800 rounded-xl p-3 sm:p-3.5 shadow-sm text-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-[260px] sm:min-w-[340px]">
         <div className="min-w-0">
@@ -203,6 +228,6 @@ export default function ContactSettingsPanel() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

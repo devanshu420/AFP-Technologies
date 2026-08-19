@@ -8,7 +8,7 @@ export async function getContactSettings(req, res) {
     if (!settings) {
       settings = await SiteSettings.create({
         salesPhoneNumber: '+91 98765 43210',
-        inquiryEmail: 'contact@machina.industries',
+        inquiryEmail: 'afptechsupport@gmail.com',
       });
     }
     return successResponse(res, settings);

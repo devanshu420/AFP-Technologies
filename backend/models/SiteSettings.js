@@ -9,7 +9,7 @@ const siteSettingsSchema = new mongoose.Schema(
     },
     inquiryEmail: {
       type: String,
-      default: 'contact@machina.industries',
+      default: 'afptechsupport@gmail.com',
       trim: true,
     },
   },
