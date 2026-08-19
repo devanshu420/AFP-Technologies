@@ -20,10 +20,23 @@ export default function CategoryPanel() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  // Helper function to get auth headers from session storage
+  const getAuthHeaders = () => {
+    const token = typeof window !== 'undefined' ? sessionStorage.getItem('admin_jwt_token') : '';
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   async function loadCategories() {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/categories`, { cache: 'no-store' });
+      const res = await fetch(`${API_BASE_URL}/categories`, { 
+        headers: getAuthHeaders(),
+        cache: 'no-store' 
+      });
       const json = await res.json();
       if (res.ok) {
         const list = Array.isArray(json?.data) ? json.data : [];
@@ -68,7 +81,7 @@ export default function CategoryPanel() {
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         credentials: 'include',
         body: JSON.stringify(formData),
       });
@@ -104,6 +117,7 @@ export default function CategoryPanel() {
       setDeleting(true);
       const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
         credentials: 'include',
       });
 
@@ -323,7 +337,6 @@ export default function CategoryPanel() {
               Are you sure you want to delete <strong className="text-white">&quot;{categoryToDelete?.name}&quot;</strong>?
             </p>
 
-            {/* 🟢 UI Warning Box when category is in use */}
             {deleteError && (
               <div className="mb-4 p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-rose-300 text-xs font-medium text-left leading-relaxed">
                 {deleteError}

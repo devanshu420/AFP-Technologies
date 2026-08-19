@@ -188,12 +188,7 @@ export default function DownloadSection() {
                         </span>
                       </div>
 
-                      <div className="absolute top-2 right-2">
-                        <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-mono font-bold bg-slate-900/80 text-slate-200">
-                          <Download size={9} />
-                          {pdf.downloadCount || 0}
-                        </span>
-                      </div>
+                      
                     </div>
 
                     <div className="p-3 flex-1 flex flex-col justify-between space-y-2.5">

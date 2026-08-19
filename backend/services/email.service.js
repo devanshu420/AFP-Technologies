@@ -2,12 +2,14 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// Create Transporter with fallback & connection verification
+// Create Transporter with explicit configuration
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // Gmail use kar rahe hain to direct service specify karna best hai
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT, 10) || 465,
+  secure: process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT == '465',
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    pass: process.env.SMTP_PASS, // Make sure this is a 16-digit Google App Password
   },
 });
 
@@ -53,10 +55,11 @@ export async function sendAdminNotification({ name, email, phone, company, produ
     return info;
   } catch (err) {
     console.error('❌ [ADMIN EMAIL FAILED]:', err.message);
+    throw err;
   }
 }
 
-// 2. Send User Confirmation (with Plain Text fallback to avoid spam filter)
+// 2. Send User Confirmation (Fixed From header & error throwing)
 export async function sendUserConfirmation({ name, email }) {
   try {
     const cleanEmail = email.trim().toLowerCase();
@@ -64,9 +67,14 @@ export async function sendUserConfirmation({ name, email }) {
     const mailOptions = {
       from: `"AFP Technologies Industries" <${process.env.SMTP_USER}>`,
       to: cleanEmail,
+      replyTo: process.env.SMTP_USER,
       subject: `Thank you for contacting AFP Technologies Industries`,
-      // Plain text fallback zaroori hai taki spam filter block na kare
-      text: `Hello ${name},\n\nThank you for reaching out to AFP Technologies Industries. We have received your machinery enquiry.\n\nOur engineering and technical sales team will review your requirement and connect with you shortly.\n\nBest regards,\AFP Technologies Industries Team`,
+      // 🟢 Yeh headers spam filter ko batate hain ki yeh automated bulk mail nahi hai
+      headers: {
+        'X-Priority': '1',
+        'X-MSMail-Priority': 'High',
+      },
+      text: `Hello ${name},\n\nThank you for reaching out to AFP Technologies Industries. We have received your machinery enquiry.\n\nOur engineering and technical sales team will review your requirement and connect with you shortly.\n\nBest regards,\nAFP Technologies Industries Team`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #1e293b; line-height: 1.6; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
           <div style="background-color: #071b32; padding: 20px; text-align: center;">
@@ -94,5 +102,6 @@ export async function sendUserConfirmation({ name, email }) {
     return info;
   } catch (err) {
     console.error(`❌ [USER EMAIL FAILED] To ${email}:`, err.message);
+    throw err;
   }
 }
