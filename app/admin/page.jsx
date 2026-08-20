@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+
 import {
   Menu,
   X,
@@ -16,7 +18,7 @@ import {
   Clock,
   RefreshCw,
   Megaphone,
-  FolderTree
+  FolderTree,
 } from "lucide-react";
 import AdminLoginForm from "../../components/Admin/AdminLoginForm";
 import AdminHeading from "../../components/Admin/AdminHeading";
@@ -26,7 +28,7 @@ import EnquiryPanel from "../../components/Admin/EnquiryPanel";
 import PdfPanel from "../../components/Admin/PdfPanel";
 import ContactSettingsPanel from "../../components/Admin/ContactSettingsPanel";
 import AnnouncementPanel from "../../components/Admin/AnnouncementPanel";
-import CategoryPanel from '../../components/Admin/CategoryPanel';
+import CategoryPanel from "../../components/Admin/CategoryPanel";
 import GearLoader from "../../components/GearLoader";
 
 const API_BASE_URL =
@@ -53,19 +55,19 @@ export default function AdminPage() {
   // Token Verification using sessionStorage & Bearer Header
   const verifyAdminToken = useCallback(async () => {
     try {
-      const token = sessionStorage.getItem('admin_jwt_token');
+      const token = sessionStorage.getItem("admin_jwt_token");
       if (!token) {
         setSession(false);
         return;
       }
 
       const res = await fetch(`${API_BASE_URL}/auth/admin/me`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        cache: 'no-store',
+        cache: "no-store",
       });
 
       const json = await res.json();
@@ -74,11 +76,11 @@ export default function AdminPage() {
         setAdminUser(json.data);
       } else {
         setSession(false);
-        sessionStorage.removeItem('admin_jwt_token');
-        sessionStorage.removeItem('admin_session_user');
+        sessionStorage.removeItem("admin_jwt_token");
+        sessionStorage.removeItem("admin_session_user");
       }
     } catch (err) {
-      console.error('Auth verification failed:', err);
+      console.error("Auth verification failed:", err);
       setSession(false);
     }
   }, []);
@@ -91,25 +93,25 @@ export default function AdminPage() {
   const fetchDashboardData = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const token = sessionStorage.getItem('admin_jwt_token');
+      const token = sessionStorage.getItem("admin_jwt_token");
       const headers = {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       };
 
       const [prodRes, enqRes, pdfRes] = await Promise.allSettled([
         fetch(`${API_BASE_URL}/products?limit=10`, {
-          method: 'GET',
+          method: "GET",
           headers,
           cache: "no-store",
         }),
         fetch(`${API_BASE_URL}/enquiries?limit=100`, {
-          method: 'GET',
+          method: "GET",
           headers,
           cache: "no-store",
         }),
         fetch(`${API_BASE_URL}/downloads/admin/all`, {
-          method: 'GET',
+          method: "GET",
           headers,
           cache: "no-store",
         }),
@@ -189,12 +191,12 @@ export default function AdminPage() {
 
   async function handleLogout() {
     try {
-      const token = sessionStorage.getItem('admin_jwt_token');
+      const token = sessionStorage.getItem("admin_jwt_token");
       await fetch(`${API_BASE_URL}/auth/admin/logout`, {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
     } catch (err) {
@@ -233,7 +235,7 @@ export default function AdminPage() {
 
   const navItems = [
     { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-    { id: 'categories', label: 'Product Categories', icon: FolderTree },
+    { id: "categories", label: "Product Categories", icon: FolderTree },
     {
       id: "products",
       label: "Products",
@@ -272,89 +274,136 @@ export default function AdminPage() {
 
       {/* Hamburger Drawer / Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-slate-900 text-slate-200 border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-slate-950 text-slate-200 border-r border-slate-800/80 flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:w-64 shrink-0`}
       >
-        <div className="h-16 flex items-center justify-between px-5 bg-slate-900 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-black text-xs tracking-wider shadow-sm shrink-0">
-              AFP
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-bold text-white tracking-tight leading-none">
-                AFP Technologies
-              </span>
-              <span className="text-[10px] text-sky-400 font-semibold uppercase tracking-wider mt-0.5">
-                Workspace
-              </span>
-            </div>
-          </div>
+        {/* Sidebar Header */}
+        <div className="min-h-20 px-5 py-4 bg-slate-950 border-b border-slate-800/80 shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              {/* Logo + Brand */}
+              <Link
+                href="/"
+                aria-label="AFP Technologies home"
+                className="inline-flex items-center gap-2.5 no-underline"
+              >
+                <span className="w-8 h-8 rounded-lg bg-white/5 border border-slate-700/60 flex items-center justify-center overflow-hidden shrink-0">
+                  <img
+                    src="/afp-logo.png"
+                    alt="AFP Technologies Logo"
+                    className="w-full h-full object-contain"
+                  />
+                </span>
 
-          <button
-            type="button"
-            onClick={() => setIsSidebarOpen(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors md:hidden"
-            aria-label="Close Sidebar"
-          >
-            <X size={18} />
-          </button>
+                <span className="text-sm font-extrabold tracking-tight text-slate-100 whitespace-nowrap leading-none">
+                  AFP Technologies
+                </span>
+              </Link>
+
+              {/* Workspace */}
+              <div className="ml-[42px] mt-1">
+                <p className="text-[11px] font-semibold text-slate-500 leading-none tracking-wide">
+                  Admin Workspace
+                </p>
+              </div>
+            </div>
+
+            {/* Mobile Close */}
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors md:hidden shrink-0"
+              aria-label="Close Sidebar"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-5 overflow-y-auto">
+          <p className="px-3 mb-2.5 text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em]">
             Navigation
           </p>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setIsSidebarOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                  isActive
-                    ? "bg-sky-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <Icon size={16} />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      isActive
-                        ? "bg-sky-800 text-sky-100"
-                        : "bg-slate-800 text-slate-300"
-                    }`}
-                  >
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`group w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-sky-600 text-white shadow-md shadow-sky-950/30"
+                      : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/70"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Icon
+                      size={17}
+                      className={`shrink-0 ${
+                        isActive
+                          ? "text-white"
+                          : "text-slate-500 group-hover:text-slate-300"
+                      }`}
+                    />
+
+                    <span className="truncate">{item.label}</span>
+                  </div>
+
+                  {item.badge !== undefined && item.badge > 0 && (
+                    <span
+                      className={`min-w-5 h-5 px-1.5 flex items-center justify-center rounded-full text-[10px] font-bold ${
+                        isActive
+                          ? "bg-sky-800/80 text-sky-100"
+                          : "bg-slate-800 text-slate-300"
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        <div className="p-3 border-t border-slate-800 bg-slate-900/50">
-          <div className="px-3 py-2 mb-2 rounded-md bg-slate-800/40">
-            <span className="block text-[10px] text-slate-400">
-              Signed in as
-            </span>
-            <p className="text-xs font-semibold text-slate-200 truncate">
-              {adminUser?.email || adminUser?.name || "Admin"}
-            </p>
+        {/* Bottom Admin Section */}
+        <div className="p-3 border-t border-slate-800/80 bg-slate-950 shrink-0">
+          <div className="p-3 mb-2.5 rounded-xl bg-slate-900 border border-slate-800/80">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-slate-300">
+                  {(adminUser?.name || adminUser?.email || "A")
+                    .charAt(0)
+                    .toUpperCase()}
+                </span>
+              </div>
+
+              <div className="min-w-0">
+                <span className="block text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                  Signed in as
+                </span>
+
+                <p className="text-xs font-semibold text-slate-200 truncate mt-0.5">
+                  {adminUser?.email || adminUser?.name || "Admin"}
+                </p>
+              </div>
+            </div>
           </div>
+
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-rose-950/30 hover:bg-rose-900/50 border border-rose-900/40 text-rose-300 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 bg-rose-950/20 hover:bg-rose-900/40 border border-rose-900/30 hover:border-rose-800/50 text-rose-300 hover:text-rose-200 rounded-xl text-xs font-semibold transition-all cursor-pointer"
           >
             <LogOut size={14} />
             Logout
@@ -656,7 +705,8 @@ export default function AdminPage() {
                   Website Contact Details
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 mb-4">
-                  Manage sales phone numbers and email addresses displayed across the website.
+                  Manage sales phone numbers and email addresses displayed
+                  across the website.
                 </p>
                 <ContactSettingsPanel />
               </div>

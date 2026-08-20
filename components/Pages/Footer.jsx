@@ -104,52 +104,51 @@ export default function Footer() {
         >
           {/* Column 1: Brand Info & Mission */}
           <div style={{ maxWidth: '340px' }}>
-            <Link
-              className="brand"
-              href="/"
+           <Link
+          href="/"
+          aria-label="AFP Technologies home"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            textDecoration: "none",
+            color: "#f8fafc",
+            fontWeight: 800,
+            fontSize: "1.2rem",
+          }}
+        >
+          <span
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src="/afp-logo.png"
+              alt="AFP Technologies Logo"
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                textDecoration: 'none',
-                marginBottom: '1rem',
+                width: "100%",
+                height: "100%",
+                objectFit: "contain", // Image stretch nahi hogi
               }}
-            >
-              <span
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '8px',
-                  backgroundColor: '#0284c7',
-                  color: '#ffffff',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  fontSize: '1.1rem',
-                  boxShadow: '0 0 15px rgba(2, 132, 199, 0.4)',
-                }}
-              >
-                A
-              </span>
-              <span
-                style={{
-                  fontSize: '1.35rem',
-                  fontWeight: 800,
-                  color: '#f8fafc',
-                  letterSpacing: '0.04em',
-                }}
-              >
-                AFP Technologies<span style={{ color: '#38bdf8' }}>.</span>
-              </span>
-            </Link>
+            />
+          </span>
+          <span>
+            AFP Technologies
+          </span>
+        </Link>
 
             <p
               style={{
                 fontSize: '0.9rem',
                 lineHeight: 1.65,
                 color: '#94a3b8',
-                marginBottom: '0',
+                marginTop: '0.4rem',
               }}
             >
               Engineering high-throughput industrial machinery, automated CNC

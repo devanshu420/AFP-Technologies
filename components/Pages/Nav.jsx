@@ -1,41 +1,41 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ArrowRight, Menu, X } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ArrowRight, Menu, X } from "lucide-react";
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   const navLinks = [
-    { name: 'Products', href: '/products' },
-    { name: 'Equipment', href: '/equipment' },
-    { name: 'About us', href: '/about' },
-    { name: 'Downloads', href: '/downloads-pdf' },
+    { name: "Products", href: "/products" },
+    { name: "Equipment", href: "/equipment" },
+    { name: "About us", href: "/about" },
+    { name: "Downloads", href: "/downloads-pdf" },
   ];
 
   return (
     <header
       style={{
-        position: 'sticky',
+        position: "sticky",
         top: 0,
         zIndex: 50,
-        backgroundColor: '#071b32',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-        backdropFilter: 'blur(8px)',
+        backgroundColor: "#071b32",
+        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+        backdropFilter: "blur(8px)",
       }}
     >
       <div
         style={{
-          maxWidth: '1280px',
-          margin: '0 auto',
-          padding: '0.9rem 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'relative',
+          maxWidth: "1280px",
+          margin: "0 auto",
+          padding: "0.9rem 1.5rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "relative",
         }}
       >
         {/* Brand Logo */}
@@ -43,43 +43,49 @@ export default function Nav() {
           href="/"
           aria-label="AFP Technologies home"
           style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '10px',
-            textDecoration: 'none',
-            color: '#f8fafc',
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+            textDecoration: "none",
+            color: "#f8fafc",
             fontWeight: 800,
-            fontSize: '1.2rem',
+            fontSize: "1.5rem",
           }}
         >
           <span
             style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1rem',
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
             }}
           >
-            M
+            <img
+              src="/afp-logo.png"
+              alt="AFP Technologies Logo"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain", // Image stretch nahi hogi
+              }}
+            />
           </span>
           <span>
-            AFP Technologies<span style={{ color: '#38bdf8' }}>.</span>
+            AFP Technologies
           </span>
         </Link>
 
         {/* Desktop & Mobile Navigation Links */}
         <nav
-          className={open ? 'main-nav is-open' : 'main-nav'}
+          className={open ? "main-nav is-open" : "main-nav"}
           aria-label="Primary navigation"
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '1.5rem',
+            display: "flex",
+            alignItems: "center",
+            gap: "1.5rem",
           }}
         >
           {navLinks.map((link) => {
@@ -96,13 +102,13 @@ export default function Nav() {
                   }
                 }}
                 style={{
-                  position: 'relative',
-                  paddingBottom: '4px',
-                  color: isActive ? '#38bdf8' : '#cbd5e1',
+                  position: "relative",
+                  paddingBottom: "4px",
+                  color: isActive ? "#38bdf8" : "#cbd5e1",
                   fontWeight: isActive ? 600 : 500,
-                  fontSize: '0.95rem',
-                  textDecoration: 'none',
-                  transition: 'color 0.2s ease',
+                  fontSize: "0.95rem",
+                  textDecoration: "none",
+                  transition: "color 0.2s ease",
                 }}
               >
                 {link.name}
@@ -110,13 +116,13 @@ export default function Nav() {
                 {isActive && (
                   <span
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       bottom: -2,
                       left: 0,
-                      width: '100%',
-                      height: '2px',
-                      backgroundColor: '#38bdf8',
-                      borderRadius: '2px',
+                      width: "100%",
+                      height: "2px",
+                      backgroundColor: "#38bdf8",
+                      borderRadius: "2px",
                     }}
                   />
                 )}
@@ -129,36 +135,36 @@ export default function Nav() {
             href="/contact"
             onClick={(e) => {
               setOpen(false);
-              if (pathname === '/contact') {
+              if (pathname === "/contact") {
                 e.preventDefault();
               }
             }}
             style={{
-              position: 'relative',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              padding: '0.5rem 1rem',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
+              position: "relative",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              backgroundColor: "#0284c7",
+              color: "#ffffff",
+              padding: "0.5rem 1rem",
+              borderRadius: "8px",
+              fontSize: "0.9rem",
               fontWeight: 600,
-              textDecoration: 'none',
-              transition: 'background-color 0.2s ease',
+              textDecoration: "none",
+              transition: "background-color 0.2s ease",
             }}
           >
             Get a quote <ArrowRight size={15} />
-            {pathname === '/contact' && (
+            {pathname === "/contact" && (
               <span
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   bottom: -2,
                   left: 0,
-                  width: '100%',
-                  height: '2px',
-                  backgroundColor: '#38bdf8',
-                  borderRadius: '2px',
+                  width: "100%",
+                  height: "2px",
+                  backgroundColor: "#38bdf8",
+                  borderRadius: "2px",
                 }}
               />
             )}
@@ -168,14 +174,14 @@ export default function Nav() {
         {/* Mobile Hamburger Menu Toggle Button */}
         <button
           onClick={() => setOpen(!open)}
-          aria-label={open ? 'Close menu' : 'Open menu'}
+          aria-label={open ? "Close menu" : "Open menu"}
           style={{
-            background: 'none',
-            border: 'none',
-            color: '#f8fafc',
-            cursor: 'pointer',
-            display: 'none', // CSS classes ke zariye media query me show hoga
-            padding: '4px',
+            background: "none",
+            border: "none",
+            color: "#f8fafc",
+            cursor: "pointer",
+            display: "none", // CSS classes ke zariye media query me show hoga
+            padding: "4px",
           }}
           className="menu-toggle-btn md:hidden"
         >
