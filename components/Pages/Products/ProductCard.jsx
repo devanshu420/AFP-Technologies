@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowUpRight, Layers } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Layers } from "lucide-react";
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -18,59 +18,64 @@ export default function ProductCard({ product }) {
     product?.images?.[0]?.url ||
     product?.mainImage?.url ||
     product?.image ||
-    'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1000&q=85&fm=jpg';
+    "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1000&q=85&fm=jpg";
 
   const categoryName =
-    product?.category?.name || product?.type || 'Industrial Machinery';
+    product?.category?.name ||
+    product?.type ||
+    "Industrial Machinery";
 
   const description =
     product?.shortDescription ||
     product?.description ||
-    'High-precision industrial manufacturing equipment engineered for maximum throughput and reliability.';
+    "High-precision industrial manufacturing equipment engineered for maximum throughput and reliability.";
 
   return (
     <article
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
 
-        // Deep blue card
-        background:
-          'linear-gradient(145deg, #101A2B 0%, #0C1626 100%)',
+        /* LIGHT BLUE / WHITE CARD */
+        background: isHovered
+          ? "linear-gradient(145deg, #ffffff 0%, #f0f9ff 100%)"
+          : "linear-gradient(145deg, #ffffff 0%, #f8fbff 100%)",
 
         border: isHovered
-          ? '1px solid rgba(59, 130, 246, 0.55)'
-          : '1px solid rgba(96, 165, 250, 0.13)',
+          ? "1px solid rgba(14, 165, 233, 0.45)"
+          : "1px solid #dbe7f1",
 
-        borderRadius: '15px',
-        overflow: 'hidden',
+        borderRadius: "15px",
+        overflow: "hidden",
 
         boxShadow: isHovered
-          ? '0 22px 45px rgba(2, 12, 27, 0.65), 0 0 25px rgba(37, 99, 235, 0.10)'
-          : '0 10px 28px rgba(2, 12, 27, 0.45)',
+          ? "0 18px 40px rgba(15, 23, 42, 0.12), 0 4px 15px rgba(14, 165, 233, 0.08)"
+          : "0 8px 24px rgba(15, 23, 42, 0.07)",
 
         transform: isHovered
-          ? 'translateY(-5px)'
-          : 'translateY(0)',
+          ? "translateY(-5px)"
+          : "translateY(0)",
 
         transition:
-          'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
+          "transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease",
       }}
     >
-      {/* IMAGE */}
+      {/* =====================================================
+          IMAGE
+      ===================================================== */}
       <Link
         href={productUrl}
         style={{
-          position: 'relative',
-          width: '100%',
-          aspectRatio: '16 / 10',
-          overflow: 'hidden',
-          background: '#070D18',
-          display: 'block',
-          textDecoration: 'none',
+          position: "relative",
+          width: "100%",
+          aspectRatio: "16 / 10",
+          overflow: "hidden",
+          background: "#eef6fb",
+          display: "block",
+          textDecoration: "none",
         }}
       >
         <img
@@ -78,153 +83,167 @@ export default function ProductCard({ product }) {
           alt={
             product?.images?.[0]?.alt ||
             product?.name ||
-            'Industrial machine'
+            "Industrial machine"
           }
           loading="lazy"
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: 'center',
-            display: 'block',
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center",
+            display: "block",
 
             transform: isHovered
-              ? 'scale(1.05)'
-              : 'scale(1)',
+              ? "scale(1.05)"
+              : "scale(1)",
 
             filter: isHovered
-              ? 'brightness(0.98) contrast(1.05)'
-              : 'brightness(0.88) contrast(1.03)',
+              ? "brightness(1) contrast(1.03)"
+              : "brightness(0.96) contrast(1.02)",
 
             transition:
-              'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease',
+              "transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease",
           }}
         />
 
-        {/* Blue Dark Gradient */}
+        {/* LIGHT IMAGE OVERLAY */}
         <div
           style={{
-            position: 'absolute',
+            position: "absolute",
             inset: 0,
+
             background:
-              'linear-gradient(180deg, rgba(3, 12, 27, 0.08) 20%, rgba(4, 13, 28, 0.30) 55%, rgba(3, 10, 23, 0.88) 100%)',
-            pointerEvents: 'none',
+              "linear-gradient(180deg, rgba(15, 23, 42, 0.02) 20%, rgba(15, 23, 42, 0.08) 60%, rgba(15, 23, 42, 0.42) 100%)",
+
+            pointerEvents: "none",
           }}
         />
 
-        {/* CATEGORY */}
+        {/* =====================================================
+            CATEGORY
+        ===================================================== */}
         <div
           style={{
-            position: 'absolute',
-            top: '14px',
-            left: '14px',
+            position: "absolute",
+            top: "14px",
+            left: "14px",
 
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
 
-            padding: '6px 10px',
-            borderRadius: '7px',
+            padding: "6px 10px",
+            borderRadius: "7px",
 
-            background: 'rgba(7, 18, 35, 0.88)',
-            border: '1px solid rgba(96, 165, 250, 0.20)',
+            /* LIGHT BLUE CATEGORY */
+            background: "rgba(255, 255, 255, 0.94)",
+            border: "1px solid rgba(14, 165, 233, 0.22)",
 
-            backdropFilter: 'blur(8px)',
+            backdropFilter: "blur(8px)",
 
-            fontSize: '0.68rem',
-            fontWeight: 600,
-            color: '#93C5FD',
+            fontSize: "0.68rem",
+            fontWeight: 700,
 
-            letterSpacing: '0.06em',
-            textTransform: 'uppercase',
+            color: "#0369a1",
+
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+
+            boxShadow: "0 3px 10px rgba(15, 23, 42, 0.08)",
           }}
         >
           <Layers size={11} />
           {categoryName}
         </div>
 
-        {/* PRODUCT TAG */}
+        {/* =====================================================
+            PRODUCT TAG
+        ===================================================== */}
         {product?.tag && (
           <span
             style={{
-              position: 'absolute',
-              top: '14px',
-              right: '14px',
+              position: "absolute",
+              top: "14px",
+              right: "14px",
 
-              padding: '6px 10px',
-              borderRadius: '6px',
+              padding: "6px 10px",
+              borderRadius: "6px",
 
               background:
-                'linear-gradient(135deg, #2563EB, #1D4ED8)',
+                "linear-gradient(135deg, #0284c7, #0369a1)",
 
-              color: '#FFFFFF',
+              color: "#ffffff",
 
-              fontSize: '0.65rem',
+              fontSize: "0.65rem",
               fontWeight: 700,
 
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
 
               boxShadow:
-                '0 5px 15px rgba(37, 99, 235, 0.30)',
+                "0 5px 15px rgba(2, 132, 199, 0.25)",
             }}
           >
             {product.tag}
           </span>
         )}
 
-        {/* VIEW BUTTON */}
+        {/* =====================================================
+            VIEW BUTTON
+        ===================================================== */}
         <div
           aria-hidden="true"
           style={{
-            position: 'absolute',
-            right: '14px',
-            bottom: '14px',
+            position: "absolute",
+            right: "14px",
+            bottom: "14px",
 
-            width: '40px',
-            height: '40px',
+            width: "40px",
+            height: "40px",
 
-            borderRadius: '10px',
+            borderRadius: "10px",
 
             background: isHovered
-              ? '#2563EB'
-              : 'rgba(7, 18, 35, 0.88)',
+              ? "#0284c7"
+              : "rgba(255, 255, 255, 0.94)",
 
             border: isHovered
-              ? '1px solid rgba(147, 197, 253, 0.35)'
-              : '1px solid rgba(148, 163, 184, 0.18)',
+              ? "1px solid rgba(255, 255, 255, 0.4)"
+              : "1px solid rgba(14, 165, 233, 0.22)",
 
-            color: '#FFFFFF',
+            color: isHovered
+              ? "#ffffff"
+              : "#0369a1",
 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
 
-            backdropFilter: 'blur(8px)',
+            backdropFilter: "blur(8px)",
 
             boxShadow: isHovered
-              ? '0 8px 20px rgba(37, 99, 235, 0.35)'
-              : 'none',
+              ? "0 8px 20px rgba(2, 132, 199, 0.28)"
+              : "0 4px 12px rgba(15, 23, 42, 0.08)",
 
             transform: isHovered
-              ? 'scale(1.05)'
-              : 'scale(1)',
+              ? "scale(1.05)"
+              : "scale(1)",
 
-            transition: 'all 0.25s ease',
+            transition: "all 0.25s ease",
           }}
         >
           <ArrowUpRight size={18} strokeWidth={1.8} />
         </div>
       </Link>
 
-      {/* CONTENT */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
       <div
         style={{
-          padding: '1.3rem',
-
-          display: 'flex',
-          flexDirection: 'column',
-
+          padding: "1.3rem",
+          display: "flex",
+          flexDirection: "column",
           flex: 1,
         }}
       >
@@ -232,27 +251,27 @@ export default function ProductCard({ product }) {
         <div>
           <h3
             style={{
-              margin: '0 0 0.55rem 0',
+              margin: "0 0 0.55rem 0",
               lineHeight: 1.3,
             }}
           >
             <Link
               href={productUrl}
               style={{
-                fontSize: '1.08rem',
-                fontWeight: 650,
+                fontSize: "1.08rem",
+                fontWeight: 700,
 
                 color: isHovered
-                  ? '#60A5FA'
-                  : '#F1F5F9',
+                  ? "#0369a1"
+                  : "#0f172a",
 
-                textDecoration: 'none',
+                textDecoration: "none",
 
-                letterSpacing: '-0.01em',
+                letterSpacing: "-0.01em",
 
-                transition: 'color 0.2s ease',
+                transition: "color 0.2s ease",
 
-                display: 'block',
+                display: "block",
               }}
             >
               {product?.name}
@@ -261,65 +280,66 @@ export default function ProductCard({ product }) {
 
           <p
             style={{
-              color: '#94A3B8',
+              color: "#64748b",
 
-              fontSize: '0.84rem',
+              fontSize: "0.84rem",
               lineHeight: 1.6,
 
-              margin: '0 0 1.25rem 0',
+              margin: "0 0 1.25rem 0",
 
-              display: '-webkit-box',
+              display: "-webkit-box",
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
             }}
           >
             {description}
           </p>
         </div>
 
-        {/* FOOTER */}
+        {/* =====================================================
+            FOOTER
+        ===================================================== */}
         <div
           style={{
-            marginTop: 'auto',
+            marginTop: "auto",
 
-            paddingTop: '0.9rem',
+            paddingTop: "0.9rem",
 
-            borderTop:
-              '1px solid rgba(96, 165, 250, 0.10)',
+            borderTop: "1px solid #e2e8f0",
 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
           {/* STATUS */}
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
+              display: "flex",
+              alignItems: "center",
+              gap: "7px",
             }}
           >
             <span
               style={{
-                width: '6px',
-                height: '6px',
+                width: "6px",
+                height: "6px",
 
-                borderRadius: '50%',
+                borderRadius: "50%",
 
-                background: '#3B82F6',
+                background: "#0ea5e9",
 
                 boxShadow:
-                  '0 0 8px rgba(59, 130, 246, 0.65)',
+                  "0 0 7px rgba(14, 165, 233, 0.35)",
               }}
             />
 
             <span
               style={{
-                fontSize: '0.72rem',
-                color: '#94A3B8',
-                fontWeight: 500,
+                fontSize: "0.72rem",
+                color: "#64748b",
+                fontWeight: 600,
               }}
             >
               Available
@@ -330,20 +350,20 @@ export default function ProductCard({ product }) {
           <Link
             href={productUrl}
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '5px',
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "5px",
 
               color: isHovered
-                ? '#60A5FA'
-                : '#CBD5E1',
+                ? "#0369a1"
+                : "#475569",
 
-              fontSize: '0.8rem',
-              fontWeight: 600,
+              fontSize: "0.8rem",
+              fontWeight: 700,
 
-              textDecoration: 'none',
+              textDecoration: "none",
 
-              transition: 'color 0.2s ease',
+              transition: "color 0.2s ease",
             }}
           >
             <span>View Details</span>
@@ -352,11 +372,11 @@ export default function ProductCard({ product }) {
               size={14}
               style={{
                 transform: isHovered
-                  ? 'translate(2px, -2px)'
-                  : 'translate(0, 0)',
+                  ? "translate(2px, -2px)"
+                  : "translate(0, 0)",
 
                 transition:
-                  'transform 0.2s ease',
+                  "transform 0.2s ease",
               }}
             />
           </Link>
