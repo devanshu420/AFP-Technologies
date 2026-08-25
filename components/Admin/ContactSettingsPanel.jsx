@@ -32,10 +32,7 @@ export default function ContactSettingsPanel() {
     async function loadContact() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/settings/contact`, { 
-          headers: getAuthHeaders(),
-          cache: 'no-store' 
-        });
+        const res = await fetch(`${API_BASE_URL}/settings/contact`);
         const json = await res.json();
         if (res.ok && json.data) {
           setContact(json.data);

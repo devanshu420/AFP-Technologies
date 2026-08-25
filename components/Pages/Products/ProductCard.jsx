@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Layers } from 'lucide-react';
+import { ArrowUpRight, Layers } from 'lucide-react';
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -11,8 +11,7 @@ export default function ProductCard({ product }) {
     return null;
   }
 
-  // Consistent ID/Slug router target
-  const targetId = product.slug || product._id;
+  const targetId = product?.slug || product?._id;
   const productUrl = `/products/${targetId}`;
 
   const imageUrl =
@@ -37,36 +36,50 @@ export default function ProductCard({ product }) {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'rgba(12, 26, 44, 0.65)',
-        backdropFilter: 'blur(12px)',
+
+        // Deep blue card
+        background:
+          'linear-gradient(145deg, #101A2B 0%, #0C1626 100%)',
+
         border: isHovered
-          ? '1px solid rgba(56, 189, 248, 0.45)'
-          : '1px solid rgba(255, 255, 255, 0.08)',
-        borderRadius: '16px',
+          ? '1px solid rgba(59, 130, 246, 0.55)'
+          : '1px solid rgba(96, 165, 250, 0.13)',
+
+        borderRadius: '15px',
         overflow: 'hidden',
+
         boxShadow: isHovered
-          ? '0 20px 35px -10px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.12)'
-          : '0 10px 25px -5px rgba(0, 0, 0, 0.4)',
-        transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
-        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          ? '0 22px 45px rgba(2, 12, 27, 0.65), 0 0 25px rgba(37, 99, 235, 0.10)'
+          : '0 10px 28px rgba(2, 12, 27, 0.45)',
+
+        transform: isHovered
+          ? 'translateY(-5px)'
+          : 'translateY(0)',
+
+        transition:
+          'transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
       }}
     >
-      {/* 1. Clickable Image Container */}
+      {/* IMAGE */}
       <Link
         href={productUrl}
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '16/10',
+          aspectRatio: '16 / 10',
           overflow: 'hidden',
-          backgroundColor: '#020617',
+          background: '#070D18',
           display: 'block',
           textDecoration: 'none',
         }}
       >
         <img
           src={imageUrl}
-          alt={product?.images?.[0]?.alt || product?.name || 'Industrial machine'}
+          alt={
+            product?.images?.[0]?.alt ||
+            product?.name ||
+            'Industrial machine'
+          }
           loading="lazy"
           style={{
             width: '100%',
@@ -74,122 +87,171 @@ export default function ProductCard({ product }) {
             objectFit: 'cover',
             objectPosition: 'center',
             display: 'block',
-            transform: isHovered ? 'scale(1.06)' : 'scale(1)',
+
+            transform: isHovered
+              ? 'scale(1.05)'
+              : 'scale(1)',
+
             filter: isHovered
-              ? 'contrast(1.06) brightness(0.98)'
-              : 'contrast(1.02) brightness(0.92)',
+              ? 'brightness(0.98) contrast(1.05)'
+              : 'brightness(0.88) contrast(1.03)',
+
             transition:
-              'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease',
+              'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease',
           }}
         />
 
-        {/* Gradient Overlay */}
+        {/* Blue Dark Gradient */}
         <div
           style={{
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(180deg, rgba(3, 7, 18, 0.3) 0%, transparent 40%, rgba(3, 7, 18, 0.75) 100%)',
+              'linear-gradient(180deg, rgba(3, 12, 27, 0.08) 20%, rgba(4, 13, 28, 0.30) 55%, rgba(3, 10, 23, 0.88) 100%)',
             pointerEvents: 'none',
           }}
         />
 
-        {/* Category Badge */}
+        {/* CATEGORY */}
         <div
           style={{
             position: 'absolute',
-            top: '12px',
-            left: '12px',
+            top: '14px',
+            left: '14px',
+
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            padding: '4px 10px',
-            borderRadius: '9999px',
-            backgroundColor: 'rgba(3, 7, 18, 0.85)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+
+            padding: '6px 10px',
+            borderRadius: '7px',
+
+            background: 'rgba(7, 18, 35, 0.88)',
+            border: '1px solid rgba(96, 165, 250, 0.20)',
+
             backdropFilter: 'blur(8px)',
-            fontSize: '0.72rem',
+
+            fontSize: '0.68rem',
             fontWeight: 600,
-            color: '#38bdf8',
-            letterSpacing: '0.04em',
+            color: '#93C5FD',
+
+            letterSpacing: '0.06em',
             textTransform: 'uppercase',
           }}
         >
-          <Layers size={12} />
+          <Layers size={11} />
           {categoryName}
         </div>
 
-        {/* Optional Tag */}
+        {/* PRODUCT TAG */}
         {product?.tag && (
           <span
             style={{
               position: 'absolute',
-              top: '12px',
-              right: '12px',
-              padding: '4px 9px',
+              top: '14px',
+              right: '14px',
+
+              padding: '6px 10px',
               borderRadius: '6px',
-              backgroundColor: '#0284c7',
-              color: '#ffffff',
-              fontSize: '0.7rem',
+
+              background:
+                'linear-gradient(135deg, #2563EB, #1D4ED8)',
+
+              color: '#FFFFFF',
+
+              fontSize: '0.65rem',
               fontWeight: 700,
+
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
-              boxShadow: '0 2px 8px rgba(2, 132, 199, 0.4)',
+
+              boxShadow:
+                '0 5px 15px rgba(37, 99, 235, 0.30)',
             }}
           >
             {product.tag}
           </span>
         )}
 
-        {/* Direct Link Arrow Indicator */}
-        {/* <span
-          aria-label={`View ${product?.name}`}
+        {/* VIEW BUTTON */}
+        <div
+          aria-hidden="true"
           style={{
             position: 'absolute',
-            bottom: '12px',
-            right: '12px',
-            width: '38px',
-            height: '38px',
+            right: '14px',
+            bottom: '14px',
+
+            width: '40px',
+            height: '40px',
+
             borderRadius: '10px',
-            backgroundColor: isHovered ? '#0284c7' : 'rgba(3, 7, 18, 0.85)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#ffffff',
+
+            background: isHovered
+              ? '#2563EB'
+              : 'rgba(7, 18, 35, 0.88)',
+
+            border: isHovered
+              ? '1px solid rgba(147, 197, 253, 0.35)'
+              : '1px solid rgba(148, 163, 184, 0.18)',
+
+            color: '#FFFFFF',
+
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            backdropFilter: 'blur(6px)',
+
+            backdropFilter: 'blur(8px)',
+
             boxShadow: isHovered
-              ? '0 0 16px rgba(2, 132, 199, 0.5)'
+              ? '0 8px 20px rgba(37, 99, 235, 0.35)'
               : 'none',
-            transform: isHovered ? 'scale(1.08)' : 'scale(1)',
+
+            transform: isHovered
+              ? 'scale(1.05)'
+              : 'scale(1)',
+
             transition: 'all 0.25s ease',
           }}
         >
-          <ArrowRight size={17} />
-        </span> */}
+          <ArrowUpRight size={18} strokeWidth={1.8} />
+        </div>
       </Link>
 
-      {/* 2. Content */}
+      {/* CONTENT */}
       <div
         style={{
-          padding: '1.25rem',
+          padding: '1.3rem',
+
           display: 'flex',
           flexDirection: 'column',
+
           flex: 1,
-          justifyContent: 'space-between',
         }}
       >
+        {/* TITLE + DESCRIPTION */}
         <div>
-          <h3 style={{ margin: '0 0 0.5rem 0', lineHeight: 1.35 }}>
+          <h3
+            style={{
+              margin: '0 0 0.55rem 0',
+              lineHeight: 1.3,
+            }}
+          >
             <Link
               href={productUrl}
               style={{
-                fontSize: '1.15rem',
-                fontWeight: 700,
-                color: isHovered ? '#38bdf8' : '#f8fafc',
+                fontSize: '1.08rem',
+                fontWeight: 650,
+
+                color: isHovered
+                  ? '#60A5FA'
+                  : '#F1F5F9',
+
                 textDecoration: 'none',
-                letterSpacing: '-0.015em',
+
+                letterSpacing: '-0.01em',
+
                 transition: 'color 0.2s ease',
+
                 display: 'block',
               }}
             >
@@ -199,10 +261,13 @@ export default function ProductCard({ product }) {
 
           <p
             style={{
-              color: '#94a3b8',
-              fontSize: '0.875rem',
-              lineHeight: 1.55,
+              color: '#94A3B8',
+
+              fontSize: '0.84rem',
+              lineHeight: 1.6,
+
               margin: '0 0 1.25rem 0',
+
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -213,72 +278,87 @@ export default function ProductCard({ product }) {
           </p>
         </div>
 
-        {/* 3. Card Footer */}
+        {/* FOOTER */}
         <div
           style={{
+            marginTop: 'auto',
+
+            paddingTop: '0.9rem',
+
+            borderTop:
+              '1px solid rgba(96, 165, 250, 0.10)',
+
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            paddingTop: '0.85rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.06)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {/* STATUS */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+            }}
+          >
             <span
               style={{
                 width: '6px',
                 height: '6px',
+
                 borderRadius: '50%',
-                backgroundColor: '#10b981',
-                boxShadow: '0 0 6px #10b981',
+
+                background: '#3B82F6',
+
+                boxShadow:
+                  '0 0 8px rgba(59, 130, 246, 0.65)',
               }}
             />
-            <span style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>
-              Deployment Ready
+
+            <span
+              style={{
+                fontSize: '0.72rem',
+                color: '#94A3B8',
+                fontWeight: 500,
+              }}
+            >
+              Available
             </span>
           </div>
 
+          {/* DETAILS */}
           <Link
             href={productUrl}
             style={{
-              background: 'none',
-              border: 'none',
-              padding: '4px 0',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              color: isHovered ? '#38bdf8' : '#cbd5e1',
-              fontSize: '0.85rem',
+              gap: '5px',
+
+              color: isHovered
+                ? '#60A5FA'
+                : '#CBD5E1',
+
+              fontSize: '0.8rem',
               fontWeight: 600,
+
               textDecoration: 'none',
-              transition: 'all 0.2s ease',
+
+              transition: 'color 0.2s ease',
             }}
           >
-             <span
-          aria-label={`View ${product?.name}`}
-          style={{
-            position: 'absolute',
-            bottom: '12px',
-            right: '12px',
-            width: '38px',
-            height: '38px',
-            borderRadius: '10px',
-            backgroundColor: isHovered ? '#0284c7' : 'rgba(3, 7, 18, 0.85)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backdropFilter: 'blur(6px)',
-            boxShadow: isHovered
-              ? '0 0 16px rgba(2, 132, 199, 0.5)'
-              : 'none',
-            transform: isHovered ? 'scale(1.08)' : 'scale(1)',
-            transition: 'all 0.25s ease',
-          }}
-        >
-          <ArrowRight size={17} />
-        </span>
+            <span>View Details</span>
+
+            <ArrowUpRight
+              size={14}
+              style={{
+                transform: isHovered
+                  ? 'translate(2px, -2px)'
+                  : 'translate(0, 0)',
+
+                transition:
+                  'transform 0.2s ease',
+              }}
+            />
           </Link>
         </div>
       </div>

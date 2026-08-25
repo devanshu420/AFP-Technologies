@@ -19,10 +19,8 @@ import {
   CheckCircle2,
   ExternalLink,
   Package,
-  Loader2,
 } from "lucide-react";
 import GearLoader from "../../../components/GearLoader";
-import { div } from "three/tsl";
 
 const emptyFormState = {
   name: "",
@@ -46,6 +44,7 @@ const emptyFormState = {
   specifications: [],
   processFlow: [],
   images: [],
+  BigSizeImage: { url: "", fileId: "", alt: "" },
   mainImage: { url: "", fileId: "", alt: "" },
   pdf: { url: "", fileId: "", name: "" },
   seo: { title: "", description: "", keywords: [] },
@@ -56,7 +55,6 @@ export default function AdminProductsPage() {
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
   const router = useRouter();
 
-  // 1. ALL HOOKS DECLARED AT THE TOP (Strict Consistent Order)
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loadingList, setLoadingList] = useState(true);
@@ -73,26 +71,22 @@ export default function AdminProductsPage() {
   const [localMainPreview, setLocalMainPreview] = useState("");
   const [localGalleryFiles, setLocalGalleryFiles] = useState([]);
   const [localPdfFile, setLocalPdfFile] = useState(null);
+  const [localBigImageFile, setLocalBigImageFile] = useState(null);
+  const [localBigImagePreview, setLocalBigImagePreview] = useState("");
 
   // Temporary inputs
   const [tempCapacity, setTempCapacity] = useState("");
   const [tempAdvantage, setTempAdvantage] = useState("");
-  const [tempFeatureTitle, setTempFeatureTitle] = useState("");
-  const [tempFeatureDesc, setTempFeatureDesc] = useState("");
-  const [tempAppTitle, setTempAppTitle] = useState("");
-  const [tempAppDesc, setTempAppDesc] = useState("");
-  const [tempSpecKey, setTempSpecKey] = useState("");
-  const [tempSpecVal, setTempSpecVal] = useState("");
   const [tempFlowTitle, setTempFlowTitle] = useState("");
 
   const mainFileInputRef = useRef(null);
   const galleryFileInputRef = useRef(null);
   const pdfFileInputRef = useRef(null);
+  const bigImageInputRef = useRef(null);
 
   const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 2. Auth Check Effect
   useEffect(() => {
     async function checkAuth() {
       const token = sessionStorage.getItem("admin_jwt_token");
@@ -132,7 +126,6 @@ export default function AdminProductsPage() {
     checkAuth();
   }, [router, API_BASE_URL]);
 
-  // 3. Load Data Function
   async function loadData() {
     setLoadingList(true);
     try {
@@ -171,7 +164,6 @@ export default function AdminProductsPage() {
     }
   }
 
-  // 4. Data Load Effect
   useEffect(() => {
     if (authorized) {
       loadData();
@@ -255,6 +247,7 @@ export default function AdminProductsPage() {
         : [],
       processFlow: Array.isArray(prod.processFlow) ? prod.processFlow : [],
       images: Array.isArray(prod.images) ? prod.images : [],
+      BigSizeImage: prod.BigSizeImage || { url: "", fileId: "", alt: "" },
       mainImage: prod.mainImage || { url: "", fileId: "", alt: "" },
       pdf: prod.pdf || { url: "", fileId: "", name: "" },
       seo: {
@@ -268,6 +261,8 @@ export default function AdminProductsPage() {
     setLocalMainPreview("");
     setLocalGalleryFiles([]);
     setLocalPdfFile(null);
+    setLocalBigImageFile(null);
+    setLocalBigImagePreview("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -281,6 +276,8 @@ export default function AdminProductsPage() {
     setLocalMainPreview("");
     setLocalGalleryFiles([]);
     setLocalPdfFile(null);
+    setLocalBigImageFile(null);
+    setLocalBigImagePreview("");
   }
 
   async function handleSave(e) {
@@ -294,19 +291,11 @@ export default function AdminProductsPage() {
       showToast("error", "Please choose a category.");
       return;
     }
-    if (
-      !localMainFile &&
-      !form.mainImage?.url &&
-      form.images.length === 0 &&
-      localGalleryFiles.length === 0
-    ) {
-      showToast("error", "Please select a main product image.");
-      return;
-    }
 
     setSaving(true);
     try {
       let finalMainImage = { ...form.mainImage };
+      let finalBigSizeImage = { ...form.BigSizeImage };
       let finalGalleryImages = [...form.images];
       let finalPdf = { ...form.pdf };
 
@@ -316,6 +305,15 @@ export default function AdminProductsPage() {
           url: uploaded.url,
           fileId: uploaded.fileId || "",
           alt: form.name.trim(),
+        };
+      }
+
+      if (localBigImageFile) {
+        const uploaded = await uploadFileToServer(localBigImageFile, "image");
+        finalBigSizeImage = {
+          url: uploaded.url,
+          fileId: uploaded.fileId || "",
+          alt: form.name.trim() || "Product Full Banner",
         };
       }
 
@@ -350,6 +348,7 @@ export default function AdminProductsPage() {
             .replace(/[^\w ]+/g, "")
             .replace(/ +/g, "-"),
         mainImage: finalMainImage.url ? finalMainImage : finalGalleryImages[0],
+        BigSizeImage: finalBigSizeImage,
         images: finalGalleryImages,
         pdf: finalPdf,
       };
@@ -379,7 +378,7 @@ export default function AdminProductsPage() {
         "success",
         editingId
           ? "Product updated successfully!"
-          : "Product published successfully!",
+          : "Product published successfully!"
       );
       cancelEditing();
       loadData();
@@ -425,16 +424,8 @@ export default function AdminProductsPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // 5. SAFE CONDITIONAL RETURNS (Placed after all Hooks)
- if (loading) {
-    return (
-      <div>
-        {/* <GearLoader className ="items-center justify-center"
-          fullScreen={false}
-          text="Verifying Admin..."
-        /> */}
-      </div>
-    );
+  if (loading) {
+    return null;
   }
 
   if (!authorized) {
@@ -458,13 +449,9 @@ export default function AdminProductsPage() {
             <div className="h-4 w-[1px] bg-slate-200 hidden sm:block shrink-0" />
 
             <h1 className="text-xs sm:text-sm font-bold text-slate-900 flex items-center gap-1.5 truncate">
-              <Layers
-                size={14}
-                className="text-sky-700 shrink-0 hidden xxs:inline"
-              />
+              <Layers size={14} className="text-sky-700 shrink-0 hidden xxs:inline" />
               <span className="truncate">
-                <span className="hidden md:inline">Machinery </span>Product
-                Workspace
+                <span className="hidden md:inline">Machinery </span>Product Workspace
               </span>
             </h1>
           </div>
@@ -514,9 +501,10 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* MAIN 2-COLUMN DUAL WORKSPACE */}
+      {/* MAIN WORKSPACE */}
       <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 mt-4 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-5 items-start">
+          
           {/* PRODUCTS LIST */}
           <div className="col-span-1 lg:col-span-5 xl:col-span-4 order-first lg:order-last lg:sticky lg:top-16">
             <div className="bg-white border border-slate-300 rounded p-3 sm:p-4 shadow-sm">
@@ -571,12 +559,8 @@ export default function AdminProductsPage() {
 
               <div className="max-h-80 md:max-h-[calc(100vh-220px)] overflow-y-auto divide-y divide-slate-100 space-y-1 pr-0.5">
                 {loadingList ? (
-                  <div className="py-12 min-h-[220px] flex flex-col items-center justify-center text-slate-400 text-[11px] gap-2">
-                    {/* Agar aap yahan GearLoader use karna chahein: */}
-                    <GearLoader
-                      fullScreen={false}
-                      text="Loading machinery list..."
-                    />
+                  <div className="py-12 min-h-[220px] flex items-center justify-center text-slate-400 text-[11px]">
+                    Loading machinery list...
                   </div>
                 ) : filteredProducts.length === 0 ? (
                   <div className="py-12 min-h-[220px] flex items-center justify-center text-center text-slate-400 text-[11px]">
@@ -658,6 +642,7 @@ export default function AdminProductsPage() {
           {/* PRODUCT FORM */}
           <div className="lg:col-span-7 xl:col-span-8 space-y-3 sm:space-y-4">
             <form onSubmit={handleSave} className="space-y-3 sm:space-y-4">
+              
               {/* 1. BASIC MACHINE DETAILS */}
               <section className="bg-white border border-slate-300 rounded p-3 sm:p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
@@ -780,11 +765,11 @@ export default function AdminProductsPage() {
                 </div>
               </section>
 
-              {/* 2. MEDIA */}
+              {/* 2. MEDIA (Includes Main Image, BigSizeImage Banner, PDF, Gallery) */}
               <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
                 <div className="border-b border-slate-200 pb-1.5 flex items-center justify-between">
                   <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
-                    2. Product Images & PDF Brochure
+                    2. Product Images, PDF & Full-Size Banner
                   </h2>
                 </div>
 
@@ -808,7 +793,7 @@ export default function AdminProductsPage() {
                               mainImage: { url: "", fileId: "" },
                             });
                           }}
-                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                         >
                           <X size={11} /> Remove
                         </button>
@@ -840,20 +825,15 @@ export default function AdminProductsPage() {
                         <button
                           type="button"
                           onClick={() => mainFileInputRef.current?.click()}
-                          className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold"
+                          className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold cursor-pointer"
                         >
                           <Upload size={12} />{" "}
                           {localMainFile
                             ? "Change Local Image"
                             : form.mainImage?.url
-                              ? "Change Image"
-                              : "Choose Main Image"}
+                            ? "Change Image"
+                            : "Choose Main Image"}
                         </button>
-                        {localMainFile && (
-                          <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
-                            Ready to upload: {localMainFile.name}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -876,7 +856,7 @@ export default function AdminProductsPage() {
                               pdf: { url: "", name: "", fileId: "" },
                             });
                           }}
-                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold"
+                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
                         >
                           <X size={11} /> Remove
                         </button>
@@ -894,20 +874,99 @@ export default function AdminProductsPage() {
                       <button
                         type="button"
                         onClick={() => pdfFileInputRef.current?.click()}
-                        className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold"
+                        className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold cursor-pointer"
                       >
                         <FileText size={12} />{" "}
                         {localPdfFile
                           ? "Change PDF"
                           : form.pdf?.url
-                            ? "Replace PDF"
-                            : "Select PDF"}
+                          ? "Replace PDF"
+                          : "Select PDF"}
                       </button>
                       <span className="block text-[10px] text-slate-600 truncate">
                         {localPdfFile
                           ? `Staged: ${localPdfFile.name}`
                           : form.pdf?.name || "No PDF attached"}
                       </span>
+                    </div>
+                  </div>
+
+                  {/* ─── BIG SIZE IMAGE (FULL WIDTH BANNER) WITH REMOVE BUTTON ─── */}
+                  <div className="bg-slate-50 border border-slate-200 rounded p-2.5 sm:col-span-2 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="block text-[10.5px] font-semibold text-slate-700">
+                        Big Size Image (Full-Width Description Banner)
+                      </span>
+                      
+                      {(localBigImageFile || form.BigSizeImage?.url) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (bigImageInputRef.current)
+                              bigImageInputRef.current.value = "";
+                            setLocalBigImageFile(null);
+                            setLocalBigImagePreview("");
+                            setForm({
+                              ...form,
+                              BigSizeImage: { url: "", fileId: "", alt: "" },
+                            });
+                            showToast("success", "Banner image removed.");
+                          }}
+                          className="inline-flex items-center gap-0.5 text-[10px] text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"
+                        >
+                          <X size={11} /> Remove Banner
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <div className="relative w-full sm:w-36 h-20 rounded border border-slate-300 bg-white overflow-hidden shrink-0 flex items-center justify-center">
+                        {localBigImagePreview || form.BigSizeImage?.url ? (
+                          <img
+                            src={localBigImagePreview || form.BigSizeImage.url}
+                            alt="Big Banner Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-[9px] text-slate-400">
+                            No Banner Image
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 w-full space-y-1.5">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={bigImageInputRef}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setLocalBigImageFile(file);
+                            setLocalBigImagePreview(URL.createObjectURL(file));
+                          }}
+                          className="hidden"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => bigImageInputRef.current?.click()}
+                          className="w-full inline-flex items-center justify-center gap-1 px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 rounded text-[10.5px] font-semibold cursor-pointer"
+                        >
+                          <Upload size={12} />
+                          {localBigImageFile
+                            ? "Change Staged Image"
+                            : form.BigSizeImage?.url
+                            ? "Replace Banner Image"
+                            : "Choose Banner Image"}
+                        </button>
+                        {localBigImageFile && (
+                          <span className="block text-[9.5px] text-emerald-700 font-medium truncate">
+                            Staged: {localBigImageFile.name}
+                          </span>
+                        )}
+                        <p className="text-[9.5px] text-slate-500">
+                          Yeh image frontend par Product Description ke theek niche full width banner me show hogi.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -930,7 +989,7 @@ export default function AdminProductsPage() {
                     <button
                       type="button"
                       onClick={() => galleryFileInputRef.current?.click()}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-700 hover:bg-sky-800 text-white rounded text-[10px] font-bold"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-700 hover:bg-sky-800 text-white rounded text-[10px] font-bold cursor-pointer"
                     >
                       <Plus size={11} /> Select Gallery Images
                     </button>
@@ -956,7 +1015,7 @@ export default function AdminProductsPage() {
                                 images: form.images.filter((_, i) => i !== idx),
                               })
                             }
-                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                           >
                             <X size={10} />
                           </button>
@@ -980,10 +1039,10 @@ export default function AdminProductsPage() {
                             type="button"
                             onClick={() =>
                               setLocalGalleryFiles((prev) =>
-                                prev.filter((_, i) => i !== idx),
+                                prev.filter((_, i) => i !== idx)
                               )
                             }
-                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded"
+                            className="absolute top-0.5 right-0.5 bg-rose-600 text-white p-0.5 rounded cursor-pointer"
                           >
                             <X size={10} />
                           </button>
@@ -1110,7 +1169,7 @@ export default function AdminProductsPage() {
                         });
                         setTempCapacity("");
                       }}
-                      className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
+                      className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold cursor-pointer"
                     >
                       Add
                     </button>
@@ -1128,11 +1187,11 @@ export default function AdminProductsPage() {
                             setForm({
                               ...form,
                               capacities: form.capacities.filter(
-                                (_, i) => i !== idx,
+                                (_, i) => i !== idx
                               ),
                             })
                           }
-                          className="text-slate-400 hover:text-rose-600"
+                          className="text-slate-400 hover:text-rose-600 cursor-pointer"
                         >
                           ×
                         </button>
@@ -1174,7 +1233,7 @@ export default function AdminProductsPage() {
                       });
                       setTempFlowTitle("");
                     }}
-                    className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
+                    className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold cursor-pointer"
                   >
                     Add Step
                   </button>
@@ -1199,81 +1258,16 @@ export default function AdminProductsPage() {
                           setForm({
                             ...form,
                             processFlow: form.processFlow.filter(
-                              (_, i) => i !== idx,
+                              (_, i) => i !== idx
                             ),
                           })
                         }
-                        className="text-slate-400 hover:text-rose-600"
+                        className="text-slate-400 hover:text-rose-600 cursor-pointer"
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   ))}
-                </div>
-              </section>
-
-              {/* 5. ADVANTAGES, FEATURES & APPLICATIONS */}
-              <section className="bg-white border border-slate-300 rounded p-4 shadow-sm space-y-3">
-                <div className="border-b border-slate-200 pb-1.5">
-                  <h2 className="text-[11px] font-bold text-sky-800 uppercase tracking-wider">
-                    5. Advantages, Key Features & Applications
-                  </h2>
-                </div>
-
-                <div>
-                  <label className="block text-[10.5px] font-semibold text-slate-700 mb-1">
-                    Advantages
-                  </label>
-                  <div className="flex gap-1.5 mb-1.5">
-                    <input
-                      type="text"
-                      placeholder="e.g. Proven Technology"
-                      value={tempAdvantage}
-                      onChange={(e) => setTempAdvantage(e.target.value)}
-                      className="flex-1 bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!tempAdvantage.trim()) return;
-                        setForm({
-                          ...form,
-                          advantages: [
-                            ...form.advantages,
-                            tempAdvantage.trim(),
-                          ],
-                        });
-                        setTempAdvantage("");
-                      }}
-                      className="px-3 py-1 bg-sky-700 hover:bg-sky-800 text-white rounded text-[11px] font-bold"
-                    >
-                      Add
-                    </button>
-                  </div>
-                  <div className="space-y-1">
-                    {form.advantages.map((adv, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between text-[11px] text-slate-700 bg-slate-50 p-1 rounded border border-slate-200"
-                      >
-                        <span>» {adv}</span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              advantages: form.advantages.filter(
-                                (_, i) => i !== idx,
-                              ),
-                            })
-                          }
-                          className="text-slate-400 hover:text-rose-600"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </section>
 
@@ -1283,7 +1277,7 @@ export default function AdminProductsPage() {
                   <button
                     type="button"
                     onClick={cancelEditing}
-                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold"
+                    className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded text-xs font-semibold cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -1291,14 +1285,14 @@ export default function AdminProductsPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-green-700 hover:bg-green-800 text-white rounded text-xs font-bold shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-green-700 hover:bg-green-800 text-white rounded text-xs font-bold shadow-sm cursor-pointer"
                 >
                   <Check size={14} />{" "}
                   {saving
                     ? "Uploading & Saving..."
                     : editingId
-                      ? "Update Machinery System"
-                      : "Publish Product"}
+                    ? "Update Machinery System"
+                    : "Publish Product"}
                 </button>
               </div>
             </form>

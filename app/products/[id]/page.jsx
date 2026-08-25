@@ -6,9 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 // Fetch single product from MongoDB via backend
 async function fetchProduct(id) {
   try {
-    const res = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`, {
-      cache: 'no-store',
-    });
+    const res = await fetch(`${API_URL}/products/${encodeURIComponent(id)}`);
     if (!res.ok) return null;
     const json = await res.json();
     return json?.data || null;
@@ -21,9 +19,7 @@ async function fetchProduct(id) {
 // Fetch all active products for dynamic left sidebar
 async function fetchAllActiveProducts() {
   try {
-    const res = await fetch(`${API_URL}/products?active=true&limit=150`, {
-      cache: 'no-store',
-    });
+    const res = await fetch(`${API_URL}/products?active=true&limit=150`);
     if (!res.ok) return [];
     const json = await res.json();
     return json?.data?.products || (Array.isArray(json?.data) ? json.data : []);

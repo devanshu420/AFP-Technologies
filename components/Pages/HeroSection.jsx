@@ -24,9 +24,7 @@ export default function HeroSection() {
   useEffect(() => {
     async function loadAnnouncements() {
       try {
-        const res = await fetch(`${API_BASE_URL}/announcements/public`, {
-          cache: 'no-store',
-        });
+        const res = await fetch(`${API_BASE_URL}/announcements/public`);
         const json = await res.json();
 
         const list = Array.isArray(json?.data)

@@ -27,9 +27,7 @@ export default function Footer() {
   useEffect(() => {
     async function fetchContactSettings() {
       try {
-        const res = await fetch(`${API_BASE_URL}/settings/contact`, {
-          cache: 'no-store',
-        });
+        const res = await fetch(`${API_BASE_URL}/settings/contact`);
         const json = await res.json();
         const settingsData = json?.data || json;
 

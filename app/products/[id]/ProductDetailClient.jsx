@@ -468,6 +468,42 @@ export default function ProductDetailClient({
               </section>
             )}
 
+            {/* ─── Big Size Image Section (Full Width Display) ─── */}
+            {product?.BigSizeImage?.url && (
+              <section className="mb-6">
+                <h3 className="text-[21.5px] font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1 mb-3">
+                  Featured Equipment View
+                </h3>
+                <div
+                  style={{
+                    width: "100vw",
+                    maxWidth: "100%",
+                    position: "relative",
+                    borderRadius: "12px",
+                    overflow: "hidden",
+                    backgroundColor: "#020617",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+                  }}
+                >
+                  <img
+                    src={product.BigSizeImage.url}
+                    alt={
+                      product.BigSizeImage.alt ||
+                      product.name ||
+                      "Industrial machine full view"
+                    }
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      maxHeight: "600px",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              </section>
+            )}
+
             {/* Standard Capacities */}
             {capacityList.length > 0 && (
               <section className="mb-4">

@@ -29,9 +29,7 @@ export default function AboutSection() {
     async function fetchContact() {
       try {
         setLoading(true);
-        const res = await fetch(`${API_BASE_URL}/settings/contact`, {
-          cache: 'no-store',
-        });
+        const res = await fetch(`${API_BASE_URL}/settings/contact`);
         const json = await res.json();
         if (res.ok && json.data) {
           setContactInfo({

@@ -1,24 +1,35 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const ProductSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, index: true },
     slug: { type: String, required: true, unique: true, index: true },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true, index: true },
-    shortDescription: { type: String, default: '' },
-    description: { type: String, default: '' },
-    detailedDescription: { type: String, default: '' },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+      index: true,
+    },
+    shortDescription: { type: String, default: "" },
+    description: { type: String, default: "" },
+    detailedDescription: { type: String, default: "" },
+
+    BigSizeImage: {
+      url: { type: String },
+      fileId: { type: String, default: "" },
+      alt: { type: String, default: "" },
+    },
 
     mainImage: {
       url: { type: String, required: true },
-      fileId: { type: String, default: '' },
-      alt: { type: String, default: '' },
+      fileId: { type: String, default: "" },
+      alt: { type: String, default: "" },
     },
     images: [
       {
         url: { type: String, required: true },
-        fileId: { type: String, default: '' },
-        alt: { type: String, default: '' },
+        fileId: { type: String, default: "" },
+        alt: { type: String, default: "" },
         order: { type: Number, default: 0 },
       },
     ],
@@ -26,14 +37,14 @@ const ProductSchema = new mongoose.Schema(
     features: [
       {
         title: { type: String, required: true },
-        description: { type: String, default: '' },
+        description: { type: String, default: "" },
         order: { type: Number, default: 0 },
       },
     ],
     applications: [
       {
         title: { type: String, required: true },
-        description: { type: String, default: '' },
+        description: { type: String, default: "" },
         order: { type: Number, default: 0 },
       },
     ],
@@ -49,7 +60,7 @@ const ProductSchema = new mongoose.Schema(
     processFlow: [
       {
         title: { type: String, required: true },
-        description: { type: String, default: '' },
+        description: { type: String, default: "" },
         order: { type: Number, default: 0 },
       },
     ],
@@ -59,17 +70,17 @@ const ProductSchema = new mongoose.Schema(
     advantages: [{ type: String }],
 
     // ─── Machine Specs / OEM Specs ───
-    capacity: { type: String, default: '' },
-    power: { type: String, default: '' },
-    dimensions: { type: String, default: '' },
-    material: { type: String, default: '' },
-    automationType: { type: String, default: 'Automatic' },
-    warranty: { type: String, default: '' },
+    capacity: { type: String, default: "" },
+    power: { type: String, default: "" },
+    dimensions: { type: String, default: "" },
+    material: { type: String, default: "" },
+    automationType: { type: String, default: "Automatic" },
+    warranty: { type: String, default: "" },
 
     pdf: {
-      url: { type: String, default: '' },
-      fileId: { type: String, default: '' },
-      name: { type: String, default: '' },
+      url: { type: String, default: "" },
+      fileId: { type: String, default: "" },
+      name: { type: String, default: "" },
     },
 
     featured: { type: Boolean, default: false, index: true },
@@ -87,9 +98,14 @@ const ProductSchema = new mongoose.Schema(
       canonicalUrl: String,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-ProductSchema.index({ name: 'text', shortDescription: 'text', description: 'text' });
+ProductSchema.index({
+  name: "text",
+  shortDescription: "text",
+  description: "text",
+});
 
-export default mongoose.models.Product || mongoose.model('Product', ProductSchema);
+export default mongoose.models.Product ||
+  mongoose.model("Product", ProductSchema);
