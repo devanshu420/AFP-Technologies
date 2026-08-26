@@ -19,6 +19,7 @@ import {
   RefreshCw,
   Megaphone,
   FolderTree,
+  Layers3,
 } from "lucide-react";
 import AdminLoginForm from "../../components/Admin/AdminLoginForm";
 import AdminHeading from "../../components/Admin/AdminHeading";
@@ -29,6 +30,7 @@ import PdfPanel from "../../components/Admin/PdfPanel";
 import ContactSettingsPanel from "../../components/Admin/ContactSettingsPanel";
 import AnnouncementPanel from "../../components/Admin/AnnouncementPanel";
 import CategoryPanel from "../../components/Admin/CategoryPanel";
+import EquipmentRangePanel from "../../components/Admin/EquipmentRangePanel";
 import GearLoader from "../../components/GearLoader";
 
 const API_BASE_URL =
@@ -234,8 +236,16 @@ export default function AdminPage() {
   }
 
   const navItems = [
-    { id: "overview", label: "Dashboard Overview", icon: LayoutDashboard },
-    { id: "categories", label: "Product Categories", icon: FolderTree },
+    {
+      id: "overview",
+      label: "Dashboard Overview",
+      icon: LayoutDashboard,
+    },
+    {
+      id: "categories",
+      label: "Product Categories",
+      icon: FolderTree,
+    },
     {
       id: "products",
       label: "Products",
@@ -259,7 +269,16 @@ export default function AdminPage() {
       label: "Contact Settings",
       icon: PhoneCall,
     },
-    { id: "announcements", label: "Announcements & Ads", icon: Megaphone },
+    {
+      id: "announcements",
+      label: "Announcements & Ads",
+      icon: Megaphone,
+    },
+    {
+      id: "equipment-range",
+      label: "Equipment Range",
+      icon: Layers3,
+    },
   ];
 
   return (
@@ -717,6 +736,13 @@ export default function AdminPage() {
           {activeTab === "announcements" && (
             <div className="max-w-4xl mx-auto">
               <AnnouncementPanel />
+            </div>
+          )}
+
+          {/* TAB : EQUIPEMENT RANGE */}
+          {activeTab === "equipment-range" && (
+            <div className="max-w-7xl mx-auto">
+              <EquipmentRangePanel />
             </div>
           )}
         </main>

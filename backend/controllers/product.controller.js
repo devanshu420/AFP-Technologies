@@ -201,3 +201,45 @@ export async function deleteProduct(req, res) {
     return errorResponse(res, err.message, 500);
   }
 }
+
+
+// 6. GET /api/products/search
+// Search products by name
+export const searchProducts = async (req, res) => {
+  try {
+    const q = req.query.q?.trim();
+
+    if (!q) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+      });
+    }
+
+    // Search only active products
+    const products = await Product.find({
+      active: true,
+      name: {
+        $regex: q,
+        $options: "i",
+      },
+    })
+      .select("name slug mainImage category shortDescription")
+      .populate("category", "name slug")
+      .sort({ name: 1 })
+      .limit(10)
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("[Search Products Error]", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search products",
+    });
+  }
+};

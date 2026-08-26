@@ -1,7 +1,9 @@
-import { notFound } from 'next/navigation';
-import ProductDetailClient from './ProductDetailClient';
+import { notFound } from "next/navigation";
+import ProductDetailClient from "./ProductDetailClient";
+import Nav from "../../../components/Pages/Nav";
+import Footer from "../../../components/Pages/Footer";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Fetch single product from MongoDB via backend
 async function fetchProduct(id) {
@@ -24,7 +26,7 @@ async function fetchAllActiveProducts() {
     const json = await res.json();
     return json?.data?.products || (Array.isArray(json?.data) ? json.data : []);
   } catch (error) {
-    console.error('Error fetching catalogue for sidebar:', error);
+    console.error("Error fetching catalogue for sidebar:", error);
     return [];
   }
 }
@@ -33,14 +35,14 @@ async function fetchAllActiveProducts() {
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const id = resolvedParams?.id;
-  if (!id) return { title: 'Product Not Found | AFP Technologies' };
+  if (!id) return { title: "Product Not Found | AFP Technologies" };
 
   const product = await fetchProduct(id);
 
   if (!product) {
     return {
-      title: 'Machinery Not Found | Industrial Solutions',
-      description: 'The requested industrial machine could not be found.',
+      title: "Machinery Not Found | Industrial Solutions",
+      description: "The requested industrial machine could not be found.",
     };
   }
 
@@ -50,18 +52,25 @@ export async function generateMetadata({ params }) {
   const description =
     product.seo?.description ||
     product.shortDescription ||
-    (typeof product.description === 'string' ? product.description.slice(0, 160) : '') ||
-    'High-efficiency food processing line engineered for maximum operational throughput.';
+    (typeof product.description === "string"
+      ? product.description.slice(0, 160)
+      : "") ||
+    "High-efficiency food processing line engineered for maximum operational throughput.";
   const keywords =
     product.seo?.keywords && product.seo.keywords.length > 0
       ? product.seo.keywords
-      : [product.name, 'food processing', 'industrial machinery', 'turnkey line'];
+      : [
+          product.name,
+          "food processing",
+          "industrial machinery",
+          "turnkey line",
+        ];
 
   const mainImage =
     product.images?.[0]?.url ||
     product.mainImage?.url ||
     product.image ||
-    '/placeholder-machinery.jpg';
+    "/placeholder-machinery.jpg";
 
   return {
     title,
@@ -70,7 +79,9 @@ export async function generateMetadata({ params }) {
     openGraph: {
       title,
       description,
-      images: [{ url: mainImage, alt: product.images?.[0]?.alt || product.name }],
+      images: [
+        { url: mainImage, alt: product.images?.[0]?.alt || product.name },
+      ],
     },
   };
 }
@@ -93,10 +104,14 @@ export default async function ProductPage({ params }) {
   }
 
   return (
-    <ProductDetailClient
-      currentId={id}
-      initialProduct={product}
-      allProducts={allProducts}
-    />
+    <>
+      <Nav />
+      <ProductDetailClient
+        currentId={id}
+        initialProduct={product}
+        allProducts={allProducts}
+      />
+      <Footer />
+    </>
   );
 }

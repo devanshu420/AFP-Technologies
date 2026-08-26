@@ -19,7 +19,7 @@ const ProductSchema = new mongoose.Schema(
       fileId: { type: String, default: "" },
       alt: { type: String, default: "" },
     },
-
+    
     mainImage: {
       url: { type: String, required: true },
       fileId: { type: String, default: "" },
