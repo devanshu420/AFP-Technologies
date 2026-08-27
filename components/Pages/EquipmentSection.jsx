@@ -19,7 +19,33 @@ async function getEquipmentRange() {
 
     const json = await res.json();
 
-    return Array.isArray(json?.data) ? json.data : [];
+    const equipment = Array.isArray(json?.data)
+      ? json.data
+      : [];
+
+    /*
+    =========================================================
+    SHOW ONLY NEWEST 5 EQUIPMENT
+    =========================================================
+
+    createdAt ke basis par newest equipment upar aayega.
+    Agar createdAt available nahi hai, existing API order
+    maintain rahega.
+    =========================================================
+    */
+
+    return equipment
+      .sort((a, b) => {
+        if (!a?.createdAt || !b?.createdAt) {
+          return 0;
+        }
+
+        return (
+          new Date(b.createdAt).getTime() -
+          new Date(a.createdAt).getTime()
+        );
+      })
+      .slice(0, 5);
   } catch (error) {
     console.error("Equipment section error:", error);
     return [];
@@ -32,6 +58,7 @@ export default async function EquipmentSection() {
   return (
     <section id="equipment" className="equipment section">
       <div className="container">
+
         {/* =====================================================
             SECTION HEADING
         ===================================================== */}
@@ -50,10 +77,10 @@ export default async function EquipmentSection() {
           </div>
 
           <p className="section-note">
-            From single washing & slicing units to complete automated
-            potato chips, french fries, and snack lines, our engineered
-            systems deliver maximum yield and reliability for industrial
-            production floors.
+            From single washing & slicing units to complete
+            automated potato chips, french fries, and snack
+            lines, our engineered systems deliver maximum yield
+            and reliability for industrial production floors.
           </p>
         </div>
 
@@ -64,15 +91,15 @@ export default async function EquipmentSection() {
         <div className="equipment-list">
           {equipmentData.length > 0 ? (
             equipmentData.map((item, i) => {
-              // API me slug available hai to slug use hoga.
-              // Nahi to _id fallback hoga.
-              const productId = item.slug || item._id;
-
               return (
                 <Link
-                  href={`/products/${productId}`}
+                  href="/equipment-range"
                   className="equipment-row"
-                  key={item._id || item.slug || item.name}
+                  key={
+                    item._id ||
+                    item.slug ||
+                    item.name
+                  }
                 >
                   {/* NUMBER */}
 
@@ -83,7 +110,8 @@ export default async function EquipmentSection() {
                   {/* NAME */}
 
                   <strong>
-                    {item.name || "Unnamed Equipment"}
+                    {item.name ||
+                      "Unnamed Equipment"}
                   </strong>
 
                   {/* DETAIL */}
@@ -102,7 +130,9 @@ export default async function EquipmentSection() {
             })
           ) : (
             <div className="equipment-row">
-              <strong>No equipment available</strong>
+              <strong>
+                No equipment available
+              </strong>
 
               <span className="row-detail">
                 Equipment will appear here once available.

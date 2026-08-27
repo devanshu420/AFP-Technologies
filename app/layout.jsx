@@ -53,10 +53,15 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${mono.variable}`}>
-      <body className="antialiased">
-        {children}
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+    <html lang="en">
+      <body className={`${inter.variable} ${mono.variable}`}>
+        <div className="site-wrapper">
+          <main className="site-main">
+            {children}
+          </main>
+        </div>
+
+        <Analytics />
       </body>
     </html>
   );
