@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import ProductShare from "../../../components/Pages/Products/ProductShare";
 import {
   ChevronRight,
   Home,
@@ -29,15 +28,35 @@ export default function ProductDetailClient({
   const product = initialProduct;
 
   // =========================================================
+  // IMAGE PREVIEW
+  // =========================================================
+
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const [zoomPosition, setZoomPosition] = useState({
+    x: 50,
+    y: 50,
+  });
+
+  const previewRef = useRef(null);
+  const sourceRef = useRef(null);
+
+  // =========================================================
   // GALLERY
   // =========================================================
 
   const galleryImages = useMemo(() => {
     const list = [];
 
-    if (Array.isArray(product?.images) && product.images.length > 0) {
+    if (
+      Array.isArray(product?.images) &&
+      product.images.length > 0
+    ) {
       product.images.forEach((img, idx) => {
-        const url = typeof img === "string" ? img : img?.url;
+        const url =
+          typeof img === "string"
+            ? img
+            : img?.url;
 
         if (url) {
           list.push({
@@ -45,7 +64,8 @@ export default function ProductDetailClient({
             alt:
               typeof img === "string"
                 ? `${product.name} - View ${idx + 1}`
-                : img?.alt || `${product.name} - View ${idx + 1}`,
+                : img?.alt ||
+                  `${product.name} - View ${idx + 1}`,
           });
         }
       });
@@ -53,13 +73,16 @@ export default function ProductDetailClient({
 
     if (product?.mainImage?.url) {
       const exists = list.some(
-        (item) => item.url === product.mainImage.url
+        (item) =>
+          item.url === product.mainImage.url
       );
 
       if (!exists) {
         list.unshift({
           url: product.mainImage.url,
-          alt: product.mainImage.alt || product.name,
+          alt:
+            product.mainImage.alt ||
+            product.name,
         });
       }
     }
@@ -67,31 +90,185 @@ export default function ProductDetailClient({
     if (list.length === 0) {
       list.push({
         url: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=1200&q=85",
-        alt: product?.name || "Industrial Machinery Equipment",
+        alt:
+          product?.name ||
+          "Industrial Machinery Equipment",
       });
     }
 
     return list;
   }, [product]);
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] =
+    useState(0);
 
   const activeImage =
-    galleryImages[selectedIndex] || galleryImages[0];
+    galleryImages[selectedIndex] ||
+    galleryImages[0];
 
   const whatsappNumber = "919876543210";
 
+  // =========================================================
+  // GALLERY NAVIGATION
+  // =========================================================
+
   const handlePrevImage = () => {
     setSelectedIndex((prev) =>
-      prev === 0 ? galleryImages.length - 1 : prev - 1
+      prev === 0
+        ? galleryImages.length - 1
+        : prev - 1
     );
   };
 
   const handleNextImage = () => {
     setSelectedIndex((prev) =>
-      prev === galleryImages.length - 1 ? 0 : prev + 1
+      prev === galleryImages.length - 1
+        ? 0
+        : prev + 1
     );
   };
+
+  // =========================================================
+  // OPEN IMAGE PREVIEW
+  // IMPORTANT:
+  // sourceElement is the ACTUAL IMAGE element.
+  // =========================================================
+
+  const openImagePreview = (
+    image,
+    sourceElement
+  ) => {
+    if (!image?.url || !sourceElement) return;
+
+    sourceRef.current = sourceElement;
+
+    setPreviewImage({
+      url: image.url,
+      alt:
+        image.alt ||
+        product?.name ||
+        "Equipment",
+    });
+
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
+  };
+
+  // =========================================================
+  // CLOSE IMAGE PREVIEW
+  // =========================================================
+
+  const closeImagePreview = () => {
+    setPreviewImage(null);
+
+    sourceRef.current = null;
+
+    setZoomPosition({
+      x: 50,
+      y: 50,
+    });
+  };
+
+  // =========================================================
+  // PREVIEW MOUSE MOVE / ZOOM
+  // =========================================================
+
+  const handlePreviewMouseMove = (e) => {
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+
+    const x =
+      ((e.clientX - rect.left) / rect.width) *
+      100;
+
+    const y =
+      ((e.clientY - rect.top) / rect.height) *
+      100;
+
+    setZoomPosition({
+      x: Math.max(0, Math.min(100, x)),
+      y: Math.max(0, Math.min(100, y)),
+    });
+  };
+
+  // =========================================================
+  // KEEP PREVIEW OPEN BETWEEN SOURCE + PREVIEW
+  //
+  // Preview stays open when mouse is:
+  // 1. On actual source image
+  // 2. Inside large preview
+  //
+  // It closes when mouse leaves BOTH.
+  // =========================================================
+
+  useEffect(() => {
+    if (!previewImage) return;
+
+    const handleMouseMove = (e) => {
+      const previewElement =
+        previewRef.current;
+
+      const sourceElement =
+        sourceRef.current;
+
+      if (!previewElement) return;
+
+      // -----------------------------------------
+      // Check large preview
+      // -----------------------------------------
+
+      const previewRect =
+        previewElement.getBoundingClientRect();
+
+      const isInsidePreview =
+        e.clientX >= previewRect.left &&
+        e.clientX <= previewRect.right &&
+        e.clientY >= previewRect.top &&
+        e.clientY <= previewRect.bottom;
+
+      // -----------------------------------------
+      // Check ACTUAL IMAGE
+      // -----------------------------------------
+
+      let isInsideSource = false;
+
+      if (sourceElement) {
+        const sourceRect =
+          sourceElement.getBoundingClientRect();
+
+        isInsideSource =
+          e.clientX >= sourceRect.left &&
+          e.clientX <= sourceRect.right &&
+          e.clientY >= sourceRect.top &&
+          e.clientY <= sourceRect.bottom;
+      }
+
+      // -----------------------------------------
+      // Close only when outside both
+      // -----------------------------------------
+
+      if (
+        !isInsidePreview &&
+        !isInsideSource
+      ) {
+        closeImagePreview();
+      }
+    };
+
+    document.addEventListener(
+      "mousemove",
+      handleMouseMove
+    );
+
+    return () => {
+      document.removeEventListener(
+        "mousemove",
+        handleMouseMove
+      );
+    };
+  }, [previewImage]);
 
   // =========================================================
   // CAPACITIES
@@ -138,14 +315,21 @@ export default function ProductDetailClient({
   const getCategoryId = (item) => {
     if (!item) return null;
 
-    if (typeof item.category === "object") {
-      return item.category?._id || item.category?.id || null;
+    if (
+      typeof item.category === "object"
+    ) {
+      return (
+        item.category?._id ||
+        item.category?.id ||
+        null
+      );
     }
 
     return item.category || null;
   };
 
-  const currentCategoryId = getCategoryId(product);
+  const currentCategoryId =
+    getCategoryId(product);
 
   // =========================================================
   // GROUP PRODUCTS CATEGORY-WISE
@@ -155,7 +339,8 @@ export default function ProductDetailClient({
     const grouped = {};
 
     allProducts.forEach((p) => {
-      const categoryId = getCategoryId(p);
+      const categoryId =
+        getCategoryId(p);
 
       if (!categoryId) return;
 
@@ -173,19 +358,22 @@ export default function ProductDetailClient({
 
   // =========================================================
   // EXPANDED CATEGORY
-  //
-  // Current product category automatically opens.
-  // User can click another category to open it.
   // =========================================================
 
   const [expandedCategory, setExpandedCategory] =
-    useState(currentCategoryId ? String(currentCategoryId) : null);
+    useState(
+      currentCategoryId
+        ? String(currentCategoryId)
+        : null
+    );
 
   // =========================================================
   // CATEGORY CLICK
   // =========================================================
 
-  const handleCategoryClick = (categoryId) => {
+  const handleCategoryClick = (
+    categoryId
+  ) => {
     const id = String(categoryId);
 
     setExpandedCategory((prev) =>
@@ -283,10 +471,14 @@ export default function ProductDetailClient({
               className="w-full bg-slate-50 border border-slate-300 rounded py-1 px-2.5 pr-8 text-[11px] font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-sky-600 appearance-none cursor-pointer"
             >
               {allProducts.map((p) => {
-                const id = p.slug || p._id;
+                const id =
+                  p.slug || p._id;
 
                 return (
-                  <option key={id} value={id}>
+                  <option
+                    key={id}
+                    value={id}
+                  >
                     {p.name}
                   </option>
                 );
@@ -317,8 +509,6 @@ export default function ProductDetailClient({
 
             <div className="bg-white border border-slate-300 rounded shadow-sm overflow-hidden">
 
-              {/* SIDEBAR HEADER */}
-
               <div className="bg-sky-800 border-b border-sky-900 px-3 py-2.5 flex items-center gap-1.5">
                 <Layers
                   size={15}
@@ -330,23 +520,7 @@ export default function ProductDetailClient({
                 </h3>
               </div>
 
-              {/* =================================================
-                  CATEGORY LIST
-
-                  Maximum 10 categories visible.
-                  After 10 => scroll.
-              ================================================= */}
-
-              <div
-                className="
-                  max-h-[430px]
-                  overflow-y-auto
-                  overscroll-contain
-                  scrollbar-thin
-                  scrollbar-thumb-slate-300
-                  scrollbar-track-slate-100
-                "
-              >
+              <div className="max-h-[430px] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
 
                 <ul className="list-none m-0 p-0">
 
@@ -355,41 +529,45 @@ export default function ProductDetailClient({
                       No products available.
                     </li>
                   ) : (
-                    // IMPORTANT:
-                    // We need categories separately.
-                    //
-                    // Since ProductDetailClient currently receives
-                    // allProducts, derive unique categories from products.
                     (() => {
-                      const categoryMap = new Map();
+                      const categoryMap =
+                        new Map();
 
-                      allProducts.forEach((p) => {
-                        const categoryId =
-                          getCategoryId(p);
+                      allProducts.forEach(
+                        (p) => {
+                          const categoryId =
+                            getCategoryId(p);
 
-                        if (!categoryId) return;
+                          if (!categoryId)
+                            return;
 
-                        const categoryObject =
-                          typeof p.category === "object"
-                            ? p.category
-                            : null;
+                          const categoryObject =
+                            typeof p.category ===
+                            "object"
+                              ? p.category
+                              : null;
 
-                        if (
-                          !categoryMap.has(
-                            String(categoryId)
-                          )
-                        ) {
-                          categoryMap.set(
-                            String(categoryId),
-                            {
-                              id: categoryId,
-                              name:
-                                categoryObject?.name ||
-                                "Other Products",
-                            }
-                          );
+                          if (
+                            !categoryMap.has(
+                              String(
+                                categoryId
+                              )
+                            )
+                          ) {
+                            categoryMap.set(
+                              String(
+                                categoryId
+                              ),
+                              {
+                                id: categoryId,
+                                name:
+                                  categoryObject?.name ||
+                                  "Other Products",
+                              }
+                            );
+                          }
                         }
-                      });
+                      );
 
                       const uniqueCategories =
                         Array.from(
@@ -398,9 +576,10 @@ export default function ProductDetailClient({
 
                       return uniqueCategories.map(
                         (category) => {
-                          const categoryId = String(
-                            category.id
-                          );
+                          const categoryId =
+                            String(
+                              category.id
+                            );
 
                           const categoryProducts =
                             productsByCategory[
@@ -415,32 +594,29 @@ export default function ProductDetailClient({
                             categoryProducts.some(
                               (p) => {
                                 const key =
-                                  p.slug || p._id;
+                                  p.slug ||
+                                  p._id;
 
                                 return (
                                   key ===
                                     product.slug ||
                                   key ===
                                     product._id ||
-                                  p._id === currentId ||
-                                  p.slug === currentId
+                                  p._id ===
+                                    currentId ||
+                                  p.slug ===
+                                    currentId
                                 );
                               }
                             );
 
                           return (
                             <li
-                              key={categoryId}
+                              key={
+                                categoryId
+                              }
                               className="border-b border-slate-100 last:border-b-0"
                             >
-
-                              {/* =================================================
-                                  CATEGORY BUTTON
-
-                                  CLICK ONLY
-                                  NO HOVER LOGIC
-                              ================================================= */}
-
                               <button
                                 type="button"
                                 onClick={() =>
@@ -467,7 +643,6 @@ export default function ProductDetailClient({
                                   }
                                 `}
                               >
-
                                 <span
                                   className={`
                                     flex
@@ -500,44 +675,35 @@ export default function ProductDetailClient({
                                   </span>
 
                                   <span className="truncate">
-                                    {category.name}
+                                    {
+                                      category.name
+                                    }
                                   </span>
                                 </span>
 
                                 <span className="shrink-0">
                                   {isExpanded ? (
                                     <Minus
-                                      size={14}
+                                      size={
+                                        14
+                                      }
                                       className="text-sky-700"
                                     />
                                   ) : (
                                     <Plus
-                                      size={14}
+                                      size={
+                                        14
+                                      }
                                       className="text-slate-400"
                                     />
                                   )}
                                 </span>
                               </button>
 
-                              {/* =================================================
-                                  PRODUCTS UNDER CATEGORY
-
-                                  ONLY APPEARS AFTER CATEGORY CLICK
-                              ================================================= */}
-
                               {isExpanded && (
                                 <div className="bg-slate-50 border-t border-slate-200">
 
-                                  <div
-                                    className="
-                                      max-h-[260px]
-                                      overflow-y-auto
-                                      overscroll-contain
-                                      scrollbar-thin
-                                      scrollbar-thumb-slate-300
-                                      scrollbar-track-slate-100
-                                    "
-                                  >
+                                  <div className="max-h-[260px] overflow-y-auto overscroll-contain scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100">
 
                                     {categoryProducts.length >
                                     0 ? (
@@ -568,11 +734,11 @@ export default function ProductDetailClient({
                                               >
                                                 <Link
                                                   href={`/products/${targetKey}`}
-                                                  onClick={() => {
+                                                  onClick={() =>
                                                     setExpandedCategory(
                                                       categoryId
-                                                    );
-                                                  }}
+                                                    )
+                                                  }
                                                   className={`
                                                     flex
                                                     items-start
@@ -591,7 +757,6 @@ export default function ProductDetailClient({
                                                     }
                                                   `}
                                                 >
-
                                                   <span
                                                     className={`
                                                       shrink-0
@@ -606,9 +771,10 @@ export default function ProductDetailClient({
                                                   </span>
 
                                                   <span className="flex-1">
-                                                    {p.name}
+                                                    {
+                                                      p.name
+                                                    }
                                                   </span>
-
                                                 </Link>
                                               </li>
                                             );
@@ -622,11 +788,9 @@ export default function ProductDetailClient({
                                         this category.
                                       </div>
                                     )}
-
                                   </div>
                                 </div>
                               )}
-
                             </li>
                           );
                         }
@@ -635,9 +799,7 @@ export default function ProductDetailClient({
                   )}
 
                 </ul>
-
               </div>
-
             </div>
           </aside>
 
@@ -647,7 +809,9 @@ export default function ProductDetailClient({
 
           <main className="min-w-0 bg-white border border-slate-300 rounded p-4 sm:p-5 shadow-sm">
 
-            {/* Title & Badge */}
+            {/* =================================================
+                TITLE
+            ================================================= */}
 
             <div className="border-b border-slate-200 pb-3 mb-4">
 
@@ -657,7 +821,10 @@ export default function ProductDetailClient({
 
                   {product.category?.name && (
                     <span className="inline-block bg-sky-100 text-sky-800 text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded mb-1">
-                      {product.category.name}
+                      {
+                        product.category
+                          .name
+                      }
                     </span>
                   )}
 
@@ -667,7 +834,9 @@ export default function ProductDetailClient({
 
                   {product.shortDescription && (
                     <p className="mt-1 text-[12.5px] text-slate-600 leading-relaxed max-w-2xl">
-                      {product.shortDescription}
+                      {
+                        product.shortDescription
+                      }
                     </p>
                   )}
                 </div>
@@ -699,26 +868,42 @@ export default function ProductDetailClient({
                       <div className="flex items-center gap-1">
 
                         <a
-                          href={product.pdf.url}
+                          href={
+                            product.pdf
+                              .url
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                           title="View PDF in new tab"
                           className="inline-flex items-center gap-1 px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[10px] font-semibold rounded shadow-2xs transition-colors whitespace-nowrap"
                         >
-                          <ExternalLink size={11} />
-                          <span>View</span>
+                          <ExternalLink
+                            size={11}
+                          />
+                          <span>
+                            View
+                          </span>
                         </a>
 
                         {(() => {
-                          const rawName = (
-                            product.pdf.name ||
-                            product.slug ||
-                            product.name ||
-                            "machinery-specification"
-                          )
-                            .replace(/\.pdf$/i, "")
-                            .trim()
-                            .replace(/\s+/g, "-");
+                          const rawName =
+                            (
+                              product
+                                .pdf
+                                .name ||
+                              product.slug ||
+                              product.name ||
+                              "machinery-specification"
+                            )
+                              .replace(
+                                /\.pdf$/i,
+                                ""
+                              )
+                              .trim()
+                              .replace(
+                                /\s+/g,
+                                "-"
+                              );
 
                           const downloadFileName =
                             `${rawName}-afptechnologies.pdf`;
@@ -726,7 +911,9 @@ export default function ProductDetailClient({
                           return (
                             <a
                               href={`${product.pdf.url}${
-                                product.pdf.url.includes("?")
+                                product.pdf.url.includes(
+                                  "?"
+                                )
                                   ? "&"
                                   : "?"
                               }ik-attachment=true&response-content-disposition=attachment;filename=${encodeURIComponent(
@@ -738,8 +925,14 @@ export default function ProductDetailClient({
                               title={`Download ${downloadFileName}`}
                               className="inline-flex items-center gap-1 px-2 py-1 bg-sky-700 hover:bg-sky-800 text-white text-[10px] font-bold rounded shadow-2xs transition-colors whitespace-nowrap"
                             >
-                              <Download size={11} />
-                              <span>Download</span>
+                              <Download
+                                size={
+                                  11
+                                }
+                              />
+                              <span>
+                                Download
+                              </span>
                             </a>
                           );
                         })()}
@@ -752,21 +945,30 @@ export default function ProductDetailClient({
                     type="button"
                     onClick={async () => {
                       const shareUrl =
-                        typeof window !== "undefined"
-                          ? window.location.href
+                        typeof window !==
+                        "undefined"
+                          ? window.location
+                              .href
                           : "";
 
-                      const shareTitle = `${product.name} | AFP Technologies`;
+                      const shareTitle =
+                        `${product.name} | AFP Technologies`;
 
-                      const shareText = `Explore specifications for ${product.name} at AFP Technologies.`;
+                      const shareText =
+                        `Explore specifications for ${product.name} at AFP Technologies.`;
 
-                      if (navigator.share) {
+                      if (
+                        navigator.share
+                      ) {
                         try {
-                          await navigator.share({
-                            title: shareTitle,
-                            text: shareText,
-                            url: shareUrl,
-                          });
+                          await navigator.share(
+                            {
+                              title:
+                                shareTitle,
+                              text: shareText,
+                              url: shareUrl,
+                            }
+                          );
                         } catch (err) {
                           if (
                             err.name !==
@@ -802,15 +1004,18 @@ export default function ProductDetailClient({
                       className="text-sky-600 shrink-0"
                     />
 
-                    <span>Share</span>
+                    <span>
+                      Share
+                    </span>
                   </button>
-
                 </div>
               </div>
             </div>
 
             {/* =====================================================
                 IMAGE GALLERY
+                IMPORTANT:
+                Hover is attached to ACTUAL IMAGE only.
             ===================================================== */}
 
             <div className="border border-slate-200 rounded p-1.5 bg-slate-50 mb-4">
@@ -820,54 +1025,79 @@ export default function ProductDetailClient({
                 <img
                   src={activeImage.url}
                   alt={activeImage.alt}
-                  className="w-full h-full object-contain block"
+                  draggable="false"
+                  onMouseEnter={(e) =>
+                    openImagePreview(
+                      activeImage,
+                      e.currentTarget
+                    )
+                  }
+                  className="max-w-full max-h-full w-auto h-auto object-contain block select-none cursor-zoom-in"
                 />
 
-                {galleryImages.length > 1 && (
+                {galleryImages.length >
+                  1 && (
                   <>
                     <button
                       type="button"
-                      onClick={handlePrevImage}
+                      onClick={
+                        handlePrevImage
+                      }
                       aria-label="Previous image"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-sky-700 hover:text-white text-slate-700 p-1 rounded shadow-sm border border-slate-300"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-sky-700 hover:text-white text-slate-700 p-1 rounded shadow-sm border border-slate-300 z-10"
                     >
-                      <ChevronLeft size={16} />
+                      <ChevronLeft
+                        size={16}
+                      />
                     </button>
 
                     <button
                       type="button"
-                      onClick={handleNextImage}
+                      onClick={
+                        handleNextImage
+                      }
                       aria-label="Next image"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-sky-700 hover:text-white text-slate-700 p-1 rounded shadow-sm border border-slate-300"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-sky-700 hover:text-white text-slate-700 p-1 rounded shadow-sm border border-slate-300 z-10"
                     >
-                      <ChevronRight size={16} />
+                      <ChevronRight
+                        size={16}
+                      />
                     </button>
                   </>
                 )}
               </div>
 
-              {galleryImages.length > 1 && (
+              {galleryImages.length >
+                1 && (
                 <div className="flex gap-1.5 mt-2 overflow-x-auto pb-0.5">
-                  {galleryImages.map((img, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() =>
-                        setSelectedIndex(idx)
-                      }
-                      className={`relative w-14 h-9 rounded border flex-shrink-0 overflow-hidden bg-slate-100 ${
-                        selectedIndex === idx
-                          ? "border-sky-700 ring-1 ring-sky-600 opacity-100"
-                          : "border-slate-300 opacity-60 hover:opacity-100"
-                      }`}
-                    >
-                      <img
-                        src={img.url}
-                        alt={img.alt}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
+
+                  {galleryImages.map(
+                    (img, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() =>
+                          setSelectedIndex(
+                            idx
+                          )
+                        }
+                        className={`relative w-14 h-9 rounded border flex-shrink-0 overflow-hidden bg-slate-100 ${
+                          selectedIndex ===
+                          idx
+                            ? "border-sky-700 ring-1 ring-sky-600 opacity-100"
+                            : "border-slate-300 opacity-60 hover:opacity-100"
+                        }`}
+                      >
+                        <img
+                          src={img.url}
+                          alt={img.alt}
+                          draggable="false"
+                          className="w-full h-full object-cover select-none"
+                        />
+                      </button>
+                    )
+                  )}
+
                 </div>
               )}
             </div>
@@ -925,11 +1155,15 @@ export default function ProductDetailClient({
                 </h3>
 
                 <div className="text-[11.5px] text-slate-700 leading-relaxed space-y-1.5">
-                  <p>{product.description}</p>
+                  <p>
+                    {product.description}
+                  </p>
 
                   {product.detailedDescription && (
                     <p>
-                      {product.detailedDescription}
+                      {
+                        product.detailedDescription
+                      }
                     </p>
                   )}
                 </div>
@@ -939,6 +1173,10 @@ export default function ProductDetailClient({
 
             {/* =====================================================
                 BIG IMAGE
+                FIXED:
+                - object-contain
+                - image itself is hover source
+                - container is NOT hover source
             ===================================================== */}
 
             {product?.BigSizeImage?.url && (
@@ -948,30 +1186,50 @@ export default function ProductDetailClient({
                   Featured Equipment View
                 </h3>
 
-                <div
-                  style={{
-                    width: "100%",
-                    position: "relative",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    backgroundColor: "#020617",
-                  }}
-                >
+                <div className="relative w-full min-h-[180px] max-h-[600px] rounded-xl overflow-hidden bg-slate-950 flex items-center justify-center">
+
                   <img
-                    src={product.BigSizeImage.url}
+                    src={
+                      product
+                        .BigSizeImage
+                        .url
+                    }
                     alt={
-                      product.BigSizeImage.alt ||
+                      product
+                        .BigSizeImage
+                        .alt ||
                       product.name ||
                       "Industrial machine full view"
                     }
-                    style={{
-                      width: "100%",
-                      height: "auto",
-                      maxHeight: "600px",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
+                    draggable="false"
+                    onMouseEnter={(e) =>
+                      openImagePreview(
+                        {
+                          url: product
+                            .BigSizeImage
+                            .url,
+                          alt:
+                            product
+                              .BigSizeImage
+                              .alt ||
+                            product.name ||
+                            "Industrial machine full view",
+                        },
+                        e.currentTarget
+                      )
+                    }
+                    className="
+                      block
+                      max-w-full
+                      max-h-[600px]
+                      w-auto
+                      h-auto
+                      object-contain
+                      select-none
+                      cursor-zoom-in
+                    "
                   />
+
                 </div>
 
               </section>
@@ -981,7 +1239,8 @@ export default function ProductDetailClient({
                 CAPACITIES
             ===================================================== */}
 
-            {capacityList.length > 0 && (
+            {capacityList.length >
+              0 && (
               <section className="mb-4">
 
                 <h3 className="text-[21.5px] font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1 mb-1.5">
@@ -990,18 +1249,22 @@ export default function ProductDetailClient({
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
 
-                  {capacityList.map((cap, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-medium text-slate-800 flex items-center gap-1.5"
-                    >
-                      <span className="text-sky-700 font-bold">
-                        •
-                      </span>
+                  {capacityList.map(
+                    (cap, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-slate-50 border border-slate-200 rounded px-2 py-1 text-[11px] font-medium text-slate-800 flex items-center gap-1.5"
+                      >
+                        <span className="text-sky-700 font-bold">
+                          •
+                        </span>
 
-                      <span>{cap}</span>
-                    </div>
-                  ))}
+                        <span>
+                          {cap}
+                        </span>
+                      </div>
+                    )
+                  )}
 
                 </div>
               </section>
@@ -1011,8 +1274,11 @@ export default function ProductDetailClient({
                 APPLICATIONS
             ===================================================== */}
 
-            {((Array.isArray(product.applications) &&
-              product.applications.length > 0) ||
+            {((Array.isArray(
+              product.applications
+            ) &&
+              product.applications.length >
+                0) ||
               product.application) && (
               <section className="mb-4">
 
@@ -1020,8 +1286,11 @@ export default function ProductDetailClient({
                   Applications
                 </h3>
 
-                {Array.isArray(product.applications) &&
-                product.applications.length > 0 ? (
+                {Array.isArray(
+                  product.applications
+                ) &&
+                product.applications.length >
+                  0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
 
                     {product.applications.map(
@@ -1040,7 +1309,9 @@ export default function ProductDetailClient({
 
                           {app.description && (
                             <p className="text-[10.5px] text-slate-600 leading-normal mt-0.5">
-                              {app.description}
+                              {
+                                app.description
+                              }
                             </p>
                           )}
                         </div>
@@ -1050,7 +1321,9 @@ export default function ProductDetailClient({
                   </div>
                 ) : (
                   <p className="text-[11.5px] text-slate-700 leading-relaxed">
-                    {product.application}
+                    {
+                      product.application
+                    }
                   </p>
                 )}
 
@@ -1061,15 +1334,23 @@ export default function ProductDetailClient({
                 ADVANTAGES + FEATURES
             ===================================================== */}
 
-            {((Array.isArray(product.advantages) &&
-              product.advantages.length > 0) ||
-              (Array.isArray(product.features) &&
-                product.features.length > 0)) && (
-
+            {((Array.isArray(
+              product.advantages
+            ) &&
+              product.advantages.length >
+                0) ||
+              (Array.isArray(
+                product.features
+              ) &&
+                product.features.length >
+                  0)) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 mb-4">
 
-                {Array.isArray(product.advantages) &&
-                  product.advantages.length > 0 && (
+                {Array.isArray(
+                  product.advantages
+                ) &&
+                  product.advantages.length >
+                    0 && (
                     <div className="bg-slate-50 border border-slate-200 rounded p-2.5">
 
                       <h3 className="text-[21.5px] font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1 mb-1.5">
@@ -1088,7 +1369,9 @@ export default function ProductDetailClient({
                                 »
                               </span>
 
-                              <span>{adv}</span>
+                              <span>
+                                {adv}
+                              </span>
                             </li>
                           )
                         )}
@@ -1097,8 +1380,11 @@ export default function ProductDetailClient({
                     </div>
                   )}
 
-                {Array.isArray(product.features) &&
-                  product.features.length > 0 && (
+                {Array.isArray(
+                  product.features
+                ) &&
+                  product.features.length >
+                    0 && (
                     <div className="bg-slate-50 border border-slate-200 rounded p-2.5">
 
                       <h3 className="text-[21.5px] font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1 mb-1.5">
@@ -1127,7 +1413,9 @@ export default function ProductDetailClient({
 
                                 {feat.description && (
                                   <p className="text-[10px] text-slate-500 mt-0.5">
-                                    {feat.description}
+                                    {
+                                      feat.description
+                                    }
                                   </p>
                                 )}
                               </div>
@@ -1149,11 +1437,11 @@ export default function ProductDetailClient({
             {((Array.isArray(
               product.specifications
             ) &&
-              product.specifications.length > 0) ||
+              product.specifications.length >
+                0) ||
               product.power ||
               product.dimensions ||
               product.material) && (
-
               <section className="mb-4">
 
                 <h3 className="text-[21.5px] font-bold text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1 mb-1.5">
@@ -1173,7 +1461,9 @@ export default function ProductDetailClient({
                           </th>
 
                           <td className="py-1.5 px-2.5 text-slate-900 font-medium">
-                            {product.power}
+                            {
+                              product.power
+                            }
                           </td>
                         </tr>
                       )}
@@ -1185,7 +1475,9 @@ export default function ProductDetailClient({
                           </th>
 
                           <td className="py-1.5 px-2.5 text-slate-900 font-medium">
-                            {product.dimensions}
+                            {
+                              product.dimensions
+                            }
                           </td>
                         </tr>
                       )}
@@ -1197,7 +1489,9 @@ export default function ProductDetailClient({
                           </th>
 
                           <td className="py-1.5 px-2.5 text-slate-900 font-medium">
-                            {product.material}
+                            {
+                              product.material
+                            }
                           </td>
                         </tr>
                       )}
@@ -1206,7 +1500,10 @@ export default function ProductDetailClient({
                         product.specifications
                       ) &&
                         product.specifications.map(
-                          (spec, idx) => (
+                          (
+                            spec,
+                            idx
+                          ) => (
                             <tr
                               key={idx}
                               className="even:bg-slate-50"
@@ -1217,7 +1514,9 @@ export default function ProductDetailClient({
                               </th>
 
                               <td className="py-1.5 px-2.5 text-slate-900 font-medium">
-                                {spec.value}
+                                {
+                                  spec.value
+                                }
                               </td>
                             </tr>
                           )
@@ -1226,7 +1525,6 @@ export default function ProductDetailClient({
                     </tbody>
 
                   </table>
-
                 </div>
 
               </section>
@@ -1240,15 +1538,20 @@ export default function ProductDetailClient({
               <div className="mb-4">
 
                 <a
-                  href={product.pdf.url}
+                  href={
+                    product.pdf.url
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[10.5px] font-bold rounded"
                 >
-                  <FileText size={13} />
+                  <FileText
+                    size={13}
+                  />
 
                   <span>
-                    Download Technical Datasheet (
+                    Download Technical
+                    Datasheet (
                     {product.pdf.name ||
                       "PDF Data"}
                     )
@@ -1286,7 +1589,9 @@ export default function ProductDetailClient({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2.5 py-1 bg-white hover:bg-emerald-600 hover:text-white border border-emerald-600 text-emerald-700 text-[10.5px] font-bold rounded shadow-sm"
                 >
-                  <MessageCircle size={13} />
+                  <MessageCircle
+                    size={13}
+                  />
                   WhatsApp
                 </a>
 
@@ -1310,17 +1615,16 @@ export default function ProductDetailClient({
               RIGHT SIDEBAR
           ================================================= */}
 
-          {processSteps.length > 0 && (
+          {processSteps.length >
+            0 && (
             <aside className="sticky top-20">
 
               <div className="bg-white border border-slate-300 rounded shadow-sm overflow-hidden">
 
                 <div className="bg-slate-800 border-b border-slate-900 px-3 py-2">
-
                   <h3 className="text-[13px] font-bold tracking-wider text-white uppercase">
                     Process Flow
                   </h3>
-
                 </div>
 
                 <ol className="divide-y divide-slate-100 list-none p-0 m-0">
@@ -1331,7 +1635,6 @@ export default function ProductDetailClient({
                         key={idx}
                         className="flex items-center gap-1.5 px-2.5 py-1.5"
                       >
-
                         <span className="w-4 h-4 rounded-full bg-sky-100 text-sky-800 text-[9px] font-bold flex items-center justify-center flex-shrink-0">
                           {idx + 1}
                         </span>
@@ -1342,13 +1645,11 @@ export default function ProductDetailClient({
                             ? step
                             : step.title}
                         </span>
-
                       </li>
                     )
                   )}
 
                 </ol>
-
               </div>
 
             </aside>
@@ -1356,6 +1657,76 @@ export default function ProductDetailClient({
 
         </div>
       </div>
+
+      {/* =========================================================
+          LARGE CENTER IMAGE HOVER PREVIEW
+          
+          IMPORTANT:
+          Preview itself remains centered.
+          Actual image uses object-contain.
+          Zoom happens only inside preview.
+      ========================================================= */}
+
+      {previewImage && (
+        <div
+          className="
+            hidden lg:flex
+            fixed inset-0
+            z-[100]
+            items-center justify-center
+            bg-black/20
+            backdrop-blur-[1px]
+            pointer-events-none
+          "
+        >
+
+          <div
+            ref={previewRef}
+            className="
+              relative
+              w-[55vw]
+              max-w-[900px]
+              h-[70vh]
+              bg-white
+              rounded-2xl
+              shadow-2xl
+              overflow-hidden
+              pointer-events-auto
+            "
+            onMouseMove={
+              handlePreviewMouseMove
+            }
+          >
+
+            <div className="relative w-full h-full overflow-hidden bg-slate-100 flex items-center justify-center">
+
+              <img
+                src={previewImage.url}
+                alt={previewImage.alt}
+                draggable="false"
+                className="
+                  max-w-full
+                  max-h-full
+                  w-auto
+                  h-auto
+                  object-contain
+                  select-none
+                  transition-transform
+                  duration-150
+                  ease-out
+                "
+                style={{
+                  transform: "scale(1.7)",
+                  transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                }}
+              />
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

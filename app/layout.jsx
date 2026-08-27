@@ -14,12 +14,36 @@ const mono = JetBrains_Mono({
 
 export const dynamic = 'force-dynamic';
 
-
 export const metadata = {
-  title: 'AFP Technologies. | Industrial machinery for what is next',
+  title: 'AFP Technologies | Industrial Machinery for What Is Next',
   description:
     'Precision industrial equipment, engineering expertise, and responsive service for ambitious manufacturers.',
-  generator: 'v0.app',
+
+  icons: {
+    icon: [
+      {
+        url: '/favicon.ico',
+        sizes: 'any',
+      },
+      {
+        url: '/favicon-16x16.png',
+        sizes: '16x16',
+        type: 'image/png',
+      },
+      {
+        url: '/favicon-32x32.png',
+        sizes: '32x32',
+        type: 'image/png',
+      },
+    ],
+    apple: [
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
+    ],
+  },
 };
 
 export const viewport = {
