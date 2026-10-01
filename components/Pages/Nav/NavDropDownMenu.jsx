@@ -274,7 +274,7 @@ export default function NavDropdown({
           EQUIPMENT RANGE DROPDOWN
       ===================================================== */}
 
-      <div
+      {/* <div
         className="relative"
         onMouseEnter={() => {
           setEquipmentDropdownOpen(true);
@@ -372,7 +372,7 @@ export default function NavDropdown({
             </div>
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* =====================================================
           DOWNLOADS DROPDOWN

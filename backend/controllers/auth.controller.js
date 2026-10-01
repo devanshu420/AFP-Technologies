@@ -12,7 +12,7 @@ async function recordAuditLog({
   entityId,
   req,
   details = {},
-}) {
+}){
   try {
     await AuditLog.create({
       adminEmail,

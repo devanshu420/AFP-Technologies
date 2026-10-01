@@ -3,7 +3,7 @@ import Footer from '../components/Pages/Footer';
 import HeroSection from '../components/Pages/HeroSection';
 import AboutSection from '../components/Pages/AboutSection';
 import ProductsSection from '../components/Pages/Products/ProductsSection';
-import EquipmentSection from '../components/Pages/EquipmentSection';
+// import EquipmentSection from '../components/Pages/EquipmentSection';
 import TrustSection from '../components/Pages/TrustSection';
 import ContactSection from '../components/Pages/ContactSection';
 
@@ -13,7 +13,7 @@ export default function Home() {
       <Nav />
       <HeroSection />
       <ProductsSection />
-      <EquipmentSection />
+      {/* <EquipmentSection /> */}
       <AboutSection />
       <TrustSection />
       <ContactSection />

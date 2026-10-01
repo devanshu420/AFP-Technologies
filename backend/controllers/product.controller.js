@@ -98,7 +98,7 @@ export async function getProductById(req, res) {
 // 3. POST /api/products (Create Product)
 export async function createProduct(req, res) {
   try {
-    const payload = { ...req.body };
+    const payload = { ...req.body };  
 
     if (!payload.name) return errorResponse(res, 'Product name is required', 400);
 

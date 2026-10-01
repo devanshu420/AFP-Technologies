@@ -35,7 +35,7 @@ export default function Nav() {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [downloadsList, setDownloadsList] = useState([]);
-  const [equipmentRange, setEquipmentRange] = useState([]);
+  // const [equipmentRange, setEquipmentRange] = useState([]);
 
   const pathname = usePathname();
 
@@ -55,14 +55,14 @@ export default function Nav() {
         navCache.categories &&
         navCache.products &&
         navCache.downloads &&
-        navCache.equipmentRange &&
+        // navCache.equipmentRange &&
         navCache.timestamp &&
         now - navCache.timestamp < CACHE_DURATION
       ) {
         setCategories(navCache.categories);
         setProducts(navCache.products);
         setDownloadsList(navCache.downloads);
-        setEquipmentRange(navCache.equipmentRange);
+        // setEquipmentRange(navCache.equipmentRange);
 
         return;
       }
@@ -157,7 +157,7 @@ export default function Nav() {
         setCategories(catList);
         setProducts(prodList);
         setDownloadsList(pdfList);
-        setEquipmentRange(equipmentList);
+        // setEquipmentRange(equipmentList);
       } catch (err) {
         console.error(
           "Failed to load navigation data:",
@@ -257,7 +257,7 @@ export default function Nav() {
             pathname={pathname}
             categories={categories}
             products={products}
-            equipmentRange={equipmentRange}
+            // equipmentRange={equipmentRange}
             downloadsList={downloadsList}
             onCloseMenu={closeMobileMenu}
           />
